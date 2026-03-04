@@ -1,0 +1,130 @@
+/* Las promociones */
+.inicio-section {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: #fdfbf8; 
+}
+
+.titulo-section {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.linea-promos {
+  width: 80%;
+  height: 1px;
+  background-color: #333;
+  margin: 0 auto 50px auto;
+}
+
+/* Grid */
+.promos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 40px;
+  justify-items: center; /* CENTRA TODAS LAS CARDS */
+}
+
+/* Tarjeta */
+.promo-card {
+  position: relative;
+  overflow: hidden;
+  width: 340px;
+  background-color: #ffffff;
+  border-radius: 25px;
+  padding-bottom: 25px;
+  cursor: pointer;
+
+  /* sombras tipo categoría */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.promo-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Imagen */
+.promo-img {
+  width: 100%;
+  height: 260px;
+  background: #faf4e6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.promo-img img {
+  width: 75%;
+  height: 75%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.promo-card:hover img {
+  transform: scale(1.06);
+}
+
+/* Los descuentos */
+.descuento {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #f5e5b7;
+  color: #111;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Texto */
+.promo-nombre {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 18px 0 6px;
+  color: #333;
+}
+
+/* Precios  */
+.promo-precios {
+  margin-bottom: 12px;
+}
+
+.promo-precio-actual {
+  color: #d62828;
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin-right: 10px;
+}
+
+.promo-precio-ant {
+  text-decoration: line-through;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* Boton */
+.btn-ver {
+  margin-top: 10px;
+  padding: 10px 22px;
+  background-color: #111;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-ver:hover {
+  background-color: #d62828;
+}

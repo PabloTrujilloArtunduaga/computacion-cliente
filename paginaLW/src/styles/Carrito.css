@@ -1,0 +1,97 @@
+.carrito-section {
+  margin-top: 30px;
+}
+
+/* Lista */
+.carrito-lista {
+  margin-top: 25px;
+  padding: 0;
+  border-radius: 14px;
+  background: #fafafa;
+  border: none !important;
+}
+
+/* Cada item */
+.carrito-item {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: #fff;
+  position: relative;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.12);
+}
+
+/* Imagen */
+.carrito-img {
+  width: 85px;
+  height: 85px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* Información */
+.carrito-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.carrito-info h6 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.precio-text {
+  margin: 4px 0;
+  color: #c79b00;
+  font-weight: 700;
+}
+
+/* Cantidad */
+.cantidad-controles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-cantidad {
+  background: #d4af37 !important; /* Dorado */
+  color: #fff !important;
+}
+
+.btn-cantidad:hover {
+  transform: scale(1.15);
+}
+
+/* Cantidad texto */
+.cantidad {
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+/* Botón eliminar */
+.btn-eliminar {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+}
+
+/* Total */
+.total {
+  margin-top: 25px;
+  font-size: 1.7rem;
+  color: #c79b00;
+  font-weight: 700;
+}
+
+/* Botón pagar */
+.btn-pagar {
+  margin-top: 18px;
+  background: linear-gradient(135deg, #ffd44d, #d4a012) !important;
+  border-radius: 10px;
+  padding: 14px 48px;
+  font-weight: 700;
+}

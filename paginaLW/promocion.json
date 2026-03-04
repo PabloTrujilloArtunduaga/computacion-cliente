@@ -1,0 +1,36 @@
+{
+  "promociones": [
+    {
+      "id": 1,
+      "titulo": "Whisky Old Parr 750ml",
+      "precioAnterior": 160000,
+      "precioPromo": 129900,
+      "descuento": 19,
+      "imagen": "https://prodcdnmobisoft.oxxodomicilios.com/01JJAJN83Z0E5VEWD0ZAPE8G6C.jpg"
+    },
+    {
+      "id": 2,
+      "titulo": "Aguardiente Antioqueño Azul 750ml",
+      "precioAnterior": 52000,
+      "precioPromo": 42900,
+      "descuento": 17,
+      "imagen": "https://clubbin-images.s3.amazonaws.com/ph223U0BE4hY.jpeg"
+    },
+    {
+      "id": 3,
+      "titulo": "Ron Medellín Añejo 12 Años",
+      "precioAnterior": 89000,
+      "precioPromo": 69900,
+      "descuento": 22,
+      "imagen": "https://www.licorea.com/images/imagecache/ron-medellin-12-licorea-1_800x800.webp"
+    },
+    {
+      "id": 4,
+      "titulo": "Vodka Smirnoff Red 750ml",
+      "precioAnterior": 65000,
+      "precioPromo": 49900,
+      "descuento": 23,
+      "imagen": "https://api.lalicorera.com/storage/extras/licores/86908535-smirnoff-tamarindo-picante-multimedia-cata.webp?t=1727655339000"
+    }
+  ]
+}

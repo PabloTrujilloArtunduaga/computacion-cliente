@@ -1,0 +1,91 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Cormorant+Garamond:wght@400;500;600&display=swap");
+
+/* Navbar */
+.nav-elegante {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  padding: 4px 0;
+}
+
+/* Logo */
+.logo-premium {
+  font-family: "Cinzel", serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: 0.4s;
+}
+
+.logo-premium:hover {
+  transform: scale(1.06);
+  text-shadow: 0 0 12px #d4af37;
+}
+
+.logo-estanco {
+  color: #fff;
+}
+
+.logo-malacopa {
+  color: #d4af37;
+  font-weight: 600;
+  position: relative;
+}
+
+
+/* LINKS DESKTOP */
+.nav-link {
+  color: #fff !important;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #d4af37 !important;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background: #d4af37;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 60%;
+}
+
+/* SIDENAV */
+.sidenav-elegante {
+  background: #000;
+  padding-top: 20px;
+  border-right: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.nav-link-mobile {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  color: white !important;
+  padding: 10px 20px;
+  display: block;
+}
+
+.nav-link-mobile:hover {
+  color: #d4af37 !important;
+}
+
+/* Animación shine */
+@keyframes shine {
+  0% { left: -120%; }
+  50% { left: 120%; }
+  100% { left: 120%; }
+}

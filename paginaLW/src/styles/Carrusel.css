@@ -1,0 +1,149 @@
+/* Contenedor principal */
+.carrusel-container {
+  position: relative;
+  width: 100%;
+
+  height: 70vh;
+  min-height: 480px;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* móviles*/
+@media (max-width: 768px) {
+  .carrusel-container {
+    height: 70vh;
+    min-height: 420px;
+  }
+}
+
+/* Slide */
+.slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Capa Oscura */
+.capa {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1;
+}
+
+/* Texto central */
+.texto-principal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 2;
+  color: #fff;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+  padding: 0 16px;
+  animation: aparecer 450ms ease both;
+}
+
+.texto-principal .overline {
+  margin: 0 0 8px;
+  font-weight: 500;
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.texto-principal h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  color: #fff;
+}
+
+.texto-principal .descripcion {
+  margin: 12px 0 18px;
+  max-width: 760px;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #fff;
+}
+
+/* CTA */
+.btn-cta {
+  border: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  padding: 10px 22px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-cta:hover {
+  background: #fff;
+  color: #111;
+}
+
+/* Flechas */
+.carrusel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  border: none;
+  font-size: 2.2rem;
+  line-height: 1;
+  padding: 6px 12px;
+  cursor: pointer;
+  z-index: 3;
+  border-radius: 10px;
+  transition: background 0.3s ease, transform 0.2s;
+}
+.carrusel-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.07);
+}
+.carrusel-btn.izquierda { left: 15px; }
+.carrusel-btn.derecha { right: 15px; }
+
+/* Dots */
+.dots {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+.dots button {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.dots button.active {
+  background: #ffffff;
+  width: 14px; height: 14px;
+}
+
+/* Animación */
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

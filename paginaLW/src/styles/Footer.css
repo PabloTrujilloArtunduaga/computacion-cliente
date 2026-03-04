@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Playfair+Display:wght@500&display=swap');
+
+.footer-elegante {
+  background: #0d0d0d;
+  padding: 30px 0 25px;
+  color: #ccc;
+  border-top: 1px solid rgba(212,175,55,0.25);
+}
+
+.footer-brand {
+  font-family: "Cinzel", serif;
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+
+.footer-estanco {
+  color: #d4af37;
+}
+
+.footer-malacopa {
+  color: white;
+  margin-left: 5px;
+}
+
+.footer-divider {
+  width: 90px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #d4af37, transparent);
+  margin: 10px auto 18px;
+}
+
+.footer-links {
+  font-family: "Playfair Display", serif;
+  font-size: 0.95rem;
+  margin-bottom: 18px;
+  color: #ccc;
+}
+
+.footer-link {
+  color: #d4af37;
+  margin: 0 5px;
+  transition: 0.3s;
+}
+
+.footer-link:hover {
+  color: #ffdf85;
+}
+
+/* Redes sociales */
+.footer-social {
+  margin-top: 10px;
+}
+
+.footer-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(212,175,55,0.35);
+  transition: 0.3s ease;
+}
+
+.footer-icon i {
+  font-size: 20px;
+  color: #d4af37;
+}
+
+.footer-icon:hover {
+  transform: scale(1.12);
+  border-color: #ffdf85;
+  box-shadow: 0 0 8px rgba(212,175,55,0.4);
+}
+
+.footer-icon:hover i {
+  color: #ffdf85;
+}
