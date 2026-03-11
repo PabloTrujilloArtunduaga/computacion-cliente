@@ -6,11 +6,14 @@ import morgan from 'morgan';
 import { connectDB  } from './db.js';
 // Import authRoutes
 import authRoutes from "./routes/auth.rout.js"
+// Cookie
+import cookeParser from 'cookie-parser'
 // Crear una constante
-
 // Se puede poner cualquier nombre: "app"
 // Sera igual a lo que express traera
 const app = express()
+// Cookie
+app.use(cookeParser())
 // Mostrar peticiones
 app.use(morgan('dev'))
 // Usar los formatos json

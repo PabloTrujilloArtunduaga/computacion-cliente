@@ -8,7 +8,7 @@ export function createAccessToken(payload){
         // No se sube en produccion queda en interno para pruebas
         TOKEN_SCRET,
         {
-            expresIn: "1d",
+            expiresIn: "1d",
         },
 
         (err, token) => {

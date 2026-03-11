@@ -1,1 +1,1 @@
-export const TOKEN_SCRET = "some scret key";
+export const TOKEN_SECRET = "some scret key";
