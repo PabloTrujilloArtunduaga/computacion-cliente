@@ -1,6 +1,7 @@
 import jwt, { decode } from 'jsonwebtoken'
 import { TOKEN_SECRET } from '../config.js'
 
+
 // La palabras next no debe ir en el 1 o 2 posicion, debe tener un orden
 // Next -> Va a ver saltos
 export const authRequired = (req, res, next) => {

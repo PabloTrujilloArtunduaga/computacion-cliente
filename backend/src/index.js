@@ -8,6 +8,8 @@ import { connectDB  } from './db.js';
 import authRoutes from "./routes/auth.rout.js"
 // Cookie
 import cookeParser from 'cookie-parser'
+
+import taskRoutes from './routes/tasks.routes.js'
 // Crear una constante
 // Se puede poner cualquier nombre: "app"
 // Sera igual a lo que express traera
@@ -21,10 +23,15 @@ app.use(express.json())
 
 // Conectar a la base de datos
 connectDB()
+
+
 // Ruta
 app.use('/api', authRoutes)
+// task
+app.use("/api", taskRoutes)
 // Puerto a conectar, realiza la conexion
 app.listen(4000)
 // Revisar si hay problemas en el servidor
 console.log('Run server', 4000)
 // Ejecutar archivos en node src/index.js 
+

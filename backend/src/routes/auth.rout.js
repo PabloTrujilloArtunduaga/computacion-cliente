@@ -3,6 +3,7 @@ import { register,
          login, 
          logout,
          profile } from "../controllers/auth.controller.js";
+import { authRequired } from "../middlewares/validateToken.js";
 
 const router = Router();
 // Se usa el post para guardar datos
