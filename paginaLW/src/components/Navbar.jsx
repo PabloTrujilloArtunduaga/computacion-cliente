@@ -36,6 +36,18 @@ export default function Navbar() {
             {location.pathname === "/productos" && (
               <li><Link to="/carrito" className="nav-link">Carrito 🛒</Link></li>
             )}
+
+            {/* --- NUEVOS BOTONES AÑADIDOS AQUÍ --- */}
+            <li style={{ marginLeft: '15px' }}>
+              <Link to="/login" className="btn amber darken-3 black-text   " style={{ border: '1px solid white', borderRadius: '4px' }}>
+                Iniciar Sesión
+              </Link>
+            </li>
+            <li style={{ marginLeft: '10px' }}>
+              <Link to="/register" className="btn " style={{ border: '1px solid white', borderRadius: '4px' }}>
+                Registrarse
+              </Link>
+            </li>
           </ul>
         </div>
       </nav>
@@ -50,6 +62,19 @@ export default function Navbar() {
         {location.pathname === "/productos" && (
           <li><Link to="/carrito" className="nav-link-mobile">Carrito 🛒</Link></li>
         )}
+
+        {/* --- Registro/Login --- */}
+        <li className="divider"></li>
+        <li>
+          <Link to="/login" className="nav-link-mobile">
+            <i className="material-icons left">login</i> Iniciar Sesión
+          </Link>
+        </li>
+        <li>
+          <Link to="/register" className="nav-link-mobile">
+            <i className="material-icons left">person_add</i> Registrarse
+          </Link>
+        </li>
       </ul>
     </>
   );
