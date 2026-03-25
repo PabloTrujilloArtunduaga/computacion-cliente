@@ -20,6 +20,12 @@ const ProductoSchema = new mongoose.Schema({
     required: true
   },
   codigo_barras: String,
+
+  // imagen
+  imagen: {
+    type: String
+  },
+
   estado: {
     type: Boolean,
     default: true
