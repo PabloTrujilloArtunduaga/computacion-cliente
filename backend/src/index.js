@@ -8,7 +8,8 @@ import { connectDB  } from './db.js';
 import authRoutes from "./routes/auth.rout.js"
 // Cookie
 import cookeParser from 'cookie-parser'
-
+// cors
+import cors from 'cors'
 import taskRoutes from './routes/tasks.routes.js'
 // Crear una constante
 // Se puede poner cualquier nombre: "app"
@@ -16,6 +17,11 @@ import taskRoutes from './routes/tasks.routes.js'
 const app = express()
 // Cookie
 app.use(cookeParser())
+// CORS conexion entre el backend y frontend
+app.use(cors({
+    origin: "htpp://localhost:5173", // donnde viene los datos, vista frontend
+    credentials: true
+}))
 // Mostrar peticiones
 app.use(morgan('dev'))
 // Usar los formatos json
