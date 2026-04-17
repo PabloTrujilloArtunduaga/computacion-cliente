@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from "mongoose";
 
 const EmpleadoSchema = new mongoose.Schema({
   usuario_id: {
@@ -15,4 +15,5 @@ const EmpleadoSchema = new mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model('Empleado', EmpleadoSchema)
+
+export default mongoose.model("Empleado", EmpleadoSchema, "empleados");

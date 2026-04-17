@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from "mongoose";
 
 const FacturaSchema = new mongoose.Schema({
   cliente_id: {
@@ -30,4 +30,4 @@ const FacturaSchema = new mongoose.Schema({
   timestamps: true
 })
 
-module.exports = mongoose.model('Factura', FacturaSchema)
+export default mongoose.model("facturas", FacturaSchema);
