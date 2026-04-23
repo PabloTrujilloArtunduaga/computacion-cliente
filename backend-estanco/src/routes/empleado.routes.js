@@ -10,6 +10,8 @@ import { createEmpleadoSchema } from '../schema/empleado.scheme.js'
 import { updateEmpleadoSchema } from '../schema/update/empleadoUpdate.schema.js'
 import { validateSchema } from '../middlewares/validate.middleware.js'
 
+
+
 const router = Router();
 
 router.get("/empleados", getEmpleados);

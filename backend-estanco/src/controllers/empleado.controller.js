@@ -10,20 +10,39 @@ export const getEmpleados = async (req, res) => {
   res.json(empleado)
 }
 
-
 // Crear
 export const createEmpleado = async (req, res) => {
-  const user = await User.findById(req.body.usuario_id);
+  try {
+    const { usuario_id } = req.body;
 
-  if (!user) {
-    console.log('empleado no existe"')
-    return res.status(400).json({ message: "empleado no existe" });
+    // 1. Verificar que el usuario exista
+    const user = await User.findById(usuario_id);
+    if (!user) {
+      return res.status(400).json({ message: "El usuario no existe" });
+    }
+
+    // 2. Verificar que NO exista ya un empleado con ese usuario
+    const empleadoExistente = await Empleado.findOne({ usuario_id });
+
+    if (empleadoExistente) {
+      return res.status(400).json({
+        message: "Este usuario ya está registrado como empleado",
+      });
+    }
+
+    // 3. Crear empleado
+    const empleado = new Empleado(req.body);
+    await empleado.save();
+
+    res.status(201).json(empleado);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al crear empleado",
+      error: error.message,
+    });
   }
-
-  const empleado = new Empleado(req.body)
-  await empleado.save()
-  res.json(empleado)
-}
+};
 
 // Buscar un solo empleado
 export const getEmpleado = async (req, res) => {
