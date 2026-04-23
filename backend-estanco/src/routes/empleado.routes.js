@@ -6,11 +6,13 @@ import {
   deleteEmpleado,
   updateEmpleado
 } from "../controllers/empleado.controller.js";
+import { createEmpleadoSchema } from '../schema/empleado.scheme.js'
+import { validateSchema } from '../middlewares/validate.middleware.js'
 
 const router = Router();
 
 router.get("/empleados", getEmpleados);
-router.post("/empleados", createEmpleado);
+router.post("/empleados", validateSchema(createEmpleadoSchema), createEmpleado);
 router.get("/empleados/:id", getEmpleado);
 router.delete("/empleados/:id", deleteEmpleado);
 router.put("/empleados/:id", updateEmpleado);

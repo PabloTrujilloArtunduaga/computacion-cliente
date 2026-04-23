@@ -9,6 +9,16 @@ export const getUsers = async (req, res) => {
 
 // Crear usuario
 export const createUser = async (req, res) => {
+  const { email } = req.body;
+   const existe = await User.findOne({ email });
+
+  if (existe) {
+    return res.status(400).json({
+      message: "El email ya existe"
+    });
+  }
+
+
   const user = new User(req.body)
   await user.save()
   res.json(user)
@@ -25,8 +35,8 @@ export const getUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.params.id,
-    { estado: true },
-    { new: false }
+    { estado: false },
+    { new: true }
   );
 
   if (!user) {
@@ -38,9 +48,15 @@ export const deleteUser = async (req, res) => {
 
 // Actualizar usuario
 export const updateUser = async (req, res) => {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-        new: user
-    })
-    if(!user) return res.status(404).json({ message: "user not found for update" })
-    res.json(user)
-}
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+
+  if (!user) {
+    return res.status(404).json({ message: "user not found for update" });
+  }
+
+  res.json(user);
+};

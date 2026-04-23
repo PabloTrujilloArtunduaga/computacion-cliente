@@ -16,6 +16,16 @@ export const createProduct = async (req, res) => {
   if (!categoria) {
     return res.status(400).json({ message: "Categoria no existe" });
   }
+
+   const { nombre } = req.body;
+     const existe = await Product.findOne({ nombre });
+  
+    if (existe) {
+      return res.status(400).json({
+        message: "El producto ya existe"
+      });
+    }
+  
   const product = new Product(req.body)
   await product.save()
   res.json(product)

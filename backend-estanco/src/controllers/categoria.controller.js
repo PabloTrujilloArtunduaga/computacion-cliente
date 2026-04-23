@@ -18,6 +18,14 @@ export const getCategoria = async (req, res) => {
 
 // Crear categoria
 export const createCategoria = async (req, res) => {
+       const { nombre } = req.body;
+       const existe = await Categoria.findOne({ nombre });
+    
+      if (existe) {
+        return res.status(400).json({
+          message: "La categoria ya existe"
+        });
+      }
   
 
   const categorias = new Categoria(req.body)
@@ -29,15 +37,15 @@ export const createCategoria = async (req, res) => {
 export const deleteCategoria = async (req, res) => {
   const categorias = await Categoria.findByIdAndUpdate(
     req.params.id,
-    { estado: true },
-    { new: false }
+    { estado: false },
+    { new: true }
   );
   if (!categorias) {
     console.log('categoria not found for deleted')
     return res.status(404).json({ message: "categoria not found for deleted" }); 
   }
 
-  res.json({ message: "categoria soft deleted", categoria });
+  res.json({ message: "categoria soft deleted", categorias });
   console.log("categoria soft deleted")
 };
 

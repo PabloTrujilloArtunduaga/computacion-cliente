@@ -6,11 +6,12 @@ import {
   deleteUser,
   updateUser
 } from "../controllers/usuario.controller.js";
-
+import { createUserSchema } from '../schema/usuario.scheme.js'
+import { validateSchema } from '../middlewares/validate.middleware.js'
 const router = Router();
 
 router.get("/users", getUsers);
-router.post("/user", createUser);
+router.post("/user", validateSchema(createUserSchema), createUser);
 router.get("/user/:id", getUser);
 router.delete("/user/:id", deleteUser);
 router.put("/user/:id", updateUser);
