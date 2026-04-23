@@ -15,6 +15,9 @@ import Carrito from "./pages/Carrito";
 import Admin from "./pages/admin/Admin.jsx";
 import Empleado from "./pages/empleados/empleados.jsx";
 import NotFound from "./pages/NotFound";
+import ProductosCategoriasPage from "./pages/admin/ProductosAD.jsx";
+import UsuariosEmpleadosPage from "./pages/admin/UsuariosAD.jsx";
+import FacturasPage from "./pages/admin/Fact.jsx";
 function App() {
   return (
     <CarritoProvider>
@@ -31,6 +34,10 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/empleado" element={<Empleado />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/admin/productos" element={<ProductosCategoriasPage />} />
+            <Route path="/admin/usuarios" element={<UsuariosEmpleadosPage />} />
+            <Route path="/admin/facturas" element={<FacturasPage />} />
+            
           </Routes>
         </div>
 

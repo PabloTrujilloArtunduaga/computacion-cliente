@@ -1,6 +1,7 @@
 import React from 'react';
-
+import { useNavigate } from "react-router-dom"
 export default function UsuariosEmpleadosPage() {
+  const navigate = useNavigate();
   const usuarios = [
     { id: 1, nombre: 'Juan Pérez', email: 'juan@malacopa.com', rol: 'Cliente', estado: 'Activo' },
     { id: 2, nombre: 'Laura Gómez', email: 'laura@malacopa.com', rol: 'Empleado', estado: 'Activo' },
@@ -20,8 +21,11 @@ export default function UsuariosEmpleadosPage() {
         <div className="nav-wrapper" style={{ padding: '0 20px' }}>
           <a href="#" className="brand-logo">MalaCopa Admin</a>
           <ul className="right hide-on-med-and-down">
-            <li><a href="#">Inicio</a></li>
-            <li className="active"><a href="#">Usuarios y Empleados</a></li>
+            <li>
+              <a onClick={() => navigate("/admin")} style={{ cursor: "pointer" }}>
+                Inicio
+              </a>
+            </li>
           </ul>
         </div>
       </nav>

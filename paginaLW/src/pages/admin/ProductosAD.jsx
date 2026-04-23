@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from "react-router-dom"
 
 export default function ProductosCategoriasPage() {
+  const navigate = useNavigate();
   const productos = [
     { id: 1, nombre: 'Whisky Premium', categoria: 'Whisky', precio: '$120.000', stock: 45, estado: 'Disponible' },
     { id: 2, nombre: 'Ron Añejo', categoria: 'Ron', precio: '$85.000', stock: 30, estado: 'Disponible' },
@@ -21,8 +23,11 @@ export default function ProductosCategoriasPage() {
         <div className="nav-wrapper" style={{ padding: '0 20px' }}>
           <a href="#" className="brand-logo">MalaCopa Admin</a>
           <ul className="right hide-on-med-and-down">
-            <li><a href="#">Inicio</a></li>
-            <li className="active"><a href="#">Productos y Categorías</a></li>
+            <li>
+              <a onClick={() => navigate("/admin")} style={{ cursor: "pointer" }}>
+                Inicio
+              </a>
+            </li>
           </ul>
         </div>
       </nav>

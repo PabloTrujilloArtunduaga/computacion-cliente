@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
+import { useNavigate, Link } from "react-router-dom";
 
 export default function AdminDashboardMaterialize() {
   const salesChartRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const chart = new Chart(salesChartRef.current, {
@@ -43,29 +45,49 @@ export default function AdminDashboardMaterialize() {
 
   return (
     <div className="grey lighten-4" style={{ minHeight: '100vh' }}>
+      
+      {/* NAVBAR */}
       <nav className="blue darken-3">
         <div className="nav-wrapper" style={{ padding: '0 20px' }}>
-          <a href="#" className="brand-logo">MalaCopa Admin</a>
+          <span className="brand-logo">MalaCopa Admin</span>
+
           <ul className="right hide-on-med-and-down">
-            <li><a href="#">Inicio</a></li>
-            <li><a href="#">Usuarios</a></li>
-            <li><a href="#">Productos</a></li>
-            <li><a href="#">Categorías</a></li>
-            <li><a href="#">Empleados</a></li>
-            <li><a href="#">Facturas</a></li>
+            <li>
+              <Link to="/admin">Inicio</Link>
+            </li>
+            <li>
+              <Link to="/admin/usuarios">Usuarios</Link>
+            </li>
+            <li>
+              <Link to="/admin/productos">Productos</Link>
+            </li>
+            <li>
+              <Link to="/admin/categorias">Categorías</Link>
+            </li>
+            <li>
+              <Link to="/admin/empleados">Empleados</Link>
+            </li>
+            <li>
+              <Link to="/admin/facturas">Facturas</Link>
+            </li>
           </ul>
         </div>
       </nav>
 
       <div className="container" style={{ width: '95%', marginTop: '30px' }}>
+        
+        {/* CARDS */}
         <div className="row">
           {cards.map((card, index) => (
             <div className="col s12 m6 l4 xl2" key={index}>
-              <div className="card white-text" style={{ backgroundColor: card.color, borderRadius: '12px' }}>
+              <div
+                className="card white-text"
+                style={{ backgroundColor: card.color, borderRadius: '12px' }}
+              >
                 <div className="card-content">
                   <div className="row" style={{ marginBottom: 0 }}>
                     <div className="col s8">
-                      <span className="card-title" style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+                      <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>
                         {card.value}
                       </span>
                       <p>{card.title}</p>
@@ -82,7 +104,9 @@ export default function AdminDashboardMaterialize() {
           ))}
         </div>
 
+        {/* GRAFICO + ACCESOS */}
         <div className="row">
+          
           <div className="col s12 l8">
             <div className="card" style={{ borderRadius: '12px' }}>
               <div className="card-content">
@@ -98,22 +122,63 @@ export default function AdminDashboardMaterialize() {
             <div className="card" style={{ borderRadius: '12px' }}>
               <div className="card-content">
                 <span className="card-title">Accesos Rápidos</span>
+
                 <div className="collection">
-                  <a href="#" className="collection-item">Gestionar Usuarios</a>
-                  <a href="#" className="collection-item">Administrar Productos</a>
-                  <a href="#" className="collection-item">Control de Categorías</a>
-                  <a href="#" className="collection-item">Gestión de Empleados</a>
-                  <a href="#" className="collection-item">Ver Facturas</a>
+
+                  <div
+                    className="collection-item"
+                    onClick={() => navigate("/admin/usuarios")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Gestionar Usuarios
+                  </div>
+
+                  <div
+                    className="collection-item"
+                    onClick={() => navigate("/admin/productos")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Administrar Productos
+                  </div>
+
+                  <div
+                    className="collection-item"
+                    onClick={() => navigate("/admin/categorias")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Control de Categorías
+                  </div>
+
+                  <div
+                    className="collection-item"
+                    onClick={() => navigate("/admin/empleados")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Gestión de Empleados
+                  </div>
+
+                  <div
+                    className="collection-item"
+                    onClick={() => navigate("/admin/facturas")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Ver Facturas
+                  </div>
+
                 </div>
               </div>
             </div>
           </div>
+
         </div>
+
+        {/* TABLA */}
         <div className="row">
           <div className="col s12">
             <div className="card" style={{ borderRadius: '12px' }}>
               <div className="card-content">
                 <span className="card-title">Productos Más Vendidos</span>
+
                 <table className="highlight responsive-table">
                   <thead>
                     <tr>
@@ -150,10 +215,12 @@ export default function AdminDashboardMaterialize() {
                     </tr>
                   </tbody>
                 </table>
+
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

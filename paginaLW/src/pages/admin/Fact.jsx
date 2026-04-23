@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from "react-router-dom"
 
 export default function FacturasPage() {
+    const navigate = useNavigate();
   const facturas = [
     { id: 'FAC-001', cliente: 'Juan Pérez', fecha: '2026-04-20', total: '$125.000', estado: 'Pagada' },
     { id: 'FAC-002', cliente: 'Laura Gómez', fecha: '2026-04-21', total: '$89.500', estado: 'Pendiente' },
@@ -15,8 +17,11 @@ export default function FacturasPage() {
         <div className="nav-wrapper" style={{ padding: '0 20px' }}>
           <a href="#" className="brand-logo">MalaCopa Admin</a>
           <ul className="right hide-on-med-and-down">
-            <li><a href="#">Inicio</a></li>
-            <li className="active"><a href="#">Facturas</a></li>
+            <li>
+              <a onClick={() => navigate("/admin")} style={{ cursor: "pointer" }}>
+                Inicio
+              </a>
+            </li>
           </ul>
         </div>
       </nav>
