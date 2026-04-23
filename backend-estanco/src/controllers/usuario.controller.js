@@ -48,15 +48,24 @@ export const deleteUser = async (req, res) => {
 
 // Actualizar usuario
 export const updateUser = async (req, res) => {
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
+  const user = await User.findById(req.params.id);
 
   if (!user) {
-    return res.status(404).json({ message: "user not found for update" });
+    return res.status(404).json({
+      message: "Usuario no encontrado para actualizar",
+    });
   }
+
+  const { nombre, email, password, rol, estado } = req.body;
+
+  // solo actualiza campos permitidos
+  if (nombre !== undefined) user.nombre = nombre;
+  if (email !== undefined) user.email = email;
+  if (password !== undefined) user.password = password;
+  if (rol !== undefined) user.rol = rol;
+  if (estado !== undefined) user.estado = estado;
+
+  await user.save();
 
   res.json(user);
 };
