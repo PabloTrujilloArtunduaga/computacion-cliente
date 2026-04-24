@@ -18,7 +18,7 @@ import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 
 
-const Admin = () => <h1>Panel Administrador</h1>;
+const Admin = () => <h1>Panel Admin</h1>;
 const Empleado = () => <h1>Panel Empleado</h1>;
 const Cliente = () => <h1>Panel Cliente</h1>;
 
