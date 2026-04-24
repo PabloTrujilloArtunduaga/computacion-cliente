@@ -12,6 +12,8 @@ import Nosotros from "./pages/Nosotros";
 import Contacto from "./pages/Contacto";
 import Productos from "./pages/Productos";
 import Carrito from "./pages/Carrito";
+import Admin from "./pages/admin/Admin.jsx";
+import Empleado from "./pages/empleados/empleados.jsx";
 
 function App() {
   return (
@@ -26,7 +28,8 @@ function App() {
             <Route path="/nosotros" element={<Nosotros />} />
             <Route path="/contacto" element={<Contacto />} />
             <Route path="/carrito" element={<Carrito />} />
-
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/empleado" element={<Empleado />} />
           </Routes>
         </div>
 
