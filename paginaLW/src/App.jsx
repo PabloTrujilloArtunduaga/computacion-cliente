@@ -12,6 +12,7 @@ import Nosotros from "./pages/Nosotros";
 import Contacto from "./pages/Contacto";
 import Productos from "./pages/Productos";
 import Carrito from "./pages/Carrito";
+import Dashboard from "./pages/Dashboard"; 
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/nosotros" element={<Nosotros />} />
             <Route path="/contacto" element={<Contacto />} />
             <Route path="/carrito" element={<Carrito />} />
+            <Route path="/dashboard-empleado" element={<Dashboard />} />
 
           </Routes>
         </div>
