@@ -8,18 +8,45 @@ export default function Registro() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!nombre.trim() || !correo.trim() || !password.trim() || !confirmPassword.trim()) {
       alert('Error: No puedes dejar campos vacíos.');
       return; 
     }
+
     if (password !== confirmPassword) {
       alert('Error: Las contraseñas no coinciden.');
       return;
     }
-    console.log('Datos listos:', { nombre, correo, password });
-    alert('¡Registro validado con éxito!');
+
+    try {
+      const res = await fetch("http://localhost:3000/api/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          usuario: nombre,   // 👈 nombre → usuario
+          email: correo,     // 👈 correo → email
+          password: password
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('¡Usuario registrado con éxito!');
+        window.location.href = "/login"; // redirige al login
+      } else {
+        alert(data.mensaje);
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("Error al conectar con el servidor");
+    }
   };
 
   return (

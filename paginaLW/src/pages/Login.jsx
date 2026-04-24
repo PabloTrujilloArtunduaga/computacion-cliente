@@ -6,16 +6,48 @@ export default function Login() {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!usuario.trim() || !password.trim()) {
       alert('Error: El nombre de usuario y la contraseña no pueden estar vacíos.');
       return; 
     }
-    console.log('Datos de login listos:', { usuario, password });
-    alert('¡Login validado correctamente!');
-  };
 
+    try {
+      const res = await fetch("http://localhost:3000/api/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          usuario: usuario,   
+          password: password
+        })
+      });
+
+      const data = await res.json();
+
+       if (res.ok) {
+      localStorage.setItem("rol", data.rol);
+
+      if (data.rol === "admin") {
+        window.location.href = "/admin";
+      } else if (data.rol === "empleado") {
+        window.location.href = "/empleado";
+      } else {
+        window.location.href = "/cliente";
+      }
+
+    } else {
+      alert(data.mensaje);
+    }
+
+  } catch (error) {
+    console.error(error);
+    alert("Error al conectar con el servidor");
+  }
+};
   return (
     <div className="contenedor-formulario">
       <div className="card-panel tarjeta-blanca z-depth-3">
