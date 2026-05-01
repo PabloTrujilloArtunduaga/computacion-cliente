@@ -7,14 +7,14 @@ function Productos() {
   const [loading, setLoading] = useState(true);
 
 
-  // 🔹 TRAER PRODUCTOS DEL BACKEND
+  // TRAER PRODUCTOS DEL BACKEND
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:3000/admin/products");
         const data = await res.json();
 
-        console.log("PRODUCTOS BACKEND:", data);
+        //console.log("PRODUCTOS BACKEND:", data);
 
         setProductos(data);
       } catch (error) {
@@ -27,7 +27,7 @@ function Productos() {
     fetchProducts();
   }, []);
 
-  // 🔹 OBSERVER
+  // OBSERVER
   useEffect(() => {
     const items = document.querySelectorAll(".producto-card, .section-title");
 
@@ -57,7 +57,7 @@ function Productos() {
   return (
     <div className="productos-section container">
 
-      {/* 🔄 LOADING */}
+      {/* LOADING */}
       {loading && <p className="center">Cargando productos...</p>}
 
       {/* SIN PRODUCTOS */}
