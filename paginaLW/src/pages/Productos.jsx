@@ -1,11 +1,36 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ProductoCard from "../components/ProductoCard";
 import "../styles/Productos.css";
 
-
 function Productos() {
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+
+  // TRAER PRODUCTOS DEL BACKEND
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/admin/products");
+        const data = await res.json();
+
+        //console.log("PRODUCTOS BACKEND:", data);
+
+        setProductos(data);
+      } catch (error) {
+        console.error("Error cargando productos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // OBSERVER
   useEffect(() => {
     const items = document.querySelectorAll(".producto-card, .section-title");
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -16,73 +41,84 @@ function Productos() {
       },
       { threshold: 0.2 }
     );
+
     items.forEach((item) => observer.observe(item));
-  }, []);
+  }, [productos]);
 
-  // Agregamos precio a cada producto
-  const cervezas = [
-    {
-      titulo: "Águila Original",
-      descripcion: "La clásica cerveza colombiana.",
-      imagen:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0oix7BeqXhUh2td085-p5lYPKx8u0D4xOZw&s",
-      precio: 5000,
-    },
-    {
-      titulo: "Poker",
-      descripcion: "Tradición entre amigos.",
-      imagen:
-        "https://distribuidoranikoll.com/wp-content/uploads/2023/04/Bebidas-Alcoholicas-Distribuidora-Nikoll-2-2.jpg",
-      precio: 4500,
-    },
-    {
-      titulo: "Corona",
-      descripcion: "Suave y refrescante.",
-      imagen:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRC4-_iiFgBY2uarVnuVamsLTbgW6Ix6kv-Ig&s",
-      precio: 6000,
-    },
-  ];
+  // 🔹 FILTROS
+  const cervezas = productos.filter(
+    (p) => p.categoria_id?.nombre?.toLowerCase() === "cerveza"
+  );
 
-  const licores = [
-    {
-      titulo: "Jack Daniel's",
-      descripcion: "Whisky premium americano.",
-      imagen:
-        "https://img.lalr.co/cms/2022/10/06193559/Jack_Daniels_Rye_Cask_Finish-1.jpg?size=xl",
-      precio: 95000,
-    },
-    {
-      titulo: "Buchanan's",
-      descripcion: "Perfecto para compartir.",
-      imagen:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBC1RrT6joqntEZ8bPKxzRpI3yGIzuErpQcw&s",
-      precio: 87000,
-    },
-    {
-      titulo: "Aguardiente Antioqueño",
-      descripcion: "El licor de la casa.",
-      imagen:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSX2pHGLTZU9vhN0XKJVzQu9UNFKaZaSv-L3Q&s",
-      precio: 30000,
-    },
-  ];
+  const licores = productos.filter(
+    (p) => p.categoria_id?.nombre?.toLowerCase() === "licores"
+  );
 
   return (
     <div className="productos-section container">
-      <h4 className="section-title">Cervezas</h4>
-      <div className="productos-grid">
-        {cervezas.map((prod, idx) => (
-          <ProductoCard key={idx} producto={prod} />
-        ))}
-      </div>
 
-      <h4 className="section-title">Licores</h4>
-      <div className="productos-grid">
-        {licores.map((prod, idx) => (
-          <ProductoCard key={idx} producto={prod} />
-        ))}
-      </div>
+      {/* LOADING */}
+      {loading && <p className="center">Cargando productos...</p>}
+
+      {/* SIN PRODUCTOS */}
+      {!loading && productos.length === 0 && (
+        <div className="center">
+          <h5>No hay productos disponibles</h5>
+          <p>Vuelve más tarde</p>
+        </div>
+      )}
+
+      {/* 🍺 CERVEZAS */}
+      {!loading && productos.length > 0 && (
+        <>
+          <h4 className="section-title">Cervezas</h4>
+          <div className="productos-grid">
+
+            {cervezas.length === 0 ? (
+              <p className="center">No hay cervezas disponibles</p>
+            ) : (
+              cervezas.map((prod) => (
+                <ProductoCard
+                  key={prod._id}
+                  producto={{
+                    nombre: prod.nombre,
+                    descripcion: prod.descripcion || "Sin descripción",
+                    precio: prod.precio,
+                    imagen: prod.imagen || "https://via.placeholder.com/300",
+                    estado: prod.estado,
+                    stock: prod.stock
+                  }}
+                />
+              ))
+            )}
+
+          </div>
+
+          {/* 🥃 LICORES */}
+          <h4 className="section-title">Licores</h4>
+          <div className="productos-grid">
+
+            {licores.length === 0 ? (
+              <p className="center">No hay licores disponibles</p>
+            ) : (
+              licores.map((prod) => (
+                <ProductoCard
+                  key={prod._id}
+                  producto={{
+                    nombre: prod.nombre,
+                    descripcion: prod.descripcion || "Sin descripción",
+                    precio: prod.precio,
+                    imagen: prod.imagen || "https://static.vecteezy.com/system/resources/previews/023/103/916/non_2x/not-available-rubber-stamp-seal-vector.jpg",
+                    estado: prod.estado,
+                    stock: prod.stock
+                  }}
+                />
+              ))
+            )}
+
+          </div>
+        </>
+      )}
     </div>
   );
 }
