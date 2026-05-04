@@ -29,6 +29,13 @@ function App() {
             <Route path="/carrito" element={<Carrito />} />
             <Route path="/dashboard-empleado" element={<Dashboard />} />
 
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/empleado" element={<Empleado />} />
+            <Route path="*" element={<NotFound />} />
+            <Route path="/admin/productos" element={<ProductosCategoriasPage />} />
+            <Route path="/admin/usuarios" element={<UsuariosEmpleadosPage />} />
+            <Route path="/admin/facturas" element={<FacturasPage />} />
+            
           </Routes>
         </div>
 
