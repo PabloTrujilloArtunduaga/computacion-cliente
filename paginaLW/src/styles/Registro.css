@@ -1,0 +1,40 @@
+/* Pega este código tanto en Login.css como en Registro.css */
+
+.contenedor-formulario {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Tarjeta blanca limpia y del mismo tamaño para ambos */
+.tarjeta-blanca {
+  background-color: #ffffff !important;
+  max-width: 450px; /* Esto asegura que el Registro no se vea más gordo que el Login */
+  width: 100%;
+  border-radius: 8px !important;
+  padding: 40px 30px !important;
+}
+
+.tarjeta-blanca h4 {
+  font-weight: bold;
+  color: #333333; /* Texto oscuro para que se vea en el fondo blanco */
+  margin-bottom: 5px;
+}
+
+/* Detalles naranjas al hacer clic en los campos */
+.tarjeta-blanca .input-field input[type=text]:focus,
+.tarjeta-blanca .input-field input[type=email]:focus,
+.tarjeta-blanca .input-field input[type=password]:focus {
+  border-bottom: 1px solid #ff8f00 !important;
+  box-shadow: 0 1px 0 0 #ff8f00 !important;
+}
+
+.tarjeta-blanca .input-field input:focus + label {
+  color: #ff8f00 !important;
+}
+
+.texto-gris {
+  color: #757575 !important;
+}
