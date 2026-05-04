@@ -7,6 +7,10 @@ import barrita from "../assets/slider/barrita.png";
 import bebidas from "../assets/slider/bebidas.png";
 import estanco from "../assets/slider/estanco.png";
 
+// GSAP
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
 export default function Carrusel() {
   const slides = [
     {
@@ -46,8 +50,11 @@ export default function Carrusel() {
   ];
 
   const [index, setIndex] = useState(0);
-  const [fade, setFade] = useState(true);
   const touchStartX = useRef(null);
+  
+
+  const carruselRef = useRef(null); 
+  const slideContentRef = useRef(null); 
 
   // Cambio de forma automatica
   useEffect(() => {
@@ -55,20 +62,13 @@ export default function Carrusel() {
     return () => clearInterval(interval);
   }, []);
 
+
   const nextSlide = () => {
-    setFade(false);
-    setTimeout(() => {
-      setIndex((i) => (i + 1) % slides.length);
-      setFade(true);
-    }, 300);
+    setIndex((i) => (i + 1) % slides.length);
   };
 
   const prevSlide = () => {
-    setFade(false);
-    setTimeout(() => {
-      setIndex((i) => (i - 1 + slides.length) % slides.length);
-      setFade(true);
-    }, 300);
+    setIndex((i) => (i - 1 + slides.length) % slides.length);
   };
 
   // Navegación tactil
@@ -87,13 +87,44 @@ export default function Carrusel() {
 
   const slide = slides[index];
 
+
+  useGSAP(() => {
+
+    const tl = gsap.timeline();
+
+
+    gsap.set(slideContentRef.current, { opacity: 0 });
+    gsap.set(".texto-principal *", { y: 20, opacity: 0 });
+
+
+    tl.to(slideContentRef.current, {
+      opacity: 1,
+      duration: 0.8,
+      ease: "power2.inOut"
+    })
+
+    .to(".texto-principal > *", {
+      y: 0,
+      opacity: 1,
+      duration: 0.5,
+      stagger: 0.15, // Cada línea de texto (overline, h1, p, btn) entra con diferencia de 0.15s
+      ease: "power3.out"
+    }, "-=0.4"); // Empieza un poco antes de que termine el fade de la imagen
+
+  }, { 
+    dependencies: [index], // Le decimos a useGSAP que se vuelva a ejecutar CADA VEZ que cambia el índice
+    scope: carruselRef 
+  });
+
   return (
     <div
+      ref={carruselRef} // Asignamos el scope
       className="carrusel-container"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className={`slide fade ${fade ? "fade-in" : "fade-out"}`}>
+
+      <div ref={slideContentRef} className="slide">
         <img src={slide.imagen} alt={slide.alt || "slide"} />
 
         <div className="capa" />
