@@ -50,8 +50,6 @@ export default function AdminDashboardMaterialize() {
             <li><a href="#">Inicio</a></li>
             <li><a href="#">Usuarios</a></li>
             <li><a href="#">Productos</a></li>
-            <li><a href="#">Categorías</a></li>
-            <li><a href="#">Empleados</a></li>
             <li><a href="#">Facturas</a></li>
           </ul>
         </div>
