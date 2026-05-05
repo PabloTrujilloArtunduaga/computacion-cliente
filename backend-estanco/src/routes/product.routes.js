@@ -6,16 +6,24 @@ import {
   deleteProduct,
   updateProduct
 } from "../controllers/producto.controller.js";
-import { createProductSchema } from '../schema/producto.schema.js'
-import { validateSchema } from '../middlewares/validate.middleware.js'
-import { productoSchema } from '../schema/update/productosUpdate.schema.js'
+
+import { createProductSchema } from "../schema/producto.schema.js";
+import { productoSchema } from "../schema/update/productosUpdate.schema.js";
+import { validateSchema } from "../middlewares/validate.middleware.js";
+
+import { verifyToken, isAdmin } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.get("/products", getProducts);
-router.post("/products", validateSchema(createProductSchema), createProduct);
-router.get("/products/:id", getProduct);
-router.delete("/products/:id", deleteProduct);
-router.put("/products/:id", validateSchema(productoSchema), updateProduct);
+// 🟢 PUBLICO (React clientes)
+router.get("/", getProducts);
+router.get("/:id", getProduct);
+
+// 🔒 SOLO ADMIN (CRUD)
+router.post("/", verifyToken, isAdmin, validateSchema(createProductSchema), createProduct);
+
+router.put("/:id", verifyToken, isAdmin, validateSchema(productoSchema), updateProduct);
+
+router.delete("/:id", verifyToken, isAdmin, deleteProduct);
 
 export default router;

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 // ─── 1. CONSTANTES ────────────────────────────────────────────────────────────
 
-const API = 'http://localhost:3000/admin';
+const API = 'http://localhost:3000/api';
 
 const inputStyle = {
   width: '100%',

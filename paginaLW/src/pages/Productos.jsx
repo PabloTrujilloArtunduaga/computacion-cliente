@@ -11,10 +11,10 @@ function Productos() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:3000/admin/products");
+        const res = await fetch("http://localhost:3000/api/products");
         const data = await res.json();
 
-        //console.log("PRODUCTOS BACKEND:", data);
+        console.log("PRODUCTOS BACKEND:", data);
 
         setProductos(data);
       } catch (error) {

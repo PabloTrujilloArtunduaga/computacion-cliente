@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Registro.css'; 
 
 export default function Registro() {
@@ -8,12 +8,25 @@ export default function Registro() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 🔹 Validaciones
     if (!nombre.trim() || !correo.trim() || !password.trim() || !confirmPassword.trim()) {
       alert('Error: No puedes dejar campos vacíos.');
       return; 
+    }
+
+    if (!correo.includes("@")) {
+      alert("Correo inválido");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres");
+      return;
     }
 
     if (password !== confirmPassword) {
@@ -28,8 +41,8 @@ export default function Registro() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          usuario: nombre,   // 👈 nombre → usuario
-          email: correo,     // 👈 correo → email
+          usuario: nombre,
+          email: correo,
           password: password
         })
       });
@@ -38,9 +51,12 @@ export default function Registro() {
 
       if (res.ok) {
         alert('¡Usuario registrado con éxito!');
-        window.location.href = "/login"; // redirige al login
+        
+        // 🔥 Redirección correcta (sin recargar)
+        navigate("/login");
+
       } else {
-        alert(data.mensaje);
+        alert(data.mensaje || "Error al registrar");
       }
 
     } catch (error) {
@@ -57,22 +73,42 @@ export default function Registro() {
 
         <form onSubmit={handleSubmit}>
           <div className="input-field">
-            <input id="nombre" type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+            <input 
+              id="nombre" 
+              type="text" 
+              value={nombre} 
+              onChange={(e) => setNombre(e.target.value)} 
+            />
             <label htmlFor="nombre">Nombre de Usuario</label>
           </div>
 
           <div className="input-field">
-            <input id="correo" type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} />
+            <input 
+              id="correo" 
+              type="email" 
+              value={correo} 
+              onChange={(e) => setCorreo(e.target.value)} 
+            />
             <label htmlFor="correo">Correo Electrónico</label>
           </div>
 
           <div className="input-field">
-            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input 
+              id="password" 
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+            />
             <label htmlFor="password">Contraseña</label>
           </div>
 
           <div className="input-field">
-            <input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            <input 
+              id="confirmPassword" 
+              type="password" 
+              value={confirmPassword} 
+              onChange={(e) => setConfirmPassword(e.target.value)} 
+            />
             <label htmlFor="confirmPassword">Confirmar Contraseña</label>
           </div>
 
