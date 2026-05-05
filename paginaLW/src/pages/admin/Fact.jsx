@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom"
+import AdminNavbar from "../admin/AdminNavbar";
 
 export default function FacturasPage() {
     const navigate = useNavigate();
@@ -13,18 +14,7 @@ export default function FacturasPage() {
 
   return (
     <div className="grey lighten-4" style={{ minHeight: '100vh' }}>
-      <nav className="blue darken-3">
-        <div className="nav-wrapper" style={{ padding: '0 20px' }}>
-          <a href="#" className="brand-logo">MalaCopa Admin</a>
-          <ul className="right hide-on-med-and-down">
-            <li>
-              <a onClick={() => navigate("/admin")} style={{ cursor: "pointer" }}>
-                Inicio
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
+      <AdminNavbar/>
 
       <div className="container" style={{ width: '95%', marginTop: '30px' }}>
         <div className="row">

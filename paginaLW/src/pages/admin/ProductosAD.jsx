@@ -11,6 +11,7 @@ import ProductosTable  from '../../components/products/ProductosTable';
 import CategoriasTable from '../../components/products/CategoriasTable';
 import ProductForm     from '../../components/products/ProductForm';
 import CategoryForm    from '../../components/products/CategoryForm';
+import AdminNavbar from "../admin/AdminNavbar";
 
 export default function ProductosCategoriasPage() {
   const navigate = useNavigate();
@@ -36,16 +37,7 @@ export default function ProductosCategoriasPage() {
       <Toast toast={toast} />
 
       {/* Nav */}
-      <nav className="blue darken-3">
-        <div className="nav-wrapper" style={{ padding: '0 20px' }}>
-          <a href="#" className="brand-logo">MalaCopa Admin</a>
-          <ul className="right hide-on-med-and-down">
-            <li>
-              <a onClick={() => navigate('/admin')} style={{ cursor: 'pointer' }}>Inicio</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
+      <AdminNavbar/>
 
       <div className="container" style={{ width: '95%', marginTop: 30 }}>
         <StatsCards productos={productos} categorias={categorias} />

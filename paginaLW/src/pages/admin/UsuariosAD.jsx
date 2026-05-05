@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import AdminNavbar from "../admin/AdminNavbar";
 // ─── 1. CONSTANTES ────────────────────────────────────────────────────────────
 
 const API = 'http://localhost:3000/api';
+
+// Función centralizada con token JWT para evitar errores 403
+const authFetch = (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+    credentials: 'include',
+  });
+};
 
 const inputStyle = {
   width: '100%',
@@ -94,7 +108,6 @@ function UsuarioForm({ initial, onSave, onClose }) {
     password:           '',
     rol:                initial?.rol      || 'cliente',
     estado:             initial?.estado !== undefined ? initial.estado : true,
-    // Campos extra para cuando rol === 'empleado'
     cargo:              '',
     salario:            '',
     fecha_contratacion: '',
@@ -154,7 +167,6 @@ function UsuarioForm({ initial, onSave, onClose }) {
       e.rol = 'Rol inválido';
     }
 
-    // Validaciones adicionales si el rol es empleado
     if (form.rol === 'empleado') {
       if (!form.cargo.trim()) {
         e.cargo = 'El cargo es requerido';
@@ -180,7 +192,6 @@ function UsuarioForm({ initial, onSave, onClose }) {
     };
     if (form.password.trim()) body.password = form.password.trim();
 
-    // Incluir datos de empleado si aplica
     if (form.rol === 'empleado') {
       body.cargo              = form.cargo.trim();
       body.salario            = form.salario;
@@ -255,7 +266,6 @@ function UsuarioForm({ initial, onSave, onClose }) {
         </label>
       </Field>
 
-      {/* ── CAMPOS ADICIONALES: SOLO SI EL ROL ES EMPLEADO ── */}
       {form.rol === 'empleado' && (
         <div style={{
           marginTop: 20,
@@ -460,24 +470,45 @@ export default function UsuariosEmpleadosPage() {
   };
 
   const fetchUsuarios = async () => {
-    try {
-      const res  = await fetch(`${API}/users`);
-      const data = await res.json();
-      setUsuarios(data);
-    } catch {
-      showToast('Error al cargar usuarios', '#c62828');
-    }
-  };
+  try {
+    const res = await authFetch(`${API}/usuarios`);
 
-  const fetchEmpleados = async () => {
-    try {
-      const res  = await fetch(`${API}/empleados`);
-      const data = await res.json();
-      setEmpleados(data);
-    } catch {
-      showToast('Error al cargar empleados', '#c62828');
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Error usuarios:', text);
+      showToast(`Error usuarios (${res.status})`, '#c62828');
+      return;
     }
-  };
+
+    const data = await res.json();
+    setUsuarios(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error(err);
+    showToast('Error de conexión usuarios', '#c62828');
+  }
+};
+
+const fetchEmpleados = async () => {
+  try {
+    const res = await authFetch(`${API}/empleados`);
+
+    console.log("STATUS:", res.status);
+
+    const data = await res.json(); // 👈 CAMBIO CLAVE
+    console.log("DATA:", data);
+
+    if (!res.ok) {
+      showToast(data.message || 'Error empleados', '#c62828');
+      return;
+    }
+
+    setEmpleados(Array.isArray(data) ? data : []);
+
+  } catch (error) {
+    console.error('ERROR EMPLEADOS:', error);
+    showToast('Error al cargar empleados', '#c62828');
+  }
+};
 
   useEffect(() => {
     fetchUsuarios();
@@ -498,15 +529,14 @@ export default function UsuariosEmpleadosPage() {
 
   const handleCreateUser = async (body) => {
     try {
-      const userRes = await fetch(`${API}/user`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          nombre:  body.nombre,
-          email:   body.email,
+      const userRes = await authFetch(`${API}/usuarios`, {
+        method: 'POST',
+        body: JSON.stringify({
+          nombre:   body.nombre,
+          email:    body.email,
           password: body.password,
-          rol:     body.rol,
-          estado:  body.estado,
+          rol:      body.rol,
+          estado:   body.estado,
         }),
       });
 
@@ -519,10 +549,9 @@ export default function UsuariosEmpleadosPage() {
 
       // Si es empleado, crear automáticamente su registro en empleados
       if (body.rol === 'empleado') {
-        const empleadoRes = await fetch(`${API}/empleados`, {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({
+        const empleadoRes = await authFetch(`${API}/empleados`, {
+          method: 'POST',
+          body: JSON.stringify({
             usuario_id:         userData._id,
             cargo:              body.cargo,
             salario:            Number(body.salario),
@@ -559,10 +588,9 @@ export default function UsuariosEmpleadosPage() {
 
   const handleUpdateUser = async (id, body) => {
     try {
-      const res = await fetch(`${API}/user/${id}`, {
-        method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(body),
+      const res = await authFetch(`${API}/usuarios/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -580,7 +608,7 @@ export default function UsuariosEmpleadosPage() {
   const handleDeleteUser = async (id) => {
     if (!window.confirm('¿Desactivar este usuario? (soft delete)')) return;
     try {
-      const res = await fetch(`${API}/user/${id}`, { method: 'DELETE' });
+      const res = await authFetch(`${API}/usuarios/${id}`, { method: 'DELETE' });
       if (!res.ok) { showToast('Error al eliminar', '#c62828'); return; }
       await fetchUsuarios();
       showToast('Usuario desactivado');
@@ -591,10 +619,9 @@ export default function UsuariosEmpleadosPage() {
 
   const handleToggleUser = async (usuario) => {
     try {
-      const res = await fetch(`${API}/user/${usuario._id}`, {
-        method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ estado: !usuario.estado }),
+      const res = await authFetch(`${API}/usuarios/${usuario._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ estado: !usuario.estado }),
       });
       if (!res.ok) { showToast('Error al cambiar estado', '#c62828'); return; }
       await fetchUsuarios();
@@ -608,10 +635,9 @@ export default function UsuariosEmpleadosPage() {
 
   const handleCreateEmpleado = async (body) => {
     try {
-      const res = await fetch(`${API}/empleados`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
+      const res = await authFetch(`${API}/empleados`, {
+        method: 'POST',
+        body: JSON.stringify({
           usuario_id:         body.usuario_id,
           cargo:              body.cargo,
           salario:            Number(body.salario),
@@ -637,10 +663,9 @@ export default function UsuariosEmpleadosPage() {
 
   const handleUpdateEmpleado = async (id, body) => {
     try {
-      const res = await fetch(`${API}/empleados/${id}`, {
-        method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(body),
+      const res = await authFetch(`${API}/empleados/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -658,7 +683,7 @@ export default function UsuariosEmpleadosPage() {
   const handleDeleteEmpleado = async (id) => {
     if (!window.confirm('¿Desactivar este empleado? (soft delete)')) return;
     try {
-      const res = await fetch(`${API}/empleados/${id}`, { method: 'DELETE' });
+      const res = await authFetch(`${API}/empleados/${id}`, { method: 'DELETE' });
       if (!res.ok) { showToast('Error al eliminar empleado', '#c62828'); return; }
       await fetchEmpleados();
       showToast('Empleado desactivado');
@@ -690,18 +715,7 @@ export default function UsuariosEmpleadosPage() {
 
       <Toast toast={toast} />
 
-      <nav className="blue darken-3">
-        <div className="nav-wrapper" style={{ padding: '0 20px' }}>
-          <a href="#" className="brand-logo">MalaCopa Admin</a>
-          <ul className="right hide-on-med-and-down">
-            <li>
-              <a onClick={() => navigate('/admin')} style={{ cursor: 'pointer' }}>
-                Inicio
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
+      <AdminNavbar/>
 
       <div className="container" style={{ width: '95%', marginTop: 30 }}>
 

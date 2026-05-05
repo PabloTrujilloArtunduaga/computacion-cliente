@@ -1,12 +1,25 @@
 import { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import AdminNavbar from "../admin/AdminNavbar";
 
 export default function AdminDashboardMaterialize() {
   const salesChartRef = useRef(null);
   const navigate = useNavigate();
 
+  // 🔐 PROTEGER RUTA
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+    }
+  }, []);
+
+  // 📊 CHART SEGURO
+  useEffect(() => {
+    if (!salesChartRef.current) return;
+
     const chart = new Chart(salesChartRef.current, {
       type: 'line',
       data: {
@@ -24,11 +37,6 @@ export default function AdminDashboardMaterialize() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: true,
-          },
-        },
       },
     });
 
@@ -46,23 +54,12 @@ export default function AdminDashboardMaterialize() {
   return (
     <div className="grey lighten-4" style={{ minHeight: '100vh' }}>
       
-      <nav className="blue darken-3">
-        <div className="nav-wrapper" style={{ padding: '0 20px' }}>
-          <span className="brand-logo">MalaCopa Admin</span>
-
-          <ul className="right hide-on-med-and-down">
-            <li><Link to="/admin">Inicio</Link></li>
-            <li><Link to="/admin/usuarios">Usuarios</Link></li>
-            <li><Link to="/admin/productos">Productos</Link></li>
-            <li><Link to="/admin/categorias">Categorías</Link></li>
-            <li><Link to="/admin/empleados">Empleados</Link></li>
-            <li><Link to="/admin/facturas">Facturas</Link></li>
-          </ul>
-        </div>
-      </nav>
+      {/* 🔥 HEADER REUTILIZADO */}
+      <AdminNavbar />
 
       <div className="container" style={{ width: '95%', marginTop: '30px' }}>
         
+        {/* ── CARDS ── */}
         <div className="row">
           {cards.map((card, index) => (
             <div className="col s12 m6 l4 xl2" key={index}>
@@ -87,6 +84,7 @@ export default function AdminDashboardMaterialize() {
           ))}
         </div>
 
+        {/* ── CHART + ACCESOS ── */}
         <div className="row">
           <div className="col s12 l8">
             <div className="card" style={{ borderRadius: '12px' }}>
@@ -127,6 +125,7 @@ export default function AdminDashboardMaterialize() {
           </div>
         </div>
 
+        {/* ── TABLA ── */}
         <div className="row">
           <div className="col s12">
             <div className="card" style={{ borderRadius: '12px' }}>
@@ -143,30 +142,10 @@ export default function AdminDashboardMaterialize() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>Whisky Premium</td>
-                      <td>Whisky</td>
-                      <td>120</td>
-                      <td>45</td>
-                    </tr>
-                    <tr>
-                      <td>Ron Añejo</td>
-                      <td>Ron</td>
-                      <td>98</td>
-                      <td>30</td>
-                    </tr>
-                    <tr>
-                      <td>Vodka Importado</td>
-                      <td>Vodka</td>
-                      <td>85</td>
-                      <td>27</td>
-                    </tr>
-                    <tr>
-                      <td>Tequila Reserva</td>
-                      <td>Tequila</td>
-                      <td>73</td>
-                      <td>18</td>
-                    </tr>
+                    <tr><td>Whisky Premium</td><td>Whisky</td><td>120</td><td>45</td></tr>
+                    <tr><td>Ron Añejo</td><td>Ron</td><td>98</td><td>30</td></tr>
+                    <tr><td>Vodka Importado</td><td>Vodka</td><td>85</td><td>27</td></tr>
+                    <tr><td>Tequila Reserva</td><td>Tequila</td><td>73</td><td>18</td></tr>
                   </tbody>
                 </table>
 

@@ -7,51 +7,56 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!usuario.trim() || !password.trim()) {
-      alert('⚠️ Usuario y contraseña obligatorios');
+  if (!usuario.trim() || !password.trim()) {
+    alert('⚠️ Usuario y contraseña obligatorios');
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:3000/api/users/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ usuario, password })
+    });
+
+    const data = await res.json();
+
+    // ❌ manejo de error
+    if (!res.ok) {
+      alert("❌ " + (data.mensaje || "Error en login"));
       return;
     }
 
-    try {
-      const res = await fetch("http://localhost:3000/api/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          usuario,
-          password
-        })
-      });
+    // 🔐 guardar sesión
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("rol", data.rol);
 
-      const data = await res.json();
-
-      if (res.ok) {
-        // 🔐 guardar sesión
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("rol", data.rol);
-
-        // 🚀 redirección por rol
-        if (data.rol === "admin") {
-          navigate("/admin");
-        } else if (data.rol === "empleado") {
-          navigate("/empleado");
-        } else {
-          navigate("/cliente");
-        }
-
-      } else {
-        alert("❌ " + data.mensaje);
-      }
-
-    } catch (error) {
-      console.error(error);
-      alert("❌ Error al conectar con el servidor");
+    // 👤 guardar usuario seguro
+    if (data.usuario && typeof data.usuario === "object") {
+      localStorage.setItem("user", JSON.stringify(data.usuario));
+    } else {
+      localStorage.removeItem("user");
     }
-  };
+
+    // 🚀 redirección por rol
+    if (data.rol === "admin") {
+      navigate("/admin");
+    } else if (data.rol === "empleado") {
+      navigate("/dashboard-empleado"); // 👈 OJO: tu ruta real
+    } else {
+      navigate("/cliente");
+    }
+
+  } catch (error) {
+    console.error(error);
+    alert("❌ Error al conectar con el servidor");
+  }
+};
 
   return (
     <div className="contenedor-formulario">

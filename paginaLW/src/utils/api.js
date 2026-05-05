@@ -14,8 +14,8 @@ export const fetchConToken = async (url, options = {}) => {
 
   // 👉 manejo básico de errores global
   if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem("token");
     localStorage.removeItem("rol");
+    localStorage.clear()
     window.location.href = "/login";
   }
 

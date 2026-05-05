@@ -21,8 +21,8 @@ import Registro from "./pages/Registro";
 
 // ROLES
 import Admin from "./pages/admin/Admin.jsx";
-import Empleado from "./pages/empleados/empleados.jsx";
-import Dashboard from "./pages/Dashboard";
+//import Empleado from "./pages/empleados/empleados.jsx";
+import Dashboard from "./pages/empleados/Dashboard";
 import NotFound from "./pages/NotFound";
 
 // ADMIN PÁGINAS
@@ -59,7 +59,6 @@ function Layout() {
 
           {/* ROLES */}
           <Route path="/admin" element={<Admin />} />
-          <Route path="/empleado" element={<Empleado />} />
           <Route path="/cliente" element={<ClienteDashboard />} />
 
           {/* EMPLEADO */}

@@ -1,5 +1,8 @@
-import User from '../models/usuario.model.js';
-import bcrypt from 'bcrypt';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import User from "../models/usuario.model.js";
+import { TOKEN_SECRET } from "../config/config.js";
+
 /* ================= LOGIN ================= */
 export const login = async (req, res) => {
   try {
@@ -11,18 +14,33 @@ export const login = async (req, res) => {
       return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
 
-    // 🔐 COMPARAR HASH
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({ mensaje: "Contraseña incorrecta" });
     }
 
+    // 🔥 TOKEN
+    const token = jwt.sign(
+      {
+        id: user._id,
+        rol: user.rol
+      },
+      TOKEN_SECRET,
+      { expiresIn: "1d" }
+    );
+
     return res.json({
       mensaje: "Login exitoso",
+      token,
       rol: user.rol,
-      id: user._id
-    });
+      usuario: {
+          _id: user._id,
+          nombre: user.nombre,
+          email: user.email,
+          rol: user.rol
+          }
+        });
 
   } catch (error) {
     console.log(error);
@@ -53,14 +71,13 @@ export const register = async (req, res) => {
       return res.status(400).json({ mensaje: "El correo ya está registrado" });
     }
 
-    // 🔐 HASH PASSWORD
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const nuevoUsuario = new User({
       nombre: usuario,
       email,
-      password: hashedPassword, // 🔥 guardamos hash
+      password: hashedPassword,
       rol: rol || "cliente"
     });
 
