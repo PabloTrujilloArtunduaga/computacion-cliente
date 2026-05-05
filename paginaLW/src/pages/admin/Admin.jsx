@@ -46,44 +46,27 @@ export default function AdminDashboardMaterialize() {
   return (
     <div className="grey lighten-4" style={{ minHeight: '100vh' }}>
       
-      {/* NAVBAR */}
       <nav className="blue darken-3">
         <div className="nav-wrapper" style={{ padding: '0 20px' }}>
           <span className="brand-logo">MalaCopa Admin</span>
 
           <ul className="right hide-on-med-and-down">
-            <li>
-              <Link to="/admin">Inicio</Link>
-            </li>
-            <li>
-              <Link to="/admin/usuarios">Usuarios</Link>
-            </li>
-            <li>
-              <Link to="/admin/productos">Productos</Link>
-            </li>
-            <li>
-              <Link to="/admin/categorias">Categorías</Link>
-            </li>
-            <li>
-              <Link to="/admin/empleados">Empleados</Link>
-            </li>
-            <li>
-              <Link to="/admin/facturas">Facturas</Link>
-            </li>
+            <li><Link to="/admin">Inicio</Link></li>
+            <li><Link to="/admin/usuarios">Usuarios</Link></li>
+            <li><Link to="/admin/productos">Productos</Link></li>
+            <li><Link to="/admin/categorias">Categorías</Link></li>
+            <li><Link to="/admin/empleados">Empleados</Link></li>
+            <li><Link to="/admin/facturas">Facturas</Link></li>
           </ul>
         </div>
       </nav>
 
       <div className="container" style={{ width: '95%', marginTop: '30px' }}>
         
-        {/* CARDS */}
         <div className="row">
           {cards.map((card, index) => (
             <div className="col s12 m6 l4 xl2" key={index}>
-              <div
-                className="card white-text"
-                style={{ backgroundColor: card.color, borderRadius: '12px' }}
-              >
+              <div className="card white-text" style={{ backgroundColor: card.color, borderRadius: '12px' }}>
                 <div className="card-content">
                   <div className="row" style={{ marginBottom: 0 }}>
                     <div className="col s8">
@@ -104,9 +87,7 @@ export default function AdminDashboardMaterialize() {
           ))}
         </div>
 
-        {/* GRAFICO + ACCESOS */}
         <div className="row">
-          
           <div className="col s12 l8">
             <div className="card" style={{ borderRadius: '12px' }}>
               <div className="card-content">
@@ -124,55 +105,28 @@ export default function AdminDashboardMaterialize() {
                 <span className="card-title">Accesos Rápidos</span>
 
                 <div className="collection">
-
-                  <div
-                    className="collection-item"
-                    onClick={() => navigate("/admin/usuarios")}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <div className="collection-item" onClick={() => navigate("/admin/usuarios")} style={{ cursor: "pointer" }}>
                     Gestionar Usuarios
                   </div>
-
-                  <div
-                    className="collection-item"
-                    onClick={() => navigate("/admin/productos")}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <div className="collection-item" onClick={() => navigate("/admin/productos")} style={{ cursor: "pointer" }}>
                     Administrar Productos
                   </div>
-
-                  <div
-                    className="collection-item"
-                    onClick={() => navigate("/admin/categorias")}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <div className="collection-item" onClick={() => navigate("/admin/categorias")} style={{ cursor: "pointer" }}>
                     Control de Categorías
                   </div>
-
-                  <div
-                    className="collection-item"
-                    onClick={() => navigate("/admin/empleados")}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <div className="collection-item" onClick={() => navigate("/admin/empleados")} style={{ cursor: "pointer" }}>
                     Gestión de Empleados
                   </div>
-
-                  <div
-                    className="collection-item"
-                    onClick={() => navigate("/admin/facturas")}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <div className="collection-item" onClick={() => navigate("/admin/facturas")} style={{ cursor: "pointer" }}>
                     Ver Facturas
                   </div>
-
                 </div>
+
               </div>
             </div>
           </div>
-
         </div>
 
-        {/* TABLA */}
         <div className="row">
           <div className="col s12">
             <div className="card" style={{ borderRadius: '12px' }}>
