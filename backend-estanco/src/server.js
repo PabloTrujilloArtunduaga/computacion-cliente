@@ -16,7 +16,7 @@ const app = express();
 
 // MIDDLEWARES
 app.use(cors({
-  origin: 'http://localhost:5174',
+  origin: 'http://localhost:5173', // Estar pendiente 5173 o 5174
   credentials: true
 }));
 app.use(express.json());
