@@ -11,7 +11,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!usuario.trim() || !password.trim()) {
-    alert('⚠️ Usuario y contraseña obligatorios');
+    alert('Usuario y contraseña obligatorios');
     return;
   }
 
@@ -26,9 +26,10 @@ const handleSubmit = async (e) => {
 
     const data = await res.json();
 
-    // ❌ manejo de error
+
+    // manejo de error
     if (!res.ok) {
-      alert("❌ " + (data.mensaje || "Error en login"));
+      alert("❌ " + (data.mensaje || data.message || "Error en login"));
       return;
     }
 
@@ -47,9 +48,12 @@ const handleSubmit = async (e) => {
     if (data.rol === "admin") {
       navigate("/admin");
     } else if (data.rol === "empleado") {
-      navigate("/dashboard-empleado"); // 👈 OJO: tu ruta real
-    } else {
+      navigate("/dashboard-empleado");
+    } else if (data.rol === "cliente") {
       navigate("/cliente");
+    } else {
+      // fallback por si el backend devuelve otro rol
+      navigate("/");
     }
 
   } catch (error) {

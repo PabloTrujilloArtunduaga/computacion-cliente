@@ -24,6 +24,7 @@ import Admin from "./pages/admin/Admin.jsx";
 //import Empleado from "./pages/empleados/empleados.jsx";
 import Dashboard from "./pages/empleados/Dashboard";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 // ADMIN PÁGINAS
 import ProductosCategoriasPage from "./pages/admin/ProductosAD.jsx";
@@ -58,11 +59,32 @@ function Layout() {
           <Route path="/register" element={<Registro />} />
 
           {/* ROLES */}
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/cliente" element={<ClienteDashboard />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute rolPermitido="admin">
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+              path="/cliente"
+              element={
+                <ProtectedRoute rolPermitido="cliente">
+                  <ClienteDashboard />
+                </ProtectedRoute>
+              }
+            />
 
           {/* EMPLEADO */}
-          <Route path="/dashboard-empleado" element={<Dashboard />} />
+          <Route
+              path="/dashboard-empleado"
+              element={
+                <ProtectedRoute rolPermitido="empleado">
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
 
           {/* ADMIN DETALLE */}
           <Route path="/admin/productos" element={<ProductosCategoriasPage />} />

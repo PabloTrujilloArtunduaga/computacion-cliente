@@ -1,10 +1,13 @@
+import bcrypt from "bcrypt";
 import User from '../models/usuario.model.js';
 
 // Obtener todos los usuarios activos
 export const getUsers = async (req, res) => {
   try {
     const users = await User.find({ estado: true });
+
     res.json(users);
+
   } catch (error) {
     res.status(500).json({
       message: 'Error al obtener usuarios',
@@ -16,6 +19,7 @@ export const getUsers = async (req, res) => {
 // Crear usuario
 export const createUser = async (req, res) => {
   try {
+
     console.log('BODY RECIBIDO:', req.body);
 
     const { nombre, email, password, rol } = req.body;
@@ -36,11 +40,16 @@ export const createUser = async (req, res) => {
       });
     }
 
+    // HASH PASSWORD
+    const salt = await bcrypt.genSalt(10);
+
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     // Crear usuario
     const user = new User({
       nombre,
       email,
-      password,
+      password: hashedPassword,
       rol
     });
 
@@ -49,6 +58,7 @@ export const createUser = async (req, res) => {
     res.status(201).json(user);
 
   } catch (error) {
+
     console.error('ERROR AL CREAR USUARIO:', error);
 
     res.status(400).json({
@@ -64,6 +74,7 @@ export const createUser = async (req, res) => {
 // Obtener un usuario por ID
 export const getUser = async (req, res) => {
   try {
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -75,6 +86,7 @@ export const getUser = async (req, res) => {
     res.json(user);
 
   } catch (error) {
+
     res.status(500).json({
       message: 'Error al buscar usuario',
       error: error.message
@@ -85,6 +97,7 @@ export const getUser = async (req, res) => {
 // Eliminación lógica
 export const deleteUser = async (req, res) => {
   try {
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { estado: false },
@@ -103,6 +116,7 @@ export const deleteUser = async (req, res) => {
     });
 
   } catch (error) {
+
     res.status(500).json({
       message: 'Error al eliminar usuario',
       error: error.message
@@ -113,6 +127,7 @@ export const deleteUser = async (req, res) => {
 // Actualizar usuario
 export const updateUser = async (req, res) => {
   try {
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -129,8 +144,9 @@ export const updateUser = async (req, res) => {
       estado
     } = req.body;
 
-    // Validar email único al actualizar
+    // Validar email único
     if (email && email !== user.email) {
+
       const existe = await User.findOne({ email });
 
       if (existe) {
@@ -141,9 +157,19 @@ export const updateUser = async (req, res) => {
     }
 
     if (nombre !== undefined) user.nombre = nombre;
+
     if (email !== undefined) user.email = email;
-    if (password !== undefined) user.password = password;
+
+    // HASH SI CAMBIA PASSWORD
+    if (password !== undefined && password.trim() !== '') {
+
+      const salt = await bcrypt.genSalt(10);
+
+      user.password = await bcrypt.hash(password, salt);
+    }
+
     if (rol !== undefined) user.rol = rol;
+
     if (estado !== undefined) user.estado = estado;
 
     await user.save();
@@ -151,6 +177,7 @@ export const updateUser = async (req, res) => {
     res.json(user);
 
   } catch (error) {
+
     res.status(400).json({
       message: 'Error al actualizar usuario',
       error: error.message,

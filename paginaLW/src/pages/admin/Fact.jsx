@@ -1,16 +1,34 @@
-import React from 'react';
-import { useNavigate } from "react-router-dom"
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import AdminNavbar from "../admin/AdminNavbar";
+import { API } from "../../constants/api";
+import { fetchConToken } from "../../utils/api";
 
 export default function FacturasPage() {
-    const navigate = useNavigate();
-  const facturas = [
-    { id: 'FAC-001', cliente: 'Juan Pérez', fecha: '2026-04-20', total: '$125.000', estado: 'Pagada' },
-    { id: 'FAC-002', cliente: 'Laura Gómez', fecha: '2026-04-21', total: '$89.500', estado: 'Pendiente' },
-    { id: 'FAC-003', cliente: 'Carlos Ruiz', fecha: '2026-04-21', total: '$210.000', estado: 'Pagada' },
-    { id: 'FAC-004', cliente: 'Ana Torres', fecha: '2026-04-22', total: '$56.000', estado: 'Anulada' },
-    { id: 'FAC-005', cliente: 'Pedro Ramírez', fecha: '2026-04-22', total: '$178.900', estado: 'Pagada' },
-  ];
+  const navigate = useNavigate();
+  const [facturas, setFacturas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFacturas = async () => {
+      try {
+        const res = await fetchConToken(`${API}/facturas`);
+        const data = await res.json();
+        setFacturas(data);
+      } catch (err) {
+        setFacturas([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFacturas();
+  }, []);
+
+  // Estadísticas
+  const totalFacturas = facturas.length;
+  const pagadas = facturas.filter(f => f.estado === 'Pagada').length;
+  const pendientes = facturas.filter(f => f.estado === 'Pendiente').length;
+  const totalVentas = facturas.reduce((acc, f) => acc + (f.total || 0), 0);
 
   return (
     <div className="grey lighten-4" style={{ minHeight: '100vh' }}>
@@ -22,7 +40,7 @@ export default function FacturasPage() {
             <div className="card blue white-text" style={{ borderRadius: '12px' }}>
               <div className="card-content center">
                 <i className="material-icons large">receipt_long</i>
-                <h4>5</h4>
+                <h4>{loading ? '-' : totalFacturas}</h4>
                 <p>Total Facturas</p>
               </div>
             </div>
@@ -32,7 +50,7 @@ export default function FacturasPage() {
             <div className="card green white-text" style={{ borderRadius: '12px' }}>
               <div className="card-content center">
                 <i className="material-icons large">paid</i>
-                <h4>3</h4>
+                <h4>{loading ? '-' : pagadas}</h4>
                 <p>Facturas Pagadas</p>
               </div>
             </div>
@@ -42,7 +60,7 @@ export default function FacturasPage() {
             <div className="card orange white-text" style={{ borderRadius: '12px' }}>
               <div className="card-content center">
                 <i className="material-icons large">schedule</i>
-                <h4>1</h4>
+                <h4>{loading ? '-' : pendientes}</h4>
                 <p>Pendientes</p>
               </div>
             </div>
@@ -52,7 +70,7 @@ export default function FacturasPage() {
             <div className="card purple white-text" style={{ borderRadius: '12px' }}>
               <div className="card-content center">
                 <i className="material-icons large">bar_chart</i>
-                <h4>$659K</h4>
+                <h4>{loading ? '-' : `$${totalVentas.toLocaleString()}`}</h4>
                 <p>Ventas Totales</p>
               </div>
             </div>
@@ -82,6 +100,7 @@ export default function FacturasPage() {
                 <tr>
                   <th>N° Factura</th>
                   <th>Cliente</th>
+                  <th>Empleado</th>
                   <th>Fecha</th>
                   <th>Total</th>
                   <th>Estado</th>
@@ -89,33 +108,40 @@ export default function FacturasPage() {
                 </tr>
               </thead>
               <tbody>
-                {facturas.map((factura) => (
-                  <tr key={factura.id}>
-                    <td>{factura.id}</td>
-                    <td>{factura.cliente}</td>
-                    <td>{factura.fecha}</td>
-                    <td>{factura.total}</td>
-                    <td>
-                      <span
-                        className={`new badge ${
-                          factura.estado === 'Pagada'
-                            ? 'green'
-                            : factura.estado === 'Pendiente'
-                            ? 'orange'
-                            : 'red'
-                        }`}
-                        data-badge-caption=""
-                      >
-                        {factura.estado}
-                      </span>
-                    </td>
-                    <td>
-                      <a className="btn-small blue"><i className="material-icons">visibility</i></a>{' '}
-                      <a className="btn-small green"><i className="material-icons">print</i></a>{' '}
-                      <a className="btn-small purple"><i className="material-icons">download</i></a>
-                    </td>
-                  </tr>
-                ))}
+                {loading ? (
+                  <tr><td colSpan="7">Cargando...</td></tr>
+                ) : facturas.length === 0 ? (
+                  <tr><td colSpan="7">No hay facturas</td></tr>
+                ) : (
+                  facturas.map((factura) => (
+                    <tr key={factura._id}>
+                      <td>{factura._id.slice(-6).toUpperCase()}</td>
+                      <td>{factura.cliente_id?.nombre || '—'}</td>
+                      <td>{factura.empleado_id?.usuario_id?.nombre || '—'}</td>
+                      <td>{new Date(factura.createdAt).toLocaleDateString()}</td>
+                      <td>${factura.total?.toLocaleString() || 0}</td>
+                      <td>
+                        <span
+                          className={`new badge ${
+                            factura.estado === 'Pagada'
+                              ? 'green'
+                              : factura.estado === 'Pendiente'
+                              ? 'orange'
+                              : 'red'
+                          }`}
+                          data-badge-caption=""
+                        >
+                          {factura.estado}
+                        </span>
+                      </td>
+                      <td>
+                        <a className="btn-small blue"><i className="material-icons">visibility</i></a>{' '}
+                        <a className="btn-small green"><i className="material-icons">print</i></a>{' '}
+                        <a className="btn-small purple"><i className="material-icons">download</i></a>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

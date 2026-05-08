@@ -1,51 +1,45 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { fetchConToken } from "../../utils/api";
+import ClienteNavbar from "./ClienteNavbar";
 
 export default function ClienteDashboard() {
-  const cliente = {
-    nombre: "Juan Pérez",
-    estado: "Activo",
-  };
+  const [usuario, setUsuario] = useState(null);
+  const [facturas, setFacturas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const compras = [
-    {
-      id: 1,
-      producto: "Whisky Premium",
-      cantidad: 2,
-      precio: "$120.000",
-      estado: "Entregado",
-    },
-    {
-      id: 2,
-      producto: "Ron Añejo",
-      cantidad: 1,
-      precio: "$85.000",
-      estado: "Enviado",
-    },
-    {
-      id: 3,
-      producto: "Vodka Importado",
-      cantidad: 3,
-      precio: "$95.000",
-      estado: "Pendiente",
-    },
-    {
-      id: 4,
-      producto: "Tequila Reserva",
-      cantidad: 1,
-      precio: "$140.000",
-      estado: "Cancelado",
-    },
-  ];
+  // 🔐 Cargar usuario desde localStorage
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUsuario(user);
+  }, []);
+
+  // 📦 Traer facturas del cliente
+  useEffect(() => {
+    const cargarFacturas = async () => {
+      try {
+        const res = await fetchConToken(
+          "http://localhost:3000/api/facturas" // Revisar
+        );
+
+        const data = await res.json();
+        setFacturas(data);
+      } catch (error) {
+        console.error("Error cargando facturas", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarFacturas();
+  }, []);
 
   const getEstadoColor = (estado) => {
     switch (estado) {
-      case "Entregado":
+      case "pagada":
         return "green";
-      case "Enviado":
-        return "blue";
-      case "Pendiente":
+      case "pendiente":
         return "orange";
-      case "Cancelado":
+      case "anulada":
         return "red";
       default:
         return "grey";
@@ -53,98 +47,87 @@ export default function ClienteDashboard() {
   };
 
   return (
-    <div className="grey lighten-4" style={{ minHeight: "100vh" }}>
-      
-      {/* NAVBAR */}
-      <nav className="black">
-        <div className="nav-wrapper" style={{ padding: "0 20px" }}>
-          <a href="#" className="brand-logo" style={{ color: "#d4af37" }}>
-            Mi Cuenta
-          </a>
-        </div>
-      </nav>
+    <>
+      {/* 🔥 NAVBAR CLIENTE */}
+      <ClienteNavbar />
 
-      <div className="container" style={{ width: "95%", marginTop: "30px" }}>
+      <div className="container" style={{ marginTop: "30px" }}>
 
         {/* INFO CLIENTE */}
-        <div className="row">
-          <div className="col s12 m6">
-            <div className="card" style={{ borderRadius: "12px" }}>
-              <div className="card-content">
-                <span className="card-title">Información del Cliente</span>
+        <div className="card">
+          <div className="card-content">
+            <span className="card-title">Mi Información</span>
 
-                <p><strong>Nombre:</strong> {cliente.nombre}</p>
-
-                <p>
-                  <strong>Estado:</strong>{" "}
-                  <span
-                    className={`new badge ${cliente.estado === "Activo" ? "green" : "red"}`}
-                    data-badge-caption=""
-                  >
-                    {cliente.estado}
-                  </span>
-                </p>
-
-              </div>
-            </div>
-          </div>
-
-          {/* RESUMEN */}
-          <div className="col s12 m6">
-            <div className="card blue white-text" style={{ borderRadius: "12px" }}>
-              <div className="card-content center">
-                <i className="material-icons large">shopping_cart</i>
-                <h4>{compras.length}</h4>
-                <p>Compras realizadas</p>
-              </div>
-            </div>
+            <p><strong>Nombre:</strong> {usuario?.nombre}</p>
+            <p><strong>Email:</strong> {usuario?.email}</p>
+            <p>
+              <strong>Estado:</strong>{" "}
+              <span className="new badge green" data-badge-caption="">
+                Activo
+              </span>
+            </p>
           </div>
         </div>
 
-        {/* HISTORIAL DE COMPRAS */}
-        <div className="row">
-          <div className="col s12">
-            <div className="card" style={{ borderRadius: "12px" }}>
-              <div className="card-content">
-                <span className="card-title">Historial de Compras</span>
+        {/* RESUMEN */}
+        <div className="card blue white-text">
+          <div className="card-content center">
+            <h4>{facturas.length}</h4>
+            <p>Compras realizadas</p>
+          </div>
+        </div>
 
-                <table className="highlight responsive-table centered">
-                  <thead>
+        {/* HISTORIAL */}
+        <div className="card">
+          <div className="card-content">
+            <span className="card-title">Mis Compras</span>
+
+            {loading ? (
+              <p>Cargando...</p>
+            ) : (
+              <table className="highlight responsive-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Total</th>
+                    <th>Método Pago</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {facturas.length === 0 ? (
                     <tr>
-                      <th>ID</th>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Precio</th>
-                      <th>Estado</th>
+                      <td colSpan="4" style={{ textAlign: "center" }}>
+                        No tienes compras aún
+                      </td>
                     </tr>
-                  </thead>
-
-                  <tbody>
-                    {compras.map((compra) => (
-                      <tr key={compra.id}>
-                        <td>{compra.id}</td>
-                        <td>{compra.producto}</td>
-                        <td>{compra.cantidad}</td>
-                        <td>{compra.precio}</td>
+                  ) : (
+                    facturas.map((factura) => (
+                      <tr key={factura._id}>
+                        <td>{factura._id}</td>
+                        <td>${factura.total}</td>
+                        <td>{factura.metodo_pago}</td>
                         <td>
                           <span
-                            className={`new badge ${getEstadoColor(compra.estado)}`}
+                            className={`new badge ${getEstadoColor(
+                              factura.estado
+                            )}`}
                             data-badge-caption=""
                           >
-                            {compra.estado}
+                            {factura.estado}
                           </span>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-
-                </table>
-              </div>
-            </div>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
       </div>
-    </div>
+    </>
   );
 }

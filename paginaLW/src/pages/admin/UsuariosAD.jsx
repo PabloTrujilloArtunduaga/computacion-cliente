@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminNavbar from "../admin/AdminNavbar";
 // ─── 1. CONSTANTES ────────────────────────────────────────────────────────────
@@ -391,9 +391,14 @@ function EmpleadoForm({ initial, usuariosLibres, onSave, onClose }) {
               </option>
             ))}
           </select>
-          {usuariosLibres.filter(u => u.rol === 'empleado').length === 0 && (
-            <span style={{ color: '#888', fontSize: 12, marginTop: 6, display: 'block' }}>
-              No hay usuarios con rol "empleado" disponibles.
+          {usuariosLibres.length === 0 && (
+            <span style={{
+              color: '#888',
+              fontSize: 12,
+              marginTop: 6,
+              display: 'block'
+            }}>
+              No hay usuarios disponibles.
             </span>
           )}
         </Field>
@@ -469,19 +474,25 @@ export default function UsuariosEmpleadosPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const fetchUsuarios = async () => {
+const fetchUsuarios = async () => {
   try {
     const res = await authFetch(`${API}/usuarios`);
 
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('Error usuarios:', text);
-      showToast(`Error usuarios (${res.status})`, '#c62828');
-      return;
-    }
-
     const data = await res.json();
-    setUsuarios(Array.isArray(data) ? data : []);
+
+    console.log("RESPUESTA USUARIOS:", data);
+
+    // 👇 Soporta varios formatos
+    const lista = Array.isArray(data)
+      ? data
+      : data.usuarios
+      ? data.usuarios
+      : data.data
+      ? data.data
+      : [];
+
+    setUsuarios(lista);
+
   } catch (err) {
     console.error(err);
     showToast('Error de conexión usuarios', '#c62828');
@@ -515,10 +526,23 @@ const fetchEmpleados = async () => {
     fetchEmpleados();
   }, []);
 
-  const empleadoUserIds = new Set(
-    empleados.map(e => e.usuario_id?._id || e.usuario_id)
+// CORRECCIÓN en UsuariosEmpleadosPage:
+const empleadoUserIds = useMemo(() => {
+  return new Set(
+    empleados.map(e => String(e.usuario_id?._id || e.usuario_id))
   );
-  const usuariosLibres = usuarios.filter(u => !empleadoUserIds.has(u._id));
+}, [empleados]);
+
+const usuariosLibres = useMemo(() => {
+  return usuarios.filter(
+    u => u.estado === true && !empleadoUserIds.has(String(u._id))
+  );
+}, [usuarios, empleadoUserIds]);
+
+console.log("USUARIOS:", usuarios);
+console.log("EMPLEADOS:", empleados);
+console.log("IDS EMPLEADOS:", [...empleadoUserIds]);
+console.log("USUARIOS LIBRES:", usuariosLibres);
 
   const totalUsuarios   = usuarios.length;
   const usuariosActivos = usuarios.filter(u => u.estado === true).length;
@@ -587,35 +611,90 @@ const fetchEmpleados = async () => {
   };
 
   const handleUpdateUser = async (id, body) => {
-    try {
-      const res = await authFetch(`${API}/usuarios/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        showToast(d.message || 'Error al actualizar', '#c62828');
-        return;
-      }
-      await fetchUsuarios();
-      setModal(null);
-      showToast('Usuario actualizado');
-    } catch {
-      showToast('Error de conexión', '#c62828');
-    }
-  };
+  try {
 
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm('¿Desactivar este usuario? (soft delete)')) return;
-    try {
-      const res = await authFetch(`${API}/usuarios/${id}`, { method: 'DELETE' });
-      if (!res.ok) { showToast('Error al eliminar', '#c62828'); return; }
-      await fetchUsuarios();
-      showToast('Usuario desactivado');
-    } catch {
-      showToast('Error de conexión', '#c62828');
+    // Buscar usuario actual
+    const usuarioActual = usuarios.find(u => u._id === id);
+
+    // Actualizar usuario
+    const res = await authFetch(`${API}/usuarios/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast(data.message || 'Error al actualizar', '#c62828');
+      return;
     }
-  };
+
+    // ─────────────────────────────────────────────
+    // SI CAMBIÓ A EMPLEADO → CREAR EMPLEADO
+    // ─────────────────────────────────────────────
+
+    const yaEsEmpleado = empleados.some(emp =>
+      (emp.usuario_id?._id || emp.usuario_id) === id
+    );
+
+    if (
+      body.rol === 'empleado' &&
+      !yaEsEmpleado
+    ) {
+
+      const empleadoRes = await authFetch(`${API}/empleados`, {
+        method: 'POST',
+        body: JSON.stringify({
+          usuario_id: id,
+          cargo: body.cargo || 'Empleado',
+          salario: Number(body.salario) || 0,
+          fecha_contratacion:
+            body.fecha_contratacion || new Date(),
+        }),
+      });
+
+      const empleadoData = await empleadoRes.json();
+
+      if (!empleadoRes.ok) {
+        showToast(
+          empleadoData.message || 'Usuario actualizado pero empleado no creado',
+          '#ef6c00'
+        );
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // SI DEJÓ DE SER EMPLEADO → ELIMINAR EMPLEADO
+    // ─────────────────────────────────────────────
+
+    if (
+      usuarioActual?.rol === 'empleado' &&
+      body.rol !== 'empleado'
+    ) {
+
+      const empleado = empleados.find(emp =>
+        (emp.usuario_id?._id || emp.usuario_id) === id
+      );
+
+      if (empleado) {
+        await authFetch(`${API}/empleados/${empleado._id}`, {
+          method: 'DELETE',
+        });
+      }
+    }
+
+    await fetchUsuarios();
+    await fetchEmpleados();
+
+    setModal(null);
+
+    showToast('Usuario actualizado correctamente');
+
+  } catch (error) {
+    console.error(error);
+    showToast('Error de conexión', '#c62828');
+  }
+};
 
   const handleToggleUser = async (usuario) => {
     try {
