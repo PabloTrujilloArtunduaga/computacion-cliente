@@ -50,12 +50,22 @@ export default function Registro() {
       const data = await res.json();
 
       if (res.ok) {
-        alert('¡Usuario registrado con éxito!');
-        
-        // 🔥 Redirección correcta (sin recargar)
-        navigate("/login");
 
-      } else {
+    //  guardar sesión automática
+    localStorage.setItem("token", data.token);
+
+    localStorage.setItem("rol", data.usuario.rol);
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data.usuario)
+    );
+
+    alert('¡Usuario registrado con éxito!');
+
+    // REDIRECCIÓN AL INICIO
+    navigate("/");
+  }   else {
         alert(data.mensaje || "Error al registrar");
       }
 

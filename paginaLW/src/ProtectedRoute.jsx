@@ -1,18 +1,64 @@
-import { Navigate } from "react-router-dom";
+import {
+  Navigate
+} from "react-router-dom";
 
-export default function ProtectedRoute({ children, rolPermitido }) {
-  const token = localStorage.getItem("token");
-  const rol = localStorage.getItem("rol");
+export default function ProtectedRoute({
+  children,
+  rolPermitido
+}) {
 
-  // 🔒 Si no hay token → al inicio
+  /*
+    =========================
+    OBTENER DATOS
+    =========================
+  */
+
+  const token =
+    localStorage.getItem("token");
+
+  const rol =
+    localStorage.getItem("rol");
+
+  /*
+    =========================
+    VALIDAR TOKEN
+    =========================
+  */
+
   if (!token) {
-    return <Navigate to="/" replace />;
+
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
   }
 
-  // 🔒 Si el rol no coincide → al inicio
-  if (rolPermitido && rol !== rolPermitido) {
-    return <Navigate to="/" replace />;
+  /*
+    =========================
+    VALIDAR ROL
+    =========================
+  */
+
+  if (
+    rolPermitido &&
+    rol !== rolPermitido
+  ) {
+
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
   }
+
+  /*
+    =========================
+    TODO OK
+    =========================
+  */
 
   return children;
 }

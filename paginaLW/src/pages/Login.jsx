@@ -45,20 +45,12 @@ const handleSubmit = async (e) => {
     }
 
     // 🚀 redirección por rol
-    if (data.rol === "admin") {
-      navigate("/admin");
-    } else if (data.rol === "empleado") {
-      navigate("/dashboard-empleado");
-    } else if (data.rol === "cliente") {
-      navigate("/cliente");
-    } else {
-      // fallback por si el backend devuelve otro rol
-      navigate("/");
-    }
+    navigate("/");
+    
 
   } catch (error) {
     console.error(error);
-    alert("❌ Error al conectar con el servidor");
+    alert(" Error al conectar con el servidor");
   }
 };
 

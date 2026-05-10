@@ -1,330 +1,852 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Lato:wght@400;600;700&display=swap');
 
 :root {
-  --color-principal: #000000;          /* Negro elegante */
-  --color-secundario: #ffffff;         /* Blanco puro */
-  --color-acento: #d4af37;             /* Dorado elegante */
-  --color-acento-hover: #c49c2f;       /* Dorado oscuro */
-  --color-neutro: #333333;             /* Gris oscuro neutro */
-  --color-footer: #0f0f0f;             /* Fondo oscuro profundo */
+  --color-principal: #000000;
+  --color-secundario: #ffffff;
+  --color-acento: #d4af37;
+  --color-acento-hover: #e7c65a;
+  --color-neutro: #333333;
+  --color-footer: #0f0f0f;
   --color-texto-light: #ffffff;
+
   --font-base: 'Lato', sans-serif;
 }
 
-/* GLOBAL */
+/* =========================================
+   GLOBAL
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
   margin: 0;
   padding: 0;
+
+  width: 100%;
+  overflow-x: hidden;
+
   font-family: var(--font-base);
+
   background-color: var(--color-secundario);
   color: var(--color-neutro);
 }
 
-section {
-  padding: 80px 0;
-}
-
-/* === NAVBAR PREMIUM === */
-nav {
-  background: linear-gradient(90deg, #000000, #1a1a1a) !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-nav .brand-logo {
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  font-size: 2rem;
-  letter-spacing: 1px;
-  color: var(--color-acento) !important;
-  transition: 0.3s ease;
-}
-
-nav .brand-logo:hover {
-  color: var(--color-acento-hover) !important;
-}
-
-nav ul li a {
-  color: var(--color-texto-light) !important;
-  font-weight: 600;
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-
-nav ul li a:hover {
-  color: var(--color-acento) !important;
-  transform: translateY(-2px);
-}
-
-/* === TITULOS Y TEXTO === */
-h1, h2, h5 {
-  text-align: center;
-  font-weight: 700;
-  color: var(--color-principal);
-  margin-bottom: 20px;
-  font-family: 'Playfair Display', serif;
-}
-
-h1 { font-size: 2.8rem; }
-h5 { font-size: 1.7rem; color: var(--color-acento); }
-
-p {
-  max-width: 850px;
-  margin: 0 auto 30px auto;
-  line-height: 1.7;
-  font-size: 1.15rem;
-  color: var(--color-neutro);
-}
-
-/* === BOTONES === */
-.btn {
-  background-color: var(--color-acento) !important;
-  border-radius: 8px;
-  padding: 0 28px;
-  font-weight: 700;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  color: var(--color-texto-light) !important;
-}
-
-.btn:hover {
-  background-color: var(--color-acento-hover) !important;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-  transform: translateY(-3px);
-}
-
-/* === CARDS === */
-.card {
-  border-radius: 14px;
-  padding: 25px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background-color: #fff;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 14px 25px rgba(0,0,0,0.25);
-}
-
-/* === CARRUSEL === */
-.carousel .carousel-item img {
-  max-height: 450px;
-  width: 100%;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-}
-
-/* === SECCIÓN SOBRE NOSOTROS === */
-#sobre-nosotros {
-  background-color: #f9f9f9;
-  border-radius: 16px;
-  padding: 60px 25px;
-  box-shadow: 0 6px 25px rgba(0,0,0,0.12);
-}
-
-/* === FOOTER === */
-footer.page-footer {
-  background: linear-gradient(90deg, #000000, #1a1a1a) !important;
-  color: var(--color-acento);
-  font-weight: 600;
-  text-align: center;
-  padding: 30px 0;
-  letter-spacing: 0.6px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-/* === LAYOUT FLEX FIX === */
-html, body {
-  height: 100%;
+body {
+  min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
+
   display: flex;
   flex-direction: column;
 }
 
-.main-content { flex: 1; }
-
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-  h1 { font-size: 2rem; }
-  p { font-size: 1rem; padding: 0 15px; }
-  .carousel .carousel-item img { max-height: 260px; }
+.main-content {
+  flex: 1;
 }
 
-/* === PRODUCTOS === */
-.producto-card {
-  height: 420px;
-  display: flex;
-  flex-direction: column;
-  border-radius: 14px;
+/*
+  IMPORTANTE:
+  NO aplicar padding al carrusel
+*/
+
+
+/* =========================================
+   NAVBAR
+========================================= */
+
+nav {
+  background:
+    linear-gradient(
+      90deg,
+      #000000,
+      #111111,
+      #1b1b1b
+    ) !important;
+
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.35);
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.08);
+}
+
+nav .nav-wrapper {
+  min-height: 72px;
+}
+
+nav .brand-logo {
+  font-family:
+    'Playfair Display',
+    serif;
+
+  font-size: 2rem;
+  font-weight: 800;
+
+  letter-spacing: 1px;
+
+  color:
+    var(--color-acento) !important;
+
+  transition:
+    color 0.3s ease;
+}
+
+nav .brand-logo:hover {
+  color:
+    var(--color-acento-hover) !important;
+}
+
+nav ul li a {
+  color:
+    var(--color-texto-light) !important;
+
+  font-weight: 700;
+
+  letter-spacing: 0.4px;
+
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+nav ul li a:hover {
+  color:
+    var(--color-acento) !important;
+
+  transform:
+    translateY(-2px);
+}
+
+/* =========================================
+   TITULOS
+========================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin-top: 0;
+
+  font-family:
+    'Playfair Display',
+    serif;
+
+  font-weight: 700;
+
+  color:
+    var(--color-principal);
+}
+
+h1 {
+  font-size: 2.8rem;
+}
+
+h2 {
+  font-size: 2.2rem;
+}
+
+h5 {
+  font-size: 1.5rem;
+}
+
+p {
+  line-height: 1.7;
+}
+
+/* =========================================
+   BOTONES
+========================================= */
+
+.btn {
+  border-radius: 10px !important;
+
+  background:
+    var(--color-acento) !important;
+
+  color:
+    #111 !important;
+
+  font-weight: 700;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+.btn:hover {
+  background:
+    var(--color-acento-hover) !important;
+
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================
+   CARRUSEL
+========================================= */
+
+.carrusel-container {
+  position: relative;
+
+  width: 100%;
+  height: 82vh;
+  min-height: 540px;
+
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-  background-color: #fff;
+
+  background: #000;
+
+  margin: 0;
+  padding: 0 !important;
+}
+
+/* SLIDE */
+
+.slide {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+}
+
+.slide-image {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+
+  display: block;
+
+  filter:
+    brightness(0.78);
+
+  animation:
+    zoomSlide 8s ease-in-out infinite alternate;
+}
+
+/* OVERLAY */
+
+.capa {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.22),
+      rgba(0, 0, 0, 0.35),
+      rgba(0, 0, 0, 0.6)
+    );
+
+  z-index: 1;
+}
+
+/* TEXTO */
+
+.texto-principal {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  transform:
+    translate(-50%, -50%);
+
+  z-index: 2;
+
+  width: 90%;
+  max-width: 950px;
+
+  text-align: center;
+
+  color: white;
+}
+
+.overline {
+  margin-bottom: 16px;
+
+  color:
+    var(--color-acento);
+
+  font-size: 1rem;
+  font-weight: 700;
+
+  letter-spacing: 5px;
+
+  text-transform: uppercase;
+}
+
+.texto-principal h1 {
+  margin: 0;
+
+  font-size:
+    clamp(3rem, 7vw, 5.8rem);
+
+  line-height: 1.08;
+
+  font-weight: 800;
+
+  color: white;
+
+  text-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.55);
+}
+
+.descripcion {
+  margin:
+    22px auto 0;
+
+  max-width: 700px;
+
+  font-size:
+    clamp(1rem, 2vw, 1.3rem);
+
+  line-height: 1.7;
+
+  color:
+    rgba(255, 255, 255, 0.92);
+
+  text-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* BOTÓN CTA */
+
+.btn-cta {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 32px;
+
+  padding:
+    14px 36px;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #d4af37,
+      #f4d76a
+    );
+
+  color: #111;
+
+  font-size: 1rem;
+  font-weight: 800;
+
+  text-decoration: none;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.btn-cta:hover {
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 12px 25px rgba(212, 175, 55, 0.35);
+}
+
+/* FLECHAS */
+
+.carrusel-btn {
+  position: absolute;
+
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+
+  z-index: 3;
+
+  width: 52px;
+  height: 52px;
+
+  border: none;
+  border-radius: 50%;
+
+  background:
+    rgba(0, 0, 0, 0.45);
+
+  color: white;
+
+  font-size: 2rem;
+
+  cursor: pointer;
+
+  transition:
+    all 0.25s ease;
+}
+
+.carrusel-btn:hover {
+  background:
+    var(--color-acento);
+
+  color: #111;
+
+  transform:
+    translateY(-50%)
+    scale(1.08);
+}
+
+.carrusel-btn.izquierda {
+  left: 18px;
+}
+
+.carrusel-btn.derecha {
+  right: 18px;
+}
+
+/* DOTS */
+
+.dots {
+  position: absolute;
+
+  bottom: 26px;
+  left: 50%;
+
+  transform:
+    translateX(-50%);
+
+  z-index: 3;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.dots button {
+  width: 12px;
+  height: 12px;
+
+  border: none;
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.45);
+
+  cursor: pointer;
+
+  transition:
+    all 0.25s ease;
+}
+
+.dots button:hover {
+  background: white;
+}
+
+.dots button.active {
+  width: 34px;
+
+  border-radius: 999px;
+
+  background:
+    var(--color-acento);
+}
+
+/* =========================================
+   PROMOCIONES
+========================================= */
+
+.inicio-section {
+  text-align: center;
+
+  padding:
+    80px 20px;
+
+  background:
+    #fdfbf8;
+}
+
+.titulo-section {
+  font-size: 2.2rem;
+
+  color: #222;
+
+  margin-bottom: 12px;
+}
+
+.linea-promos {
+  width: 90px;
+  height: 4px;
+
+  margin:
+    0 auto 55px;
+
+  border-radius: 999px;
+
+  background:
+    var(--color-acento);
+}
+
+/* GRID */
+
+.promos-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(260px, 1fr)
+    );
+
+  gap: 35px;
+
+  max-width: 1250px;
+
+  margin: 0 auto;
+}
+
+/* CARD */
+
+.promo-card {
+  position: relative;
+
+  overflow: hidden;
+
+  background: white;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.08);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.promo-card:hover {
+  transform:
+    translateY(-8px);
+
+  box-shadow:
+    0 16px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* IMG */
+
+.promo-img {
+  width: 100%;
+  height: 260px;
+
+  background:
+    #faf4e6;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+}
+
+.promo-img img {
+  width: 75%;
+  height: 75%;
+
+  object-fit: contain;
+
+  transition:
+    transform 0.4s ease;
+}
+
+.promo-card:hover .promo-img img {
+  transform:
+    scale(1.08);
+}
+
+/* DESCUENTO */
+
+.descuento {
+  position: absolute;
+
+  top: 15px;
+  right: 15px;
+
+  z-index: 5;
+
+  background:
+    #d62828;
+
+  color: white;
+
+  font-size: 0.9rem;
+  font-weight: 800;
+
+  padding:
+    6px 14px;
+
+  border-radius: 999px;
+}
+
+/* TEXTOS */
+
+.promo-nombre {
+  margin:
+    20px 16px 8px;
+
+  font-size: 1.25rem;
+
+  color: #222;
+}
+
+.promo-precios {
+  margin-bottom: 22px;
+}
+
+.promo-precio-actual {
+  color: #d62828;
+
+  font-size: 1.5rem;
+  font-weight: 900;
+
+  margin-right: 10px;
+}
+
+.promo-precio-ant {
+  color: #999;
+
+  text-decoration: line-through;
+}
+
+/* =========================================
+   PRODUCTOS
+========================================= */
+
+.producto-card {
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background: white;
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.12);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .producto-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 14px 25px rgba(0,0,0,0.25);
+  transform:
+    translateY(-6px);
+
+  box-shadow:
+    0 14px 26px rgba(0, 0, 0, 0.18);
 }
 
-/* Imagen */
 .producto-img-wrapper {
-  height: 230px;
+  height: 240px;
+
   overflow: hidden;
-  border-bottom: 3px solid rgba(0,0,0,0.1);
 }
+
 .producto-img {
   width: 100%;
   height: 100%;
+
   object-fit: cover;
-  transition: transform 0.4s ease;
+
+  transition:
+    transform 0.4s ease;
 }
+
 .producto-card:hover .producto-img {
-  transform: scale(1.15);
+  transform:
+    scale(1.08);
 }
 
-/* Contenido */
 .producto-content {
-  padding: 15px;
-  text-align: center;
-  flex: 1;
+  padding: 18px;
 }
+
 .producto-titulo {
-  font-weight: 700;
   font-size: 1.4rem;
-  margin-bottom: 8px;
-  color: var(--color-principal);
-  font-family: 'Playfair Display', serif;
-}
-.producto-descripcion {
-  font-size: 1rem;
-  color: var(--color-neutro);
-  line-height: 1.4;
-  margin-bottom: 15px;
-}
 
-/* Botón */
-.producto-btn {
-  border-radius: 8px;
-  font-weight: 700;
-  width: 100%;
-  background-color: var(--color-acento);
-  color: var(--color-texto-light);
-  transition: all 0.3s ease;
-}
-.producto-btn:hover {
-  background-color: var(--color-acento-hover);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-  transform: translateY(-3px);
-}
-
-/* Títulos de sección */
-.section h4 {
-  font-weight: 700;
-  font-size: 2rem;
-  margin: 40px 0 20px;
-  color: var(--color-principal);
-  text-align: center;
-  font-family: 'Playfair Display', serif;
-  letter-spacing: 1px;
-}
-
-/* === CONTACTO PREMIUM === */
-.contacto-section {
-  padding: 90px 0;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
-}
-
-.contacto-titulo {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.6rem;
-  font-weight: 700;
-  text-align: center;
-  color: var(--color-principal);
   margin-bottom: 10px;
-  letter-spacing: 1px;
 }
 
-.contacto-sub {
-  text-align: center;
-  max-width: 600px;
-  margin: 0 auto 45px;
-  font-size: 1.15rem;
+.producto-descripcion {
   color: #555;
+
+  font-size: 1rem;
+}
+
+.producto-btn {
+  width: 100%;
+
+  border-radius: 10px;
+}
+
+/* =========================================
+   CONTACTO
+========================================= */
+
+.contacto-section {
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #f7f7f7
+    );
 }
 
 .contacto-card {
   max-width: 650px;
+
   margin: auto;
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 35px 45px;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.16);
-  border-top: 4px solid var(--color-acento);
+
+  padding:
+    40px;
+
+  border-radius: 18px;
+
+  background: white;
+
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.12);
+
+  border-top:
+    4px solid var(--color-acento);
 }
 
-.input-field input,
-.input-field textarea {
-  color: var(--color-principal);
-  font-weight: 600;
-}
+/* =========================================
+   FOOTER
+========================================= */
 
-.input-field label {
-  font-weight: 600;
-  color: var(--color-neutro);
-}
-
-/* Botón dorado elegante */
-.btn-contacto {
-  background-color: var(--color-acento) !important;
-  border-radius: 10px;
-  padding: 10px 35px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  color: var(--color-texto-light) !important;
-  transition: all .3s ease;
-}
-
-.btn-contacto:hover {
-  background-color: var(--color-acento-hover) !important;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-}
-
-
-/* === FOOTER ESTILO ELEGANTE Y SOBRIO === */
 .footer-minimal {
-  background-color: #000; /* negro sólido */
-  padding: 18px 0;
-  border-top: 1px solid rgba(255,255,255,0.12); /* línea suave */
+  background:
+    #000;
+
+  padding:
+    22px 0;
+
   text-align: center;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.08);
 }
 
 .footer-line {
   margin: 0;
+
+  color: #e5e5e5;
+
   font-size: 0.95rem;
   font-weight: 600;
-  color: #e5e5e5;
-  letter-spacing: 0.4px;
 }
 
 .footer-brand {
-  color: var(--color-acento); /* dorado elegante */
-  font-weight: 700;
+  color:
+    var(--color-acento);
 }
 
 .footer-link {
   color: #e5e5e5;
+
   text-decoration: none;
-  margin: 0 4px;
-  transition: 0.3s ease;
+
+  transition:
+    color 0.25s ease;
 }
 
 .footer-link:hover {
-  color: var(--color-acento-hover);
+  color:
+    var(--color-acento);
+}
+
+/* =========================================
+   ANIMACIONES
+========================================= */
+
+@keyframes zoomSlide {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.05);
+  }
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 992px) {
+  .carrusel-container {
+    height: 72vh;
+  }
+
+  .texto-principal h1 {
+    font-size: 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  nav .brand-logo {
+    font-size: 1.6rem;
+  }
+
+  .carrusel-container {
+    height: 65vh;
+    min-height: 480px;
+  }
+
+  .texto-principal h1 {
+    font-size: 2.7rem;
+  }
+
+  .descripcion {
+    font-size: 1rem;
+  }
+
+  .btn-cta {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .carrusel-btn {
+    width: 44px;
+    height: 44px;
+
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .inicio-section {
+    padding:
+      60px 15px;
+  }
+
+  .titulo-section {
+    font-size: 1.8rem;
+  }
+
+  .promos-grid {
+    gap: 24px;
+  }
+
+  .promo-img {
+    height: 220px;
+  }
 }

@@ -1,83 +1,254 @@
-import React, { useEffect, useContext, useRef } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+
 import M from "materialize-css";
+
 import { CarritoContext } from "../context/CarritoContext";
 
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { GSAP_CONFIG } from "../utils/animaciones";
+import "../styles/Productos.css";
 
-export default function ProductoCard({ producto }) {
-  const { agregarAlCarrito } = useContext(CarritoContext);
-  const cardWrapperRef = useRef(null);
+export default function ProductoCard({
+  producto = {},
+}) {
+  /*
+    =========================
+    CONTEXT
+    =========================
+  */
+
+  const { agregarAlCarrito } =
+    useContext(CarritoContext);
+
+  /*
+    =========================
+    REF
+    =========================
+  */
+
+  const cardRef = useRef(null);
+
+  /*
+    =========================
+    DATA SAFE
+    =========================
+  */
+
+  const {
+    nombre = "Producto",
+    descripcion =
+      "Sin descripción",
+    precio = 0,
+    stock = 0,
+    imagen =
+      "https://via.placeholder.com/400x300?text=Producto",
+    estado = false,
+  } = producto;
+
+  /*
+    =========================
+    DISPONIBILIDAD
+    =========================
+  */
+
+  const disponible = useMemo(() => {
+    return (
+      Boolean(estado) &&
+      Number(stock) > 0
+    );
+  }, [estado, stock]);
+
+  /*
+    =========================
+    PRECIO FORMAT
+    =========================
+  */
+
+  const precioFormateado =
+    useMemo(() => {
+      return Number(
+        precio || 0
+      ).toLocaleString("es-CO");
+    }, [precio]);
+
+  /*
+    =========================
+    MATERIALIZE
+    =========================
+  */
 
   useEffect(() => {
-    M.AutoInit();
+    if (!cardRef.current) {
+      return;
+    }
+
+    const waves =
+      cardRef.current.querySelectorAll(
+        ".waves-effect"
+      );
+
+    /*
+      INIT WAVES SAFE
+    */
+
+    if (
+      M?.Waves?.init &&
+      waves.length > 0
+    ) {
+      M.Waves.init(waves);
+    }
   }, []);
 
-  useGSAP(() => {
-    gsap.from(cardWrapperRef.current, {
-      scrollTrigger: {
-        trigger: cardWrapperRef.current,
-        start: "top 85%",
-        toggleActions: "play none none reverse",
-      },
-      y: 40,
-      opacity: 0,
-      duration: GSAP_CONFIG.duracionMedia,
-      ease: GSAP_CONFIG.easePrincipal,
-      clearProps: "all"
-    });
-  }); 
+  /*
+    =========================
+    AGREGAR CARRITO
+    =========================
+  */
 
-  const disponible = producto.estado && producto.stock > 0;
+  const handleAgregar =
+    () => {
+      if (!disponible) {
+        return;
+      }
 
-  const agregarSimulado = () => {
-    if (!disponible) return;
-    agregarAlCarrito(producto);
-    M.toast({ html: `<strong>${producto.nombre}</strong> agregado al carrito`, classes: "green darken-2" });
-  };
+      /*
+        ADD
+      */
+
+      agregarAlCarrito(producto);
+
+      /*
+        TOAST SAFE
+      */
+
+      if (
+        typeof M?.toast ===
+        "function"
+      ) {
+        M.toast({
+          html: `
+            <span>
+              <strong>${nombre}</strong>
+              agregado al carrito
+            </span>
+          `,
+          classes:
+            "green darken-2 rounded",
+          displayLength: 2000,
+        });
+      }
+    };
 
   return (
-    <div ref={cardWrapperRef} className="col s12 m6 l4">
-      <div className={`card hoverable producto-card ${!disponible ? "grey lighten-3" : ""}`}>
-
+    <div
+      ref={cardRef}
+      className="col s12 m6 l4"
+    >
+      <article
+        className={`
+          card
+          hoverable
+          producto-card
+          ${
+            !disponible
+              ? "producto-disabled"
+              : ""
+          }
+        `}
+      >
+        {/* IMAGE */}
         <div className="card-image producto-img-wrapper">
-
           <img
-            src={producto.imagen || "https://via.placeholder.com/300"}
-            alt={producto.nombre}
+            src={imagen}
+            alt={nombre}
             className="producto-img"
             loading="lazy"
             decoding="async"
+            onError={(e) => {
+              e.target.src =
+                "https://via.placeholder.com/400x300?text=Sin+Imagen";
+            }}
           />
-        </div>
 
-        <div className="card-content producto-content">
-          <h5 className="producto-titulo">{producto.nombre}</h5>
-          <p className="producto-descripcion">{producto.descripcion || "Sin descripción"}</p>
-          <p><b>Precio:</b> ${producto.precio ? producto.precio.toLocaleString() : "0"}</p>
-          
-          {disponible ? (
-            <p className="green-text"><b>Disponible</b></p>
-          ) : (
-            <p className="red-text"><b>No disponible</b></p>
+          {!disponible && (
+            <span className="card-title producto-badge">
+              Agotado
+            </span>
           )}
-          <p className="grey-text">Stock: {producto.stock ?? 0}</p>
         </div>
 
+        {/* CONTENT */}
+        <div className="card-content producto-content">
+          <h5 className="producto-titulo">
+            {nombre}
+          </h5>
+
+          <p className="producto-descripcion">
+            {descripcion}
+          </p>
+
+          <div className="producto-info">
+            <p className="producto-precio">
+              $
+              {
+                precioFormateado
+              }
+            </p>
+
+            <p
+              className={
+                disponible
+                  ? "green-text text-darken-2"
+                  : "red-text text-darken-2"
+              }
+            >
+              <strong>
+                {disponible
+                  ? "Disponible"
+                  : "No disponible"}
+              </strong>
+            </p>
+
+            <p className="grey-text text-darken-1">
+              Stock:
+              {" "}
+              {stock}
+            </p>
+          </div>
+        </div>
+
+        {/* ACTION */}
         <div className="card-action center-align">
           <button
-            disabled={!disponible}
-            className={`btn waves-effect waves-light producto-btn ${ disponible ? "amber darken-2" : "grey" }`}
-            onClick={agregarSimulado}
-            aria-label={`Agregar ${producto.nombre} al carrito`}
+            type="button"
+            onClick={
+              handleAgregar
+            }
+            disabled={
+              !disponible
+            }
+            className={`
+              btn
+              waves-effect
+              waves-light
+              producto-btn
+              ${
+                disponible
+                  ? "amber darken-2"
+                  : "grey"
+              }
+            `}
+            aria-label={`Agregar ${nombre} al carrito`}
           >
-            {disponible ? "Agregar" : "No disponible"}
+            {disponible
+              ? "Agregar"
+              : "Agotado"}
           </button>
         </div>
-
-      </div>
+      </article>
     </div>
   );
 }

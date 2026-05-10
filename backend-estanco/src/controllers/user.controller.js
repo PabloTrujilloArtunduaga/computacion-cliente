@@ -83,8 +83,42 @@ export const register = async (req, res) => {
 
     await nuevoUsuario.save();
 
-    return res.json({
-      mensaje: "Usuario registrado correctamente"
+/*
+  =========================
+  CREAR TOKEN JWT
+  =========================
+*/
+
+const token = jwt.sign(
+  {
+    id: nuevoUsuario._id,
+    rol: nuevoUsuario.rol
+  },
+  TOKEN_SECRET,
+  {
+    expiresIn: "1d"
+  }
+);
+
+/*
+  =========================
+  RESPUESTA
+  =========================
+*/
+
+return res.json({
+  mensaje: "Usuario registrado correctamente",
+
+      token,
+
+      rol: nuevoUsuario.rol,
+
+      usuario: {
+        _id: nuevoUsuario._id,
+        nombre: nuevoUsuario.nombre,
+        email: nuevoUsuario.email,
+        rol: nuevoUsuario.rol
+      }
     });
 
   } catch (error) {
