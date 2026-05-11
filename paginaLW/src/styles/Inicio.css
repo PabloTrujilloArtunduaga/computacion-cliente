@@ -1,4 +1,6 @@
-/* Las promociones */
+/* =========================================
+   SECCIÓN PROMOCIONES
+========================================= */
 .inicio-section {
   text-align: center;
   padding: 60px 20px;
@@ -15,41 +17,57 @@
 }
 
 .linea-promos {
-  width: 80%;
-  height: 1px;
-  background-color: #333;
+  width: 80px; /* Reducido a un acento más moderno tipo "separador" */
+  height: 3px;
+  background-color: #d4af37; /* Tono dorado para mantener consistencia premium */
   margin: 0 auto 50px auto;
+  border-radius: 2px;
 }
 
-/* Grid */
+/* =========================================
+   GRID Y TARJETAS
+========================================= */
 .promos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 40px;
-  justify-items: center; /* CENTRA TODAS LAS CARDS */
+  justify-items: center;
+  max-width: 1200px; /* Limita el ancho máximo en monitores ultra anchos */
+  margin: 0 auto;
 }
 
-/* Tarjeta */
 .promo-card {
   position: relative;
   overflow: hidden;
-  width: 340px;
+  width: 100%; /* Ahora se adapta al contenedor del grid de forma fluida */
+  max-width: 340px;
   background-color: #ffffff;
-  border-radius: 25px;
+  border-radius: 20px;
   padding-bottom: 25px;
   cursor: pointer;
-
-  /* sombras tipo categoría */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Sombra inicial más sutil */
+  
+  /* CRÍTICO: Limitamos la transición de CSS SOLO al box-shadow. 
+     Dejamos que GSAP maneje los transforms iniciales, y aplicamos 
+     el hover mediante transformaciones limpias. */
+  transition: box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  will-change: transform; /* Optimización de GPU */
 }
 
+/* El efecto levitación al pasar el mouse */
 .promo-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  /* Al no tener 'transition: transform' en la clase base, 
+     el hover usa su propia aceleración sin pelear con GSAP */
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  /* Agregamos la transición del transform SOLO en el hover */
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+              box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-/* Imagen */
+/* =========================================
+   IMAGEN Y ETIQUETAS
+========================================= */
 .promo-img {
   width: 100%;
   height: 260px;
@@ -57,43 +75,46 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden; /* Evita que la imagen se salga al hacer zoom */
 }
 
 .promo-img img {
   width: 75%;
   height: 75%;
   object-fit: contain;
-  transition: transform 0.4s ease;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Curva de animación más elegante */
+  will-change: transform;
 }
 
 .promo-card:hover img {
-  transform: scale(1.06);
+  transform: scale(1.08); /* Un poco más de zoom para mayor impacto */
 }
 
-/* Los descuentos */
 .descuento {
   position: absolute;
   top: 15px;
   right: 15px;
-  background: #f5e5b7;
-  color: #111;
+  background: #d62828; /* Cambiado a rojo para alertar sobre la oferta */
+  color: #fff;
   font-weight: 700;
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 10px rgba(214, 40, 40, 0.3);
+  z-index: 10;
 }
 
-/* Texto */
+/* =========================================
+   TEXTOS Y BOTÓN
+========================================= */
 .promo-nombre {
   font-family: 'Playfair Display', serif;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  margin: 18px 0 6px;
-  color: #333;
+  margin: 18px 15px 6px; /* Añadido margen lateral */
+  color: #222;
 }
 
-/* Precios  */
 .promo-precios {
   margin-bottom: 12px;
 }
@@ -107,24 +128,28 @@
 
 .promo-precio-ant {
   text-decoration: line-through;
-  color: #777;
-  font-size: 0.9rem;
+  color: #999;
+  font-size: 0.95rem;
 }
 
-/* Boton */
 .btn-ver {
   margin-top: 10px;
-  padding: 10px 22px;
-  background-color: #111;
+  padding: 10px 24px;
+  background-color: #222;
   color: white;
   border: none;
   border-radius: 25px;
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Transición suave */
 }
 
 .btn-ver:hover {
-  background-color: #d62828;
+  background-color: #d4af37; /* Hover en dorado en lugar de rojo para mantener elegancia */
+  color: #111;
+}
+
+.btn-ver:active {
+  transform: scale(0.95); /* Feedback táctil al hacer clic */
 }
