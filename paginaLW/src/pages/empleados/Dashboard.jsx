@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import '../styles/Dashboard.css';
+import '../../styles/Dashboard.css';
 
 const Dashboard = () => {
   // --- 1. ESTADO DE LA APLICACIÓN ---

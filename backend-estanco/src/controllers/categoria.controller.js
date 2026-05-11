@@ -52,6 +52,7 @@ export const deleteCategoria = async (req, res) => {
 
 // Actualizar
 export const updateCategoria = async (req, res) => {
+  
     const categoria = await Categoria.findByIdAndUpdate(req.params.id, req.body, {
         new: true
     })
