@@ -1,26 +1,45 @@
 @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Cormorant+Garamond:wght@400;500;600&display=swap");
 
-/* Navbar */
+/* NAVBAR GENERAL */
 .nav-elegante {
-  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
-  padding: 4px 0;
+  background: #090909 !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.55);
+  min-height: 74px;
+  position: relative;
+  z-index: 1000;
 }
 
-/* Logo */
-.logo-premium {
-  font-family: "Cinzel", serif;
+/* CONTENEDOR INTERNO */
+.nav-contenido {
+  width: 92%;
+  max-width: 1280px;
+  margin: 0 auto;
+  height: 74px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+}
+
+/* LOGO */
+.logo-premium {
+  font-family: "Cinzel", serif;
+  display: flex !important;
+  align-items: center;
+  gap: 3px;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  transition: 0.4s;
+  letter-spacing: 1px;
+  font-size: 1.75rem !important;
+  line-height: 1;
+  position: static !important;
+  transform: none !important;
+  white-space: nowrap;
+  transition: 0.3s ease;
 }
 
 .logo-premium:hover {
-  transform: scale(1.06);
-  text-shadow: 0 0 12px #d4af37;
+  transform: scale(1.03) !important;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.65);
 }
 
 .logo-estanco {
@@ -30,18 +49,34 @@
 .logo-malacopa {
   color: #d4af37;
   font-weight: 600;
-  position: relative;
 }
 
+/* MENÚ DESKTOP */
+.nav-menu-desktop {
+  display: flex !important;
+  align-items: center;
+  gap: 24px;
+  height: 100%;
+  margin: 0;
+}
 
-/* LINKS DESKTOP */
+.nav-menu-desktop li {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* LINKS */
 .nav-link {
   color: #fff !important;
   font-family: "Cormorant Garamond", serif;
-  font-size: 1.2rem;
-  letter-spacing: 0.5px;
-  transition: color 0.3s ease;
+  font-size: 1.28rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 0 2px !important;
   position: relative;
+  transition: color 0.3s ease;
+  line-height: 74px;
 }
 
 .nav-link:hover {
@@ -54,26 +89,123 @@
   width: 0%;
   height: 2px;
   background: #d4af37;
-  bottom: -4px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
   transition: width 0.3s ease;
 }
 
 .nav-link:hover::after {
-  width: 60%;
+  width: 65%;
 }
 
-/* SIDENAV */
+/* BOTONES LOGIN / REGISTRO */
+.btn-navbar {
+  height: 42px;
+  min-width: 170px;
+  padding: 0 28px;
+  border-radius: 6px;
+  border: 1px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: 0.25s ease;
+}
+
+.btn-login-navbar {
+  background-color: #fb8500;
+  color: white !important;
+}
+
+.btn-register-navbar {
+  background-color: #d4af37;
+  color: white !important;
+}
+
+.btn-navbar:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
+}
+
+/* MENÚ DE USUARIO */
+.usuario-menu-navbar {
+  position: relative;
+}
+
+.usuario-boton-navbar {
+  height: 42px;
+  min-width: 190px;
+  padding: 0 24px;
+  border-radius: 6px;
+  border: 1px solid white;
+  background-color: #fb8500;
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.usuario-boton-navbar:hover {
+  background-color: #d4af37;
+  color: #000;
+}
+
+.usuario-dropdown-navbar {
+  position: absolute;
+  top: 58px;
+  right: 0;
+  background-color: #fff;
+  min-width: 215px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  z-index: 9999;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+}
+
+.usuario-dropdown-navbar button {
+  width: 100%;
+  padding: 13px 16px;
+  background-color: white;
+  border: none;
+  color: #111;
+  text-align: left;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.usuario-dropdown-navbar button:hover {
+  background-color: #f3e7b4;
+}
+
+/* SIDENAV MOBILE */
 .sidenav-elegante {
   background: #000;
   padding-top: 20px;
   border-right: 1px solid rgba(212, 175, 55, 0.25);
 }
 
+.mobile-logo {
+  font-family: "Cinzel", serif;
+  text-transform: uppercase;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  padding: 15px 25px;
+  margin-bottom: 10px;
+}
+
 .nav-link-mobile {
   font-family: "Cormorant Garamond", serif;
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   color: white !important;
   padding: 10px 20px;
   display: block;
@@ -83,9 +215,65 @@
   color: #d4af37 !important;
 }
 
-/* Animación shine */
-@keyframes shine {
-  0% { left: -120%; }
-  50% { left: 120%; }
-  100% { left: 120%; }
+.nav-link-mobile i {
+  color: #d4af37 !important;
+}
+
+.usuario-mobile {
+  color: #d4af37 !important;
+  font-weight: 600;
+}
+
+.sidenav-elegante .divider {
+  background-color: rgba(212, 175, 55, 0.35);
+  margin: 12px 0;
+}
+
+/* RESPONSIVE */
+@media screen and (max-width: 1250px) {
+  .nav-contenido {
+    width: 96%;
+  }
+
+  .logo-premium {
+    font-size: 1.45rem !important;
+  }
+
+  .nav-menu-desktop {
+    gap: 16px;
+  }
+
+  .nav-link {
+    font-size: 1.15rem;
+  }
+
+  .btn-navbar {
+    min-width: 145px;
+    padding: 0 20px;
+    font-size: 0.85rem;
+  }
+
+  .usuario-boton-navbar {
+    min-width: 165px;
+    padding: 0 18px;
+    font-size: 0.85rem;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .nav-elegante {
+    min-height: 68px;
+  }
+
+  .nav-contenido {
+    height: 68px;
+  }
+
+  .logo-premium {
+    font-size: 1.35rem !important;
+  }
+
+  .sidenav-trigger {
+    display: block !important;
+  }
 }
