@@ -1,58 +1,192 @@
-import React, { createContext, useState } from "react";
+import React, {
+  createContext,
+  useEffect,
+  useState
+} from "react";
 
 export const CarritoContext = createContext();
 
 export function CarritoProvider({ children }) {
+
+  // =========================================
+  // ESTADOS
+  // =========================================
   const [carrito, setCarrito] = useState([]);
+
   const [total, setTotal] = useState(0);
 
-  const agregarAlCarrito = (producto) => {
-    setCarrito((prev) => {
-      const existing = prev.find((p) => p.titulo === producto.titulo);
-      if (existing) {
-        // Si hay prodicto, aumentamos cantidad
-        return prev.map((p) =>
-          p.titulo === producto.titulo
-            ? { ...p, cantidad: p.cantidad + 1 }
-            : p
-        );
-      }
-      
-      // Si no existe prodcuto, agregamos con cantidad 1
-      return [...prev, { ...producto, cantidad: 1 }];
-    });
 
-    setTotal((prevTotal) => prevTotal + (producto.precio || 0));
-  };
+  // =========================================
+  // CARGAR LOCALSTORAGE
+  // =========================================
+  useEffect(() => {
 
-  const actualizarCantidad = (titulo, delta) => {
-    setCarrito((prev) => {
-      const newCarrito = prev.map((p) =>
-        p.titulo === titulo
-          ? { ...p, cantidad: Math.max(p.cantidad + delta, 1) }
-          : p
-      );
-      return newCarrito;
-    });
-    // Recalcular total
-    setTotal((prevTotal) =>
-      carrito.reduce(
-        (acc, p) => acc + p.precio * p.cantidad,
-        0
-      )
+    const carritoGuardado = localStorage.getItem("carrito");
+
+    if (carritoGuardado) {
+
+      const carritoParseado = JSON.parse(carritoGuardado);
+
+      setCarrito(carritoParseado);
+
+    }
+
+  }, []);
+
+
+  // =========================================
+  // RECALCULAR TOTAL
+  // =========================================
+  useEffect(() => {
+
+    const nuevoTotal = carrito.reduce(
+      (acc, item) =>
+        acc + (item.precio * item.cantidad),
+      0
     );
+
+    setTotal(nuevoTotal);
+
+    // Guardar carrito
+    localStorage.setItem(
+      "carrito",
+      JSON.stringify(carrito)
+    );
+
+  }, [carrito]);
+
+
+  // =========================================
+  // AGREGAR PRODUCTO
+  // =========================================
+  const agregarAlCarrito = (producto) => {
+
+    setCarrito((prev) => {
+
+      // ✅ BUSCAR POR _id
+      const existe = prev.find(
+        (p) => p._id === producto._id
+      );
+
+      // =====================================
+      // SI YA EXISTE
+      // =====================================
+      if (existe) {
+
+        return prev.map((p) =>
+
+          p._id === producto._id
+
+            ? {
+                ...p,
+                cantidad: p.cantidad + 1
+              }
+
+            : p
+
+        );
+
+      }
+
+      // =====================================
+      // NUEVO PRODUCTO
+      // =====================================
+      return [
+
+        ...prev,
+
+        {
+          ...producto,
+          cantidad: 1
+        }
+
+      ];
+
+    });
+
   };
 
-  const vaciarCarrito = () => {
-    setCarrito([]);
-    setTotal(0);
+
+  // =========================================
+  // ACTUALIZAR CANTIDAD
+  // =========================================
+  const actualizarCantidad = (_id, delta) => {
+
+    setCarrito((prev) =>
+
+      prev.map((p) =>
+
+        p._id === _id
+
+          ? {
+              ...p,
+
+              cantidad: Math.max(
+                p.cantidad + delta,
+                1
+              )
+            }
+
+          : p
+
+      )
+
+    );
+
   };
+
+
+  // =========================================
+  // ELIMINAR PRODUCTO
+  // =========================================
+  const eliminarProducto = (_id) => {
+
+    setCarrito((prev) =>
+
+      prev.filter(
+        (p) => p._id !== _id
+      )
+
+    );
+
+  };
+
+
+  // =========================================
+  // VACIAR CARRITO
+  // =========================================
+  const vaciarCarrito = () => {
+
+    setCarrito([]);
+
+    localStorage.removeItem("carrito");
+
+  };
+
 
   return (
+
     <CarritoContext.Provider
-      value={{ carrito, total, agregarAlCarrito, actualizarCantidad, vaciarCarrito, setCarrito, setTotal }}
+      value={{
+
+        carrito,
+        total,
+
+        agregarAlCarrito,
+        actualizarCantidad,
+        eliminarProducto,
+        vaciarCarrito,
+
+        setCarrito,
+        setTotal
+
+      }}
     >
+
       {children}
+
     </CarritoContext.Provider>
+
   );
+
 }

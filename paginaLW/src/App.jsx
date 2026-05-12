@@ -26,6 +26,7 @@ import Admin from "./pages/admin/Admin.jsx";
 import Dashboard from "./pages/empleados/Dashboard";
 
 import NotFound from "./pages/NotFound";
+import RecuperarPassword from "./pages/RecuperarPassword.jsx";
 
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
@@ -93,6 +94,13 @@ function Layout() {
             path="/register"
             element={<Registro />}
           />
+
+            <Route
+              path="/recuperar-password"
+              element={
+                <RecuperarPassword />
+              }
+            />
 
           {/* EMPLEADO */}
           <Route

@@ -117,7 +117,12 @@ export default function ProductoCard({
       /*
         ADD
       */
+      console.log("=================================");
+      console.log("PRODUCTO AGREGADO:");
+      console.log(producto);
 
+      console.log("PRODUCTO ID:");
+      console.log(producto._id);
       agregarAlCarrito(producto);
 
       /*

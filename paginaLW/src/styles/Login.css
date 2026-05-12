@@ -1,40 +1,324 @@
-/* Pega este código tanto en Login.css como en Registro.css */
+/* =========================================
+   REGISTRO PAGE ONLY
+   src/styles/Registro.css
+========================================= */
 
-.contenedor-formulario {
-  min-height: 80vh;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* =========================================
+   CONTAINER
+========================================= */
+
+.registro-container {
+  position: relative;
+
+  min-height: 100vh;
+
+  overflow: hidden;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+
+  padding: 30px 16px;
+
+  font-family: 'Poppins', sans-serif;
+
+  background:
+    linear-gradient(
+      135deg,
+      #111827 0%,
+      #0f172a 40%,
+      #1e293b 100%
+    );
 }
 
-/* Tarjeta blanca limpia y del mismo tamaño para ambos */
-.tarjeta-blanca {
-  background-color: #ffffff !important;
-  max-width: 450px; /* Esto asegura que el Registro no se vea más gordo que el Login */
+.registro-container::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(245, 158, 11, 0.15),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(147, 51, 234, 0.14),
+      transparent 40%
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================
+   FLOATING CIRCLES
+========================================= */
+
+.registro-circle {
+  position: absolute;
+
+  border-radius: 50%;
+
+  opacity: 0.2;
+
+  filter: blur(6px);
+
+  z-index: 1;
+}
+
+.registro-circle-1 {
+  width: 240px;
+  height: 240px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b,
+      #fbbf24
+    );
+
+  top: -60px;
+  left: -60px;
+}
+
+.registro-circle-2 {
+  width: 170px;
+  height: 170px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8b5cf6,
+      #7c3aed
+    );
+
+  bottom: 50px;
+  right: -40px;
+}
+
+.registro-circle-3 {
+  width: 110px;
+  height: 110px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #3b82f6,
+      #2563eb
+    );
+
+  top: 20%;
+  right: 18%;
+}
+
+/* =========================================
+   CARD
+========================================= */
+
+.registro-card {
+  position: relative;
+  z-index: 5;
+
   width: 100%;
-  border-radius: 8px !important;
-  padding: 40px 30px !important;
+  max-width: 410px;
+
+  padding:
+    34px
+    28px
+    28px !important;
+
+  border-radius: 22px !important;
+
+  background:
+    rgba(255,255,255,0.97) !important;
+
+  backdrop-filter: blur(10px);
+
+  border:
+    1px solid rgba(255,255,255,0.22);
+
+  box-shadow:
+    0 20px 55px rgba(0,0,0,0.35) !important;
 }
 
-.tarjeta-blanca h4 {
-  font-weight: bold;
-  color: #333333; /* Texto oscuro para que se vea en el fondo blanco */
-  margin-bottom: 5px;
+/* =========================================
+   TITLE
+========================================= */
+
+.registro-title {
+  margin: 0 0 10px 0;
+
+  font-size: 2rem;
+  font-weight: 700;
+
+  color: #111827;
 }
 
-/* Detalles naranjas al hacer clic en los campos */
-.tarjeta-blanca .input-field input[type=text]:focus,
-.tarjeta-blanca .input-field input[type=email]:focus,
-.tarjeta-blanca .input-field input[type=password]:focus {
-  border-bottom: 1px solid #ff8f00 !important;
-  box-shadow: 0 1px 0 0 #ff8f00 !important;
+.registro-subtitle {
+  margin-bottom: 28px;
+
+  color: #6b7280;
+
+  line-height: 1.6;
 }
 
-.tarjeta-blanca .input-field input:focus + label {
-  color: #ff8f00 !important;
+.registro-subtitle strong {
+  color: #f59e0b;
+  font-weight: 700;
 }
 
-.texto-gris {
-  color: #757575 !important;
+/* =========================================
+   INPUTS
+========================================= */
+
+.registro-card .input-field {
+  margin-bottom: 18px;
+}
+
+.registro-card .input-field input {
+  border-bottom:
+    1px solid #d1d5db !important;
+
+  color: #111827;
+}
+
+.registro-card .input-field label {
+  color: #6b7280 !important;
+}
+
+.registro-card .input-field input:focus {
+  border-bottom:
+    1px solid #f59e0b !important;
+
+  box-shadow:
+    0 1px 0 0 #f59e0b !important;
+}
+
+.registro-card
+.input-field
+input:focus + label {
+  color: #f59e0b !important;
+}
+
+.registro-card .prefix {
+  color: #9ca3af;
+  transition: 0.3s ease;
+}
+
+.registro-card
+.input-field
+input:focus
+~ .prefix {
+  color: #f59e0b;
+}
+
+/* =========================================
+   BUTTON
+========================================= */
+
+.registro-btn-wrapper {
+  margin-top: 28px;
+}
+
+.registro-btn {
+  width: 100%;
+
+  height: 48px;
+  line-height: 48px;
+
+  border-radius: 12px !important;
+
+  font-weight: 700;
+
+  text-transform: none;
+
+  letter-spacing: 0.5px;
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease !important;
+}
+
+.registro-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================
+   LINKS
+========================================= */
+
+.registro-links {
+  margin-top: 24px;
+}
+
+.registro-links p {
+  margin: 0;
+  font-size: 0.94rem;
+}
+
+.registro-link-bold {
+  font-weight: 700;
+}
+
+/* =========================================
+   AUTOFILL FIX
+========================================= */
+
+.registro-card input:-webkit-autofill,
+.registro-card input:-webkit-autofill:hover,
+.registro-card input:-webkit-autofill:focus {
+  -webkit-box-shadow:
+    0 0 0px 1000px white inset !important;
+
+  -webkit-text-fill-color:
+    #111827 !important;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .registro-container {
+    padding: 20px 14px;
+  }
+
+  .registro-card {
+    max-width: 345px;
+
+    padding:
+      28px
+      22px
+      24px !important;
+
+    border-radius: 18px !important;
+  }
+
+  .registro-title {
+    font-size: 1.7rem;
+  }
+
+  .registro-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .registro-circle-1 {
+    width: 180px;
+    height: 180px;
+  }
+
+  .registro-circle-2 {
+    width: 120px;
+    height: 120px;
+  }
+
+  .registro-circle-3 {
+    width: 80px;
+    height: 80px;
+  }
 }

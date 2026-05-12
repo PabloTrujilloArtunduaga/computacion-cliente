@@ -1,0 +1,267 @@
+/* FacturasPage.css */
+
+.facturas-page {
+  min-height: 100vh;
+  background:
+    #f5f7fb;
+}
+
+.facturas-container {
+  width: 95%;
+  margin-top: 30px;
+  padding-bottom: 40px;
+}
+
+/* ====================================
+HEADER
+==================================== */
+
+.facturas-header {
+  border-radius: 20px;
+  padding:
+    30px 35px;
+  margin-bottom: 30px;
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #f8fafc
+    );
+}
+
+.facturas-title {
+  margin: 0;
+  font-weight: 700;
+  color:
+    #1e293b;
+}
+
+.facturas-subtitle {
+  margin-top: 8px;
+  color:
+    #64748b;
+  font-size: 1rem;
+}
+
+.facturas-btn {
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* ====================================
+CARDS
+==================================== */
+
+.facturas-stat-card {
+  border-radius: 20px;
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.facturas-stat-card:hover {
+  transform:
+    translateY(-6px);
+
+  box-shadow:
+    0 18px 35px
+    rgba(0,0,0,0.18);
+}
+
+.stat-icon {
+  font-size: 52px !important;
+  margin-bottom: 10px;
+}
+
+.ventas-total {
+  font-size: 1.7rem;
+}
+
+/* ====================================
+GRADIENTES
+==================================== */
+
+.blue-gradient {
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #1d4ed8
+    );
+}
+
+.green-gradient {
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #15803d
+    );
+}
+
+.orange-gradient {
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b,
+      #d97706
+    );
+}
+
+.purple-gradient {
+  background:
+    linear-gradient(
+      135deg,
+      #9333ea,
+      #7e22ce
+    );
+}
+
+/* ====================================
+TABLA
+==================================== */
+
+.facturas-table-card {
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.facturas-table-card
+.card-content {
+  padding: 30px;
+}
+
+.facturas-filters {
+  margin-bottom: 10px;
+}
+
+.canceladas-panel {
+  border-radius: 16px;
+  margin-top: 10px;
+}
+
+.canceladas-panel h5 {
+  margin: 0;
+  font-weight: 700;
+}
+
+.canceladas-panel p {
+  margin-top: 6px;
+}
+
+/* ====================================
+INPUTS
+==================================== */
+
+.input-field input:focus {
+  border-bottom:
+    1px solid #2563eb !important;
+
+  box-shadow:
+    0 1px 0 0 #2563eb !important;
+}
+
+.input-field .prefix.active {
+  color:
+    #2563eb !important;
+}
+
+/* ====================================
+TABLA
+==================================== */
+
+table.highlight tbody tr:hover {
+  background:
+    rgba(37,99,235,0.06)
+    !important;
+}
+
+table thead {
+  background:
+    #f8fafc;
+}
+
+table thead th {
+  color:
+    #334155;
+  font-weight: 700;
+}
+
+table tbody td {
+  vertical-align: middle;
+}
+
+/* ====================================
+BOTONES
+==================================== */
+
+.facturas-action-btn {
+  margin-right: 6px;
+  border-radius: 10px;
+}
+
+.facturas-action-btn:last-child {
+  margin-right: 0;
+}
+
+/* ====================================
+BADGES
+==================================== */
+
+.badge {
+  border-radius: 8px;
+  padding:
+    0 10px;
+  font-weight: 600;
+}
+
+/* ====================================
+RESPONSIVE
+==================================== */
+
+@media only screen
+and (max-width: 992px) {
+
+  .facturas-header {
+    padding:
+      25px 22px;
+  }
+
+  .facturas-title {
+    font-size: 2rem;
+  }
+
+  .facturas-btn {
+    margin-top: 20px;
+    width: 100%;
+  }
+}
+
+@media only screen
+and (max-width: 600px) {
+
+  .facturas-container {
+    width: 100%;
+    padding:
+      0 10px
+      30px;
+  }
+
+  .facturas-header {
+    border-radius: 16px;
+  }
+
+  .facturas-title {
+    font-size: 1.7rem;
+  }
+
+  .facturas-table-card
+  .card-content {
+    padding: 18px;
+  }
+
+  .facturas-action-btn {
+    margin-bottom: 5px;
+  }
+}

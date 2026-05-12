@@ -1,28 +1,74 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import { useNavigate } from "react-router-dom";
 import AdminNavbar from "../admin/AdminNavbar";
 
+import {
+  getUsuarios,
+  getProductos,
+  getCategorias,
+  getEmpleados,
+  getFacturas,
+  getVentasPorMes,
+  getProductosMasVendidos
+} from '../../api/admin';
+
+
 export default function AdminDashboardMaterialize() {
   const salesChartRef = useRef(null);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [cardData, setCardData] = useState({ usuarios: 0, productos: 0, categorias: 0, empleados: 0, facturas: 0 });
+  const [ventasMes, setVentasMes] = useState([]);
+  const [productosMasVendidos, setProductosMasVendidos] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) navigate("/login");
-  }, []);
+    if (!token) return navigate("/login");
+
+    async function fetchData() {
+      try {
+        const [usuariosRes, productosRes, categoriasRes, empleadosRes, facturasRes, ventasMesRes, masVendidosRes] = await Promise.all([
+          getUsuarios(token),
+          getProductos(),
+          getCategorias(),
+          getEmpleados(token),
+          getFacturas(token),
+          getVentasPorMes(token),
+          getProductosMasVendidos(token)
+        ]);
+        setCardData({
+          usuarios: usuariosRes.data.length || 0,
+          productos: productosRes.data.length || 0,
+          categorias: categoriasRes.data.length || 0,
+          empleados: empleadosRes.data.length || 0,
+          facturas: facturasRes.data.length || 0
+        });
+        setVentasMes(ventasMesRes.data || []);
+        setProductosMasVendidos(masVendidosRes.data || []);
+      } catch (err) {
+        // Manejo de error simple
+        setCardData({ usuarios: 0, productos: 0, categorias: 0, empleados: 0, facturas: 0 });
+        setVentasMes([]);
+        setProductosMasVendidos([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [navigate]);
 
   useEffect(() => {
-    if (!salesChartRef.current) return;
+    if (!salesChartRef.current || ventasMes.length === 0) return;
     const chart = new Chart(salesChartRef.current, {
       type: 'line',
       data: {
-        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
+        labels: ventasMes.map(v => v.mes),
         datasets: [
           {
             label: 'Ventas',
-            data: [1200, 1900, 1500, 2200, 2800, 3200],
+            data: ventasMes.map(v => v.total),
             borderWidth: 3,
             tension: 0.4,
             fill: true,
@@ -47,14 +93,14 @@ export default function AdminDashboardMaterialize() {
       },
     });
     return () => chart.destroy();
-  }, []);
+  }, [ventasMes]);
 
   const cards = [
-    { title: 'Usuarios', value: '150', color: 'linear-gradient(135deg,#2563eb,#1e293b)', icon: 'people' },
-    { title: 'Productos', value: '320', color: 'linear-gradient(135deg,#059669,#1e293b)', icon: 'inventory_2' },
-    { title: 'Categorías', value: '44', color: 'linear-gradient(135deg,#f59e42,#1e293b)', icon: 'category' },
-    { title: 'Empleados', value: '65', color: 'linear-gradient(135deg,#a21caf,#1e293b)', icon: 'badge' },
-    { title: 'Facturas', value: '540', color: 'linear-gradient(135deg,#dc2626,#1e293b)', icon: 'receipt_long' },
+    { title: 'Usuarios', value: cardData.usuarios, color: 'linear-gradient(135deg,#2563eb,#1e293b)', icon: 'people' },
+    { title: 'Productos', value: cardData.productos, color: 'linear-gradient(135deg,#059669,#1e293b)', icon: 'inventory_2' },
+    { title: 'Categorías', value: cardData.categorias, color: 'linear-gradient(135deg,#f59e42,#1e293b)', icon: 'category' },
+    { title: 'Empleados', value: cardData.empleados, color: 'linear-gradient(135deg,#a21caf,#1e293b)', icon: 'badge' },
+    { title: 'Facturas', value: cardData.facturas, color: 'linear-gradient(135deg,#dc2626,#1e293b)', icon: 'receipt_long' },
   ];
 
   return (
@@ -126,10 +172,18 @@ export default function AdminDashboardMaterialize() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr><td>Whisky Premium</td><td>Whisky</td><td>120</td><td>45</td></tr>
-                    <tr><td>Ron Añejo</td><td>Ron</td><td>98</td><td>30</td></tr>
-                    <tr><td>Vodka Importado</td><td>Vodka</td><td>85</td><td>27</td></tr>
-                    <tr><td>Tequila Reserva</td><td>Tequila</td><td>73</td><td>18</td></tr>
+                    {productosMasVendidos.length === 0 ? (
+                      <tr><td colSpan="4" style={{ textAlign: 'center' }}>No hay datos</td></tr>
+                    ) : (
+                      productosMasVendidos.map((prod, idx) => (
+                        <tr key={idx}>
+                          <td>{prod.nombre || prod.producto || '-'}</td>
+                          <td>{prod.categoria || '-'}</td>
+                          <td>{prod.ventas || '-'}</td>
+                          <td>{prod.stock ?? '-'}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>

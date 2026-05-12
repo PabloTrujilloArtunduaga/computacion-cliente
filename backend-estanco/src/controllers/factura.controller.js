@@ -3,6 +3,65 @@ import Empleado from "../models/empleado.model.js";
 import Producto from "../models/producto.model.js";
 import Factura from "../models/factura.model.js";
 
+// Agregar al final de factura.controller.js
+
+// Compra desde el carrito (sin empleado)
+export const createFacturaCliente = async (req, res) => {
+  try {
+    const { cliente_id, productos, metodo_pago } = req.body;
+
+    const cliente = await Usuario.findById(cliente_id);
+    if (!cliente) {
+      return res.status(400).json({ message: "Cliente no existe" });
+    }
+
+    let total = 0;
+    const productosProcesados = [];
+
+    for (const item of productos) {
+      const producto = await Producto.findById(item.producto_id);
+      if (!producto) {
+        return res.status(400).json({ message: `Producto no existe: ${item.producto_id}` });
+      }
+      const subtotal = item.cantidad * item.precio_unitario;
+      total += subtotal;
+      productosProcesados.push({
+        producto_id: item.producto_id,
+        nombre: producto.nombre,
+        cantidad: item.cantidad,
+        precio_unitario: item.precio_unitario,
+        subtotal,
+      });
+    }
+
+    const factura = new Factura({
+      cliente_id,
+      empleado_id: null,   // autoservicio
+      productos: productosProcesados,
+      total,
+      metodo_pago,
+      estado: "pagada",
+    });
+
+    await factura.save();
+    res.status(201).json(factura);
+
+  } catch (error) {
+    res.status(500).json({ message: "Error creando factura", error: error.message });
+  }
+};
+
+// Facturas de un cliente específico
+export const getFacturasByCliente = async (req, res) => {
+  try {
+    const facturas = await Factura.find({ cliente_id: req.params.clienteId })
+      .populate("cliente_id")
+      .populate("productos.producto_id");
+    res.json(facturas);
+  } catch (error) {
+    res.status(500).json({ message: "Error obteniendo facturas", error: error.message });
+  }
+};
 
 // Crear una factura
 export const createFactura = async (req, res) => {

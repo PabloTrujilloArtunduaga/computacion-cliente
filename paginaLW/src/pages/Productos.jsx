@@ -81,12 +81,13 @@ function Productos() {
                 <ProductoCard
                   key={prod._id}
                   producto={{
-                    nombre: prod.nombre,
-                    descripcion: prod.descripcion || "Sin descripción",
-                    precio: prod.precio,
-                    imagen: prod.imagen || "https://via.placeholder.com/300",
-                    estado: prod.estado,
-                    stock: prod.stock
+                    ...prod,
+                    descripcion:
+                      prod.descripcion || "Sin descripción",
+
+                    imagen:
+                      prod.imagen ||
+                      "https://via.placeholder.com/300",
                   }}
                 />
               ))
@@ -103,16 +104,18 @@ function Productos() {
             ) : (
               licores.map((prod) => (
                 <ProductoCard
-                  key={prod._id}
-                  producto={{
-                    nombre: prod.nombre,
-                    descripcion: prod.descripcion || "Sin descripción",
-                    precio: prod.precio,
-                    imagen: prod.imagen || "https://static.vecteezy.com/system/resources/previews/023/103/916/non_2x/not-available-rubber-stamp-seal-vector.jpg",
-                    estado: prod.estado,
-                    stock: prod.stock
-                  }}
-                />
+                      key={prod._id}
+                      producto={{
+                        ...prod,
+
+                        descripcion:
+                          prod.descripcion || "Sin descripción",
+
+                        imagen:
+                          prod.imagen ||
+                          "https://static.vecteezy.com/system/resources/previews/023/103/916/non_2x/not-available-rubber-stamp-seal-vector.jpg",
+                      }}
+                    />
               ))
             )}
 
