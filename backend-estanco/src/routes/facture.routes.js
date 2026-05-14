@@ -7,6 +7,7 @@ import {
   deleteFactura,
   createFacturaCliente,
   getFacturasByCliente,
+  updateFactura
 } from "../controllers/factura.controller.js";
 
 import { createFacturaSchema } from "../schema/factura.scheme.js";
@@ -30,6 +31,8 @@ router.post(
 );
 
 router.get("/:id", getFactura);
+
+router.put("/:id", verifyToken, updateFactura);
 
 router.delete("/:id", deleteFactura);
 

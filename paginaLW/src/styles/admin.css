@@ -1,0 +1,228 @@
+.admin-dashboard {
+  min-height: 100vh;
+  background: #f8f6f1;
+}
+
+.admin-container {
+  padding-top: 40px;
+  padding-bottom: 50px;
+}
+
+/* =========================================
+   CARDS
+========================================= */
+
+.dashboard-card {
+  border-radius: 20px;
+  overflow: hidden;
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.08);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+
+  border: none;
+}
+
+.dashboard-card:hover {
+  transform:
+    translateY(-5px);
+
+  box-shadow:
+    0 14px 28px rgba(0,0,0,0.12);
+}
+
+.dashboard-card .card-content {
+  padding: 28px;
+}
+
+.dashboard-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard-card h3 {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.dashboard-card p {
+  margin-top: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #444;
+}
+
+.dashboard-icon {
+  font-size: 3rem !important;
+  color: #111;
+}
+
+/* =========================================
+   ADMIN CARD
+========================================= */
+
+.admin-card {
+  border-radius: 20px;
+
+  background: white;
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.08);
+
+  border:
+    1px solid rgba(212,175,55,0.12);
+}
+
+.admin-card .card-content {
+  padding: 28px;
+}
+
+.card-title {
+  display: block;
+
+  margin-bottom: 24px !important;
+
+  color: #111 !important;
+
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+}
+
+/* =========================================
+   CHART
+========================================= */
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 350px;
+}
+
+/* =========================================
+   BOTONES
+========================================= */
+
+.quick-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quick-access-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #d4af37,
+      #f4d76a
+    );
+
+  color: #111;
+
+  font-size: 1rem;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.quick-access-btn:hover {
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 10px 20px rgba(212,175,55,0.25);
+}
+
+/* =========================================
+   TABLA
+========================================= */
+
+table {
+  background: white;
+}
+
+table thead {
+  background:
+    rgba(212,175,55,0.12);
+}
+
+table thead th {
+  color: #111;
+  font-weight: 800;
+}
+
+table tbody tr {
+  border-bottom:
+    1px solid #ececec;
+}
+
+table tbody td {
+  color: #444;
+  font-weight: 600;
+}
+
+/* =========================================
+   LOADING
+========================================= */
+
+.admin-loading {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #f7f3e8
+    );
+}
+
+.admin-loading h4 {
+  color: #111;
+  font-weight: 800;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .dashboard-card h3 {
+    font-size: 2rem;
+  }
+
+  .dashboard-icon {
+    font-size: 2.4rem !important;
+  }
+
+  .admin-card .card-content {
+    padding: 22px;
+  }
+
+}

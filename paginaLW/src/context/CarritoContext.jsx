@@ -4,169 +4,356 @@ import React, {
   useState
 } from "react";
 
-export const CarritoContext = createContext();
+export const CarritoContext =
+  createContext();
 
-export function CarritoProvider({ children }) {
+export function CarritoProvider({
+  children
+}) {
 
   // =========================================
   // ESTADOS
   // =========================================
-  const [carrito, setCarrito] = useState([]);
 
-  const [total, setTotal] = useState(0);
+  const [carrito, setCarrito] =
+    useState([]);
 
+  const [total, setTotal] =
+    useState(0);
+
+  const [carritoKey, setCarritoKey] =
+    useState("carrito_invitado");
 
   // =========================================
-  // CARGAR LOCALSTORAGE
+  // CARGAR USER
   // =========================================
+
   useEffect(() => {
 
-    const carritoGuardado = localStorage.getItem("carrito");
+    try {
 
-    if (carritoGuardado) {
+      const user =
+        JSON.parse(
+          localStorage.getItem("user")
+        );
 
-      const carritoParseado = JSON.parse(carritoGuardado);
+      console.log("=================================");
+      console.log("👤 USER LOCALSTORAGE:");
+      console.log(user);
 
-      setCarrito(carritoParseado);
+      // =====================================
+      // KEY POR USUARIO
+      // =====================================
+
+      const nuevaKey =
+        user?._id
+          ? `carrito_${user._id}`
+          : "carrito_invitado";
+
+      console.log("🛒 CARRITO KEY:");
+      console.log(nuevaKey);
+
+      setCarritoKey(nuevaKey);
+
+    } catch (error) {
+
+      console.error(
+        "❌ ERROR LEYENDO USER:",
+        error
+      );
+
+      setCarritoKey(
+        "carrito_invitado"
+      );
 
     }
 
   }, []);
 
+  // =========================================
+  // CARGAR CARRITO
+  // =========================================
+
+  useEffect(() => {
+
+    try {
+
+      console.log("=================================");
+      console.log("📦 CARGANDO CARRITO");
+
+      const carritoGuardado =
+        localStorage.getItem(
+          carritoKey
+        );
+
+      console.log("🛒 KEY:");
+      console.log(carritoKey);
+
+      console.log("💾 DATA:");
+      console.log(carritoGuardado);
+
+      if (carritoGuardado) {
+
+        const carritoParseado =
+          JSON.parse(
+            carritoGuardado
+          );
+
+        console.log(
+          "✅ CARRITO CARGADO:"
+        );
+
+        console.log(
+          carritoParseado
+        );
+
+        setCarrito(
+          carritoParseado
+        );
+
+      } else {
+
+        console.log(
+          "⚠️ NO EXISTE CARRITO"
+        );
+
+        setCarrito([]);
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "❌ ERROR CARGANDO CARRITO:",
+        error
+      );
+
+      setCarrito([]);
+
+    }
+
+  }, [carritoKey]);
 
   // =========================================
   // RECALCULAR TOTAL
   // =========================================
+
   useEffect(() => {
 
-    const nuevoTotal = carrito.reduce(
-      (acc, item) =>
-        acc + (item.precio * item.cantidad),
-      0
-    );
+    const nuevoTotal =
+      carrito.reduce(
+
+        (acc, item) =>
+
+          acc +
+
+          (
+            Number(item.precio) *
+            Number(item.cantidad)
+          ),
+
+        0
+
+      );
 
     setTotal(nuevoTotal);
 
-    // Guardar carrito
+    console.log("=================================");
+    console.log("💰 TOTAL:");
+    console.log(nuevoTotal);
+
+    // =====================================
+    // GUARDAR
+    // =====================================
+
     localStorage.setItem(
-      "carrito",
+
+      carritoKey,
+
       JSON.stringify(carrito)
+
     );
 
-  }, [carrito]);
+    console.log("💾 CARRITO GUARDADO");
 
+  }, [carrito, carritoKey]);
 
   // =========================================
-  // AGREGAR PRODUCTO
+  // AGREGAR
   // =========================================
-  const agregarAlCarrito = (producto) => {
 
-    setCarrito((prev) => {
+  const agregarAlCarrito =
+    (producto) => {
 
-      // ✅ BUSCAR POR _id
-      const existe = prev.find(
-        (p) => p._id === producto._id
-      );
+      console.log("=================================");
+      console.log("➕ AGREGAR PRODUCTO:");
+      console.log(producto);
 
-      // =====================================
-      // SI YA EXISTE
-      // =====================================
-      if (existe) {
+      setCarrito((prev) => {
 
-        return prev.map((p) =>
+        const existe =
+          prev.find(
 
-          p._id === producto._id
+            (p) =>
+              p._id ===
+              producto._id
+
+          );
+
+        // =====================================
+        // YA EXISTE
+        // =====================================
+
+        if (existe) {
+
+          console.log(
+            "📌 PRODUCTO EXISTENTE"
+          );
+
+          return prev.map((p) =>
+
+            p._id ===
+            producto._id
+
+              ? {
+
+                  ...p,
+
+                  cantidad:
+                    Number(
+                      p.cantidad
+                    ) + 1
+
+                }
+
+              : p
+
+          );
+
+        }
+
+        // =====================================
+        // NUEVO
+        // =====================================
+
+        console.log(
+          "🆕 NUEVO PRODUCTO"
+        );
+
+        return [
+
+          ...prev,
+
+          {
+
+            ...producto,
+
+            cantidad: 1
+
+          }
+
+        ];
+
+      });
+
+    };
+
+  // =========================================
+  // ACTUALIZAR
+  // =========================================
+
+  const actualizarCantidad =
+    (_id, delta) => {
+
+      console.log("=================================");
+      console.log("🔄 ACTUALIZAR CANTIDAD");
+
+      console.log("_id:", _id);
+      console.log("delta:", delta);
+
+      setCarrito((prev) =>
+
+        prev.map((p) =>
+
+          p._id === _id
 
             ? {
+
                 ...p,
-                cantidad: p.cantidad + 1
+
+                cantidad:
+                  Math.max(
+
+                    Number(
+                      p.cantidad
+                    ) + delta,
+
+                    1
+
+                  )
+
               }
 
             : p
 
-        );
+        )
 
-      }
+      );
 
-      // =====================================
-      // NUEVO PRODUCTO
-      // =====================================
-      return [
-
-        ...prev,
-
-        {
-          ...producto,
-          cantidad: 1
-        }
-
-      ];
-
-    });
-
-  };
-
+    };
 
   // =========================================
-  // ACTUALIZAR CANTIDAD
+  // ELIMINAR
   // =========================================
-  const actualizarCantidad = (_id, delta) => {
 
-    setCarrito((prev) =>
+  const eliminarProducto =
+    (_id) => {
 
-      prev.map((p) =>
+      console.log("=================================");
+      console.log("🗑️ ELIMINAR PRODUCTO");
+      console.log(_id);
 
-        p._id === _id
+      setCarrito((prev) =>
 
-          ? {
-              ...p,
+        prev.filter(
 
-              cantidad: Math.max(
-                p.cantidad + delta,
-                1
-              )
-            }
+          (p) =>
+            p._id !== _id
 
-          : p
+        )
 
-      )
+      );
 
-    );
-
-  };
-
+    };
 
   // =========================================
-  // ELIMINAR PRODUCTO
+  // VACIAR
   // =========================================
-  const eliminarProducto = (_id) => {
 
-    setCarrito((prev) =>
+  const vaciarCarrito =
+    () => {
 
-      prev.filter(
-        (p) => p._id !== _id
-      )
+      console.log("=================================");
+      console.log("🧹 VACIANDO CARRITO");
 
-    );
+      setCarrito([]);
 
-  };
+      setTotal(0);
 
+      localStorage.removeItem(
+        carritoKey
+      );
+
+    };
 
   // =========================================
-  // VACIAR CARRITO
+  // PROVIDER
   // =========================================
-  const vaciarCarrito = () => {
-
-    setCarrito([]);
-
-    localStorage.removeItem("carrito");
-
-  };
-
 
   return (
 
     <CarritoContext.Provider
+
       value={{
 
         carrito,
@@ -181,6 +368,7 @@ export function CarritoProvider({ children }) {
         setTotal
 
       }}
+
     >
 
       {children}

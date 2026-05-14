@@ -14,30 +14,28 @@ import "../styles/Productos.css";
 export default function ProductoCard({
   producto = {},
 }) {
-  /*
-    =========================
-    CONTEXT
-    =========================
-  */
 
-  const { agregarAlCarrito } =
-    useContext(CarritoContext);
+  // =========================================
+  // CONTEXT
+  // =========================================
 
-  /*
-    =========================
-    REF
-    =========================
-  */
+  const {
+    carrito,
+    agregarAlCarrito
+  } = useContext(CarritoContext);
+
+  // =========================================
+  // REF
+  // =========================================
 
   const cardRef = useRef(null);
 
-  /*
-    =========================
-    DATA SAFE
-    =========================
-  */
+  // =========================================
+  // DATA SAFE
+  // =========================================
 
   const {
+    _id,
     nombre = "Producto",
     descripcion =
       "Sin descripción",
@@ -48,39 +46,104 @@ export default function ProductoCard({
     estado = false,
   } = producto;
 
-  /*
-    =========================
-    DISPONIBILIDAD
-    =========================
-  */
+  // =========================================
+  // CANTIDAD EN CARRITO
+  // =========================================
 
-  const disponible = useMemo(() => {
-    return (
-      Boolean(estado) &&
-      Number(stock) > 0
-    );
-  }, [estado, stock]);
+  const cantidadEnCarrito =
+    useMemo(() => {
 
-  /*
-    =========================
-    PRECIO FORMAT
-    =========================
-  */
+      const productoCarrito =
+        carrito.find(
+          (item) =>
+            item._id === _id
+        );
+
+      return productoCarrito
+        ? Number(
+            productoCarrito.cantidad
+          )
+        : 0;
+
+    }, [carrito, _id]);
+
+  // =========================================
+  // STOCK DISPONIBLE
+  // =========================================
+
+  const stockDisponible =
+    useMemo(() => {
+
+      const disponible =
+        Number(stock) -
+        Number(cantidadEnCarrito);
+
+      return Math.max(
+        disponible,
+        0
+      );
+
+    }, [
+      stock,
+      cantidadEnCarrito
+    ]);
+
+  // =========================================
+  // DISPONIBILIDAD
+  // =========================================
+
+  const disponible =
+    useMemo(() => {
+
+      return (
+        Boolean(estado) &&
+        Number(stockDisponible) > 0
+      );
+
+    }, [
+      estado,
+      stockDisponible
+    ]);
+
+  // =========================================
+  // PRECIO FORMAT
+  // =========================================
 
   const precioFormateado =
     useMemo(() => {
+
       return Number(
         precio || 0
       ).toLocaleString("es-CO");
+
     }, [precio]);
 
-  /*
-    =========================
-    MATERIALIZE
-    =========================
-  */
+  // =========================================
+  // DEBUG
+  // =========================================
+
+  console.log("=================================");
+  console.log("📦 PRODUCTO:");
+  console.log(nombre);
+
+  console.log("🆔 ID:");
+  console.log(_id);
+
+  console.log("📦 STOCK DB:");
+  console.log(stock);
+
+  console.log("🛒 EN CARRITO:");
+  console.log(cantidadEnCarrito);
+
+  console.log("✅ STOCK DISPONIBLE:");
+  console.log(stockDisponible);
+
+  // =========================================
+  // MATERIALIZE
+  // =========================================
 
   useEffect(() => {
+
     if (!cardRef.current) {
       return;
     }
@@ -90,69 +153,103 @@ export default function ProductoCard({
         ".waves-effect"
       );
 
-    /*
-      INIT WAVES SAFE
-    */
-
     if (
       M?.Waves?.init &&
       waves.length > 0
     ) {
+
       M.Waves.init(waves);
+
     }
+
   }, []);
 
-  /*
-    =========================
-    AGREGAR CARRITO
-    =========================
-  */
+  // =========================================
+  // AGREGAR CARRITO
+  // =========================================
 
   const handleAgregar =
     () => {
+
+      // =====================================
+      // NO DISPONIBLE
+      // =====================================
+
       if (!disponible) {
+
+        console.log("❌ SIN STOCK");
+
+        M.toast({
+
+          html:
+            "⚠️ Producto agotado",
+
+          classes:
+            "red darken-2"
+
+        });
+
         return;
       }
 
-      /*
-        ADD
-      */
+      // =====================================
+      // DEBUG
+      // =====================================
+
       console.log("=================================");
-      console.log("PRODUCTO AGREGADO:");
+      console.log("➕ AGREGAR PRODUCTO");
+
       console.log(producto);
 
-      console.log("PRODUCTO ID:");
-      console.log(producto._id);
+      console.log("STOCK ACTUAL:");
+      console.log(stockDisponible);
+
+      // =====================================
+      // AGREGAR
+      // =====================================
+
       agregarAlCarrito(producto);
 
-      /*
-        TOAST SAFE
-      */
+      // =====================================
+      // TOAST
+      // =====================================
 
       if (
         typeof M?.toast ===
         "function"
       ) {
+
         M.toast({
+
           html: `
+
             <span>
               <strong>${nombre}</strong>
               agregado al carrito
             </span>
+
           `,
+
           classes:
             "green darken-2 rounded",
+
           displayLength: 2000,
+
         });
+
       }
+
     };
 
   return (
+
     <div
       ref={cardRef}
       className="col s12 m6 l4"
     >
+
       <article
+
         className={`
           card
           hoverable
@@ -163,9 +260,12 @@ export default function ProductoCard({
               : ""
           }
         `}
+
       >
+
         {/* IMAGE */}
         <div className="card-image producto-img-wrapper">
+
           <img
             src={imagen}
             alt={nombre}
@@ -173,20 +273,30 @@ export default function ProductoCard({
             loading="lazy"
             decoding="async"
             onError={(e) => {
+
               e.target.src =
                 "https://via.placeholder.com/400x300?text=Sin+Imagen";
+
             }}
           />
 
-          {!disponible && (
-            <span className="card-title producto-badge">
-              Agotado
-            </span>
-          )}
+          {
+            !disponible && (
+
+              <span className="card-title producto-badge">
+
+                Agotado
+
+              </span>
+
+            )
+          }
+
         </div>
 
         {/* CONTENT */}
         <div className="card-content producto-content">
+
           <h5 className="producto-titulo">
             {nombre}
           </h5>
@@ -196,45 +306,72 @@ export default function ProductoCard({
           </p>
 
           <div className="producto-info">
+
             <p className="producto-precio">
+
               $
               {
                 precioFormateado
               }
+
             </p>
 
             <p
+
               className={
                 disponible
                   ? "green-text text-darken-2"
                   : "red-text text-darken-2"
               }
+
             >
+
               <strong>
-                {disponible
-                  ? "Disponible"
-                  : "No disponible"}
+
+                {
+                  disponible
+                    ? "Disponible"
+                    : "No disponible"
+                }
+
               </strong>
+
             </p>
 
+            {/* =====================================
+                STOCK DINÁMICO
+            ===================================== */}
+
             <p className="grey-text text-darken-1">
+
               Stock:
               {" "}
-              {stock}
+
+              <strong>
+                {stockDisponible}
+              </strong>
+
             </p>
+
           </div>
+
         </div>
 
         {/* ACTION */}
         <div className="card-action center-align">
+
           <button
+
             type="button"
+
             onClick={
               handleAgregar
             }
+
             disabled={
               !disponible
             }
+
             className={`
               btn
               waves-effect
@@ -246,14 +383,25 @@ export default function ProductoCard({
                   : "grey"
               }
             `}
+
             aria-label={`Agregar ${nombre} al carrito`}
+
           >
-            {disponible
-              ? "Agregar"
-              : "Agotado"}
+
+            {
+              disponible
+                ? "Agregar"
+                : "Agotado"
+            }
+
           </button>
+
         </div>
+
       </article>
+
     </div>
+
   );
+
 }

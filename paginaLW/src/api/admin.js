@@ -1,48 +1,235 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:3001'; // Cambia el puerto si tu backend usa otro
+// ============================================
+// CONFIG AXIOS
+// ============================================
 
-export const getUsuarios = async (token) => {
-  const res = await axios.get(`${API_URL}/api/usuarios`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return res.data;
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:3000";
+
+// ============================================
+// INSTANCE
+// ============================================
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json"
+  }
+});
+
+// ============================================
+// INTERCEPTOR TOKEN
+// ============================================
+
+api.interceptors.request.use(
+  (config) => {
+
+    const token =
+      localStorage.getItem("token");
+
+    if (token) {
+
+      config.headers.Authorization =
+        `Bearer ${token}`;
+
+    }
+
+    return config;
+
+  },
+  (error) =>
+    Promise.reject(error)
+);
+
+// ============================================
+// ERROR HANDLER
+// ============================================
+
+const handleError = (
+  error,
+  endpoint
+) => {
+
+  console.error(
+    `❌ ERROR EN ${endpoint}:`,
+    error?.response?.data ||
+    error.message
+  );
+
+  throw (
+    error?.response?.data ||
+    error
+  );
+
 };
 
-export const getProductos = async () => {
-  const res = await axios.get(`${API_URL}/api/productos`);
-  return res.data;
-};
+// ============================================
+// USUARIOS
+// ============================================
 
-export const getCategorias = async () => {
-  const res = await axios.get(`${API_URL}/api/categorias`);
-  return res.data;
-};
+export const getUsuarios =
+  async () => {
 
-export const getEmpleados = async (token) => {
-  const res = await axios.get(`${API_URL}/api/empleados`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return res.data;
-};
+    try {
 
-export const getFacturas = async (token) => {
-  const res = await axios.get(`${API_URL}/api/facturas`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return res.data;
-};
+      const res =
+        await api.get(
+          "/api/usuarios"
+        );
 
-export const getVentasPorMes = async (token) => {
-  const res = await axios.get(`${API_URL}/api/facturas/ventas-mes`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return res.data;
-};
+      return res.data;
 
-export const getProductosMasVendidos = async (token) => {
-  const res = await axios.get(`${API_URL}/api/facturas/mas-vendidos`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return res.data;
-};
+    } catch (error) {
+
+      handleError(
+        error,
+        "GET USUARIOS"
+      );
+
+    }
+
+  };
+
+// ============================================
+// PRODUCTOS
+// ============================================
+
+export const getProductos =
+  async () => {
+
+    try {
+
+      const res =
+        await api.get(
+          "/api/productos"
+        );
+
+      return res.data;
+
+    } catch (error) {
+
+      handleError(
+        error,
+        "GET PRODUCTOS"
+      );
+
+    }
+
+  };
+
+// ============================================
+// CATEGORIAS
+// ============================================
+
+export const getCategorias =
+  async () => {
+
+    try {
+
+      const res =
+        await api.get(
+          "/api/categorias"
+        );
+
+      return res.data;
+
+    } catch (error) {
+
+      handleError(
+        error,
+        "GET CATEGORIAS"
+      );
+
+    }
+
+  };
+
+// ============================================
+// EMPLEADOS
+// ============================================
+
+export const getEmpleados =
+  async () => {
+
+    try {
+
+      const res =
+        await api.get(
+          "/api/empleados"
+        );
+
+      return res.data;
+
+    } catch (error) {
+
+      handleError(
+        error,
+        "GET EMPLEADOS"
+      );
+
+    }
+
+  };
+
+// ============================================
+// FACTURAS
+// ============================================
+
+export const getFacturas =
+  async () => {
+
+    try {
+
+      const res =
+        await api.get(
+          "/api/facturas"
+        );
+
+      return res.data;
+
+    } catch (error) {
+
+      handleError(
+        error,
+        "GET FACTURAS"
+      );
+
+    }
+
+  };
+
+// ============================================
+// VENTAS POR MES
+// ============================================
+
+export const getVentasPorMes =
+  async () => {
+
+    try {
+
+      const res =
+        await api.get(
+          "/api/facturas/ventas-mes"
+        );
+
+      return res.data;
+
+    } catch (error) {
+
+      handleError(
+        error,
+        "GET VENTAS POR MES"
+      );
+
+    }
+
+  };
+
+
+// ============================================
+// EXPORT DEFAULT
+// ============================================
+
+export default api;

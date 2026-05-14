@@ -7,52 +7,61 @@ export const createFacturaSchema = z.object({
     invalid_type_error: "El cliente debe ser un ID válido",
   }),
 
+  // ✅ OPCIONAL
   empleado_id: z.string({
-    required_error: "El empleado es obligatorio",
     invalid_type_error: "El empleado debe ser un ID válido",
-  }),
+  }).optional().nullable(),
 
   productos: z.array(
+
     z.object({
+
       producto_id: z.string({
         required_error: "El producto es obligatorio",
         invalid_type_error: "Debe ser un ID válido",
       }),
 
       nombre: z.string({
-        required_error: "El nombre del producto es obligatorio",
+        required_error: "El nombre es obligatorio",
       }),
 
       cantidad: z.coerce.number({
         required_error: "La cantidad es obligatoria",
       })
-      .int("La cantidad debe ser un número entero")
-      .positive("La cantidad debe ser mayor a 0"),
+      .int("Debe ser entero")
+      .positive("Debe ser mayor a 0"),
 
       precio_unitario: z.coerce.number({
-        required_error: "El precio unitario es obligatorio",
+        required_error: "El precio es obligatorio",
       })
-      .positive("El precio debe ser mayor a 0"),
+      .positive("Debe ser mayor a 0"),
 
       subtotal: z.coerce.number({
         required_error: "El subtotal es obligatorio",
       })
-      .positive("El subtotal debe ser mayor a 0"),
+      .positive("Debe ser mayor a 0"),
+
     })
+
   )
-  .min(1, "Debe haber al menos un producto en la factura"),
+  .min(1, "Debe haber al menos un producto"),
 
   total: z.coerce.number({
     required_error: "El total es obligatorio",
   })
   .positive("El total debe ser mayor a 0"),
 
-  metodo_pago: z.enum(["efectivo", "tarjeta"], {
-    errorMap: () => ({ message: "Método de pago inválido" }),
-  }),
+  // ✅ ENUM IGUAL A MONGOOSE
+  metodo_pago: z.enum([
+    "Efectivo",
+    "Tarjeta",
+    "Transferencia"
+  ]),
 
-  estado: z.enum(["pendiente", "pagada", "cancelada"], {
-    errorMap: () => ({ message: "Estado inválido" }),
-  }).optional(),
+  estado: z.enum([
+    "pendiente",
+    "pagada",
+    "cancelada"
+  ]).optional(),
 
 });

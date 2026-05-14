@@ -1,0 +1,56 @@
+.dashboard-container {
+  padding: 30px;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.header-dashboard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header-dashboard h4 {
+  margin: 0;
+  font-weight: bold;
+}
+
+.card-panel {
+  border-radius: 14px;
+}
+
+.card {
+  border-radius: 16px;
+}
+
+.modal {
+  border-radius: 20px;
+}
+
+.producto-box {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 15px;
+  margin-bottom: 25px;
+  align-items: center;
+}
+
+.total-box {
+  margin-top: 25px;
+  text-align: right;
+  font-weight: bold;
+}
+
+table td,
+table th {
+  vertical-align: middle;
+}
+
+.btn {
+  border-radius: 10px;
+}
+
+.modal-footer {
+  padding-right: 20px !important;
+}

@@ -1,330 +1,1269 @@
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import '../../styles/Dashboard.css';
+// =====================================================
+// DASHBOARD EMPLEADO CORREGIDO
+// =====================================================
+
+import React, {
+  useState,
+  useEffect
+} from "react";
+
+import M from "materialize-css";
+
+import "../../styles/EmpleadoDashboard.css";
 
 export default function EmpleadoDashboard() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [carrito, setCarrito] = useState([]);
-  const [productoSeleccionado, setProductoSeleccionado] = useState('');
-  const [cantidad, setCantidad] = useState(1);
-  const [metodoPago, setMetodoPago] = useState('Efectivo');
-  const [cargando, setCargando] = useState(false);
 
-  const [empleado, setEmpleado]     = useState(null);
-  const [facturas, setFacturas]     = useState([]);
-  const [productos, setProductos]   = useState([]);
-  const [clientes, setClientes]     = useState([]);
-  const [clienteId, setClienteId]   = useState('');
+  // =====================================================
+  // STATES
+  // =====================================================
 
-  const token = localStorage.getItem("token");
-  const user  = JSON.parse(localStorage.getItem("user"));
+  const [facturas, setFacturas] =
+    useState([]);
 
-  // Cargar datos iniciales
+  const [productos, setProductos] =
+    useState([]);
+
+  const [clientes, setClientes] =
+    useState([]);
+
+  const [carrito, setCarrito] =
+    useState([]);
+
+  const [empleado, setEmpleado] =
+    useState(null);
+
+  const [productoSeleccionado,
+    setProductoSeleccionado] =
+    useState("");
+
+  const [clienteId,
+    setClienteId] =
+    useState("");
+
+  const [cantidad,
+    setCantidad] =
+    useState(1);
+
+  // ✅ ENUM EXACTO DEL BACKEND/ZOD
+  const [metodoPago,
+    setMetodoPago] =
+    useState("efectivo");
+
+  const [cargando,
+    setCargando] =
+    useState(false);
+
+  const token =
+    localStorage.getItem("token");
+
+  const user =
+    JSON.parse(
+      localStorage.getItem("user")
+    );
+
+  // =====================================================
+  // LOAD
+  // =====================================================
+
   useEffect(() => {
+
+    M.AutoInit();
+
+    console.log(
+      "🚀 DASHBOARD INICIADO"
+    );
+
+    console.log(
+      "👤 USER STORAGE:",
+      user
+    );
+
+    console.log(
+      "🔑 TOKEN:",
+      token
+    );
+
+    if (!user) {
+
+      console.error(
+        "❌ USER NO EXISTE EN LOCALSTORAGE"
+      );
+
+      M.toast({
+        html:
+          "Sesión inválida"
+      });
+
+      return;
+    }
+
     setEmpleado(user);
+
     cargarFacturas();
+
     cargarProductos();
+
     cargarClientes();
+
   }, []);
 
-  const cargarFacturas = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/facturas", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setFacturas(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error("Error facturas", e);
-    }
-  };
+  // =====================================================
+  // FACTURAS
+  // =====================================================
 
-  const cargarProductos = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/productos");
-      const data = await res.json();
-      // Solo productos activos
-      setProductos(Array.isArray(data) ? data.filter(p => p.estado) : []);
-    } catch (e) {
-      console.error("Error productos", e);
-    }
-  };
+  const cargarFacturas =
+    async () => {
 
-  const cargarClientes = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      // Solo clientes
-      setClientes(Array.isArray(data) ? data.filter(u => u.rol === "cliente") : []);
-    } catch (e) {
-      console.error("Error clientes", e);
-    }
-  };
+      try {
 
-  const agregarAlCarrito = () => {
-    if (!productoSeleccionado) return;
-    const producto = productos.find(p => p._id === productoSeleccionado);
-    if (!producto) return;
+        const res =
+          await fetch(
+            "http://localhost:3000/api/facturas",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
 
-    const existente = carrito.find(i => i._id === producto._id);
-    if (existente) {
-      setCarrito(carrito.map(i =>
-        i._id === producto._id
-          ? { ...i, cantidad: i.cantidad + parseInt(cantidad), subtotal: (i.cantidad + parseInt(cantidad)) * i.precio }
-          : i
-      ));
-    } else {
-      setCarrito([...carrito, {
-        ...producto,
-        cantidad: parseInt(cantidad),
-        subtotal: producto.precio * parseInt(cantidad),
-      }]);
-    }
-    setCantidad(1);
-  };
+        const data =
+          await res.json();
 
-  const calcularTotal = () => carrito.reduce((acc, i) => acc + i.subtotal, 0);
+        console.log(
+          "✅ FACTURAS:",
+          data
+        );
 
-  const guardarFactura = async () => {
-    if (carrito.length === 0) {
-      alert("Agrega al menos un producto.");
-      return;
-    }
-    if (!clienteId) {
-      alert("Selecciona un cliente.");
-      return;
-    }
+        if (!Array.isArray(data)) {
 
-    setCargando(true);
+          setFacturas([]);
 
-    // El empleado necesita su empleado_id (no el usuario_id)
-    // Lo guardamos en localStorage al hacer login si existe
-    const empleadoId = localStorage.getItem("empleado_id");
+          return;
+        }
 
-    const productosPayload = carrito.map(item => ({
-      producto_id: item._id,
-      cantidad: item.cantidad,
-      precio_unitario: item.precio,
-    }));
+        const activas =
+          data.filter(
+            factura =>
+              !factura.eliminado
+          );
 
-    try {
-      const res = await fetch("http://localhost:3000/api/facturas", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          cliente_id: clienteId,
-          empleado_id: empleadoId,
-          productos: productosPayload,
-          metodo_pago: metodoPago,
-          estado: "pagada",
-        }),
-      });
+        setFacturas(activas);
 
-      const data = await res.json();
+      } catch (error) {
 
-      if (!res.ok) {
-        alert(`Error: ${data.message}`);
+        console.error(
+          "❌ ERROR FACTURAS:",
+          error
+        );
+
+        M.toast({
+          html:
+            "Error cargando facturas"
+        });
+      }
+    };
+
+  // =====================================================
+  // PRODUCTOS
+  // =====================================================
+
+  const cargarProductos =
+    async () => {
+
+      try {
+
+        const res =
+          await fetch(
+            "http://localhost:3000/api/products"
+          );
+
+        const data =
+          await res.json();
+
+        console.log(
+          "✅ PRODUCTOS:",
+          data
+        );
+
+        if (!Array.isArray(data)) {
+          return;
+        }
+
+        const activos =
+          data.filter(
+            producto =>
+              producto.estado === true
+          );
+
+        setProductos(activos);
+
+      } catch (error) {
+
+        console.error(
+          "❌ ERROR PRODUCTOS:",
+          error
+        );
+
+        M.toast({
+          html:
+            "Error cargando productos"
+        });
+      }
+    };
+
+  // =====================================================
+  // CLIENTES
+  // =====================================================
+
+  const cargarClientes =
+    async () => {
+
+      try {
+
+        const res =
+          await fetch(
+            "http://localhost:3000/api/usuarios",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
+
+        const data =
+          await res.json();
+
+        console.log(
+          "✅ CLIENTES:",
+          data
+        );
+
+        if (!Array.isArray(data)) {
+          return;
+        }
+
+        const filtrados =
+          data.filter(
+            usuario =>
+              usuario.rol === "cliente"
+          );
+
+        setClientes(filtrados);
+
+      } catch (error) {
+
+        console.error(
+          "❌ ERROR CLIENTES:",
+          error
+        );
+
+        M.toast({
+          html:
+            "Error cargando clientes"
+        });
+      }
+    };
+
+  // =====================================================
+  // AGREGAR CARRITO
+  // =====================================================
+
+  const agregarAlCarrito =
+    () => {
+
+      if (!productoSeleccionado) {
+
+        M.toast({
+          html:
+            "Selecciona un producto"
+        });
+
         return;
       }
 
-      alert(`✅ Factura creada. Total: $${calcularTotal().toLocaleString()}`);
-      setCarrito([]);
-      setClienteId('');
-      setIsModalOpen(false);
-      cargarFacturas(); // Refrescar tabla
-    } catch (e) {
-      console.error(e);
-      alert("Error al conectar con el servidor");
-    } finally {
-      setCargando(false);
-    }
-  };
+      const producto =
+        productos.find(
+          producto =>
+            producto._id ===
+            productoSeleccionado
+        );
 
-  const getEstadoClass = (estado) => {
-    if (!estado) return '';
-    return estado.toLowerCase();
-  };
+      if (!producto) {
+
+        M.toast({
+          html:
+            "Producto no encontrado"
+        });
+
+        return;
+      }
+
+      const cantidadNumero =
+        Number(cantidad);
+
+      if (
+        isNaN(cantidadNumero)
+      ) {
+
+        M.toast({
+          html:
+            "Cantidad inválida"
+        });
+
+        return;
+      }
+
+      if (
+        cantidadNumero <= 0
+      ) {
+
+        M.toast({
+          html:
+            "Cantidad inválida"
+        });
+
+        return;
+      }
+
+      if (
+        cantidadNumero >
+        producto.stock
+      ) {
+
+        M.toast({
+          html:
+            "Stock insuficiente"
+        });
+
+        return;
+      }
+
+      const existe =
+        carrito.find(
+          item =>
+            item._id === producto._id
+        );
+
+      if (existe) {
+
+        const nuevoCarrito =
+          carrito.map(item => {
+
+            if (
+              item._id === producto._id
+            ) {
+
+              const nuevaCantidad =
+                item.cantidad +
+                cantidadNumero;
+
+              return {
+
+                ...item,
+
+                cantidad:
+                  nuevaCantidad,
+
+                subtotal:
+                  nuevaCantidad *
+                  Number(producto.precio)
+              };
+            }
+
+            return item;
+          });
+
+        setCarrito(nuevoCarrito);
+
+      } else {
+
+        const nuevoItem = {
+
+          _id:
+            producto._id,
+
+          nombre:
+            producto.nombre,
+
+          precio:
+            Number(producto.precio),
+
+          cantidad:
+            cantidadNumero,
+
+          subtotal:
+            cantidadNumero *
+            Number(producto.precio)
+        };
+
+        setCarrito([
+          ...carrito,
+          nuevoItem
+        ]);
+      }
+
+      M.toast({
+        html:
+          "Producto agregado"
+      });
+
+      setProductoSeleccionado("");
+
+      setCantidad(1);
+    };
+
+  // =====================================================
+  // ELIMINAR DEL CARRITO
+  // =====================================================
+
+  const eliminarDelCarrito =
+    id => {
+
+      const nuevo =
+        carrito.filter(
+          item =>
+            item._id !== id
+        );
+
+      setCarrito(nuevo);
+
+      M.toast({
+        html:
+          "Producto eliminado"
+      });
+    };
+
+  // =====================================================
+  // TOTAL
+  // =====================================================
+
+  const calcularTotal =
+    () => {
+
+      return carrito.reduce(
+        (
+          acumulador,
+          item
+        ) =>
+          acumulador +
+          Number(item.subtotal),
+        0
+      );
+    };
+
+  // =====================================================
+  // CREAR FACTURA
+  // =====================================================
+
+  const guardarFactura =
+    async () => {
+
+      try {
+
+        if (
+          carrito.length === 0
+        ) {
+
+          M.toast({
+            html:
+              "Agrega productos"
+          });
+
+          return;
+        }
+
+        if (!clienteId) {
+
+          M.toast({
+            html:
+              "Selecciona un cliente"
+          });
+
+          return;
+        }
+
+        if (!user?._id) {
+
+          M.toast({
+            html:
+              "Empleado inválido"
+          });
+
+          return;
+        }
+
+        setCargando(true);
+
+        // =================================================
+        // PRODUCTOS PAYLOAD
+        // =================================================
+
+        const productosPayload =
+          carrito.map(item => ({
+
+            producto_id:
+              item._id,
+
+            nombre:
+              item.nombre,
+
+            cantidad:
+              Number(item.cantidad),
+
+            precio_unitario:
+              Number(item.precio),
+
+            subtotal:
+              Number(item.subtotal)
+          }));
+
+        // =================================================
+        // PAYLOAD FINAL
+        // =================================================
+
+        const payload = {
+
+          cliente_id:
+            clienteId,
+
+          // ✅ EL BACKEND VALIDA CONTRA USUARIO
+          empleado_id:
+            user._id,
+
+          productos:
+            productosPayload,
+
+          total:
+            calcularTotal(),
+
+          // ✅ DEBE SER MINUSCULA
+          metodo_pago:
+            metodoPago,
+
+          estado:
+            "pagada"
+        };
+
+        console.log(
+          "📦 PAYLOAD:",
+          payload
+        );
+
+        const res =
+          await fetch(
+            "http://localhost:3000/api/facturas",
+            {
+              method: "POST",
+
+              headers: {
+
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`
+              },
+
+              body:
+                JSON.stringify(payload)
+            }
+          );
+
+        console.log(
+          "📡 STATUS:",
+          res.status
+        );
+
+        const data =
+          await res.json();
+
+        console.log(
+          "✅ RESPUESTA:",
+          data
+        );
+
+        if (!res.ok) {
+
+          console.error(
+            "❌ ERROR BACKEND:",
+            data
+          );
+
+          // ZOD ERRORS
+          if (
+            Array.isArray(data.error)
+          ) {
+
+            data.error.forEach(err => {
+
+              console.error(err);
+
+              M.toast({
+                html:
+                  `${err.field || ""} ${err.message || ""}`
+              });
+            });
+
+          } else {
+
+            M.toast({
+              html:
+                data.message ||
+                "Error creando factura"
+            });
+          }
+
+          return;
+        }
+
+        M.toast({
+          html:
+            "Factura creada correctamente"
+        });
+
+        // =================================================
+        // RESET
+        // =================================================
+
+        setCarrito([]);
+
+        setClienteId("");
+
+        setCantidad(1);
+
+        setMetodoPago(
+          "efectivo"
+        );
+
+        setProductoSeleccionado("");
+
+        // =================================================
+        // CERRAR MODAL
+        // =================================================
+
+        const modal =
+          M.Modal.getInstance(
+            document.getElementById(
+              "modalFactura"
+            )
+          );
+
+        if (modal) {
+          modal.close();
+        }
+
+        // =================================================
+        // RECARGAR
+        // =================================================
+
+        cargarFacturas();
+
+      } catch (error) {
+
+        console.error(
+          "❌ ERROR CREAR:",
+          error
+        );
+
+        M.toast({
+          html:
+            "Error creando factura"
+        });
+
+      } finally {
+
+        setCargando(false);
+      }
+    };
+
+  // =====================================================
+  // DELETE
+  // =====================================================
+
+  const eliminarFactura =
+    async id => {
+
+      try {
+
+        const res =
+          await fetch(
+            `http://localhost:3000/api/facturas/${id}`,
+            {
+              method:
+                "DELETE",
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
+
+        const data =
+          await res.json();
+
+        if (!res.ok) {
+
+          throw new Error(
+            data.message
+          );
+        }
+
+        M.toast({
+          html:
+            "Factura eliminada"
+        });
+
+        cargarFacturas();
+
+      } catch (error) {
+
+        console.error(
+          "❌ ERROR DELETE:",
+          error
+        );
+
+        M.toast({
+          html:
+            "Error eliminando factura"
+        });
+      }
+    };
+
+  // =====================================================
+  // JSX
+  // =====================================================
 
   return (
-    <div className="dashboard-layout">
-      <aside className="sidebar">
-        <h2 className="sidebar-logo">
-          <span className="logo-blanco">ESTANCO</span>
-          <span className="logo-amarillo">MALACOPA</span>
-        </h2>
-        <ul>
-          <li className="active">Dashboard</li>
-        </ul>
-      </aside>
 
-      <main className="main-content">
-        <div className="header-section">
-          <div>
-            <h1 style={{ margin: 0, color: '#111827' }}>Hola, {empleado?.nombre}</h1>
-            <p style={{ margin: '5px 0 0 0', color: '#6b7280' }}>
-              Empleado | Estado: <strong>Activo</strong>
-            </p>
-          </div>
-          <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
-            + Nueva Factura
-          </button>
+    <div className="dashboard-container">
+
+      {/* HEADER */}
+
+      <div className="header-dashboard">
+
+        <div>
+
+          <h4>
+            Bienvenido,
+            {" "}
+            {empleado?.nombre}
+          </h4>
+
+          <p>
+            Panel de empleado
+          </p>
+
         </div>
 
-        <section className="kpi-grid">
-          <div className="kpi-card"><h3>Facturas Totales</h3><p>{facturas.length}</p></div>
-          <div className="kpi-card">
-            <h3>Ingresos Totales</h3>
-            <p>${facturas.reduce((acc, f) => acc + (f.total || 0), 0).toLocaleString()}</p>
-          </div>
-          <div className="kpi-card">
-            <h3>Pagadas</h3>
-            <p>{facturas.filter(f => f.estado === "pagada").length}</p>
-          </div>
-        </section>
+        <a
+          href="#modalFactura"
+          className="
+            btn
+            amber
+            darken-2
+            modal-trigger
+          "
+        >
+          Nueva Factura
+        </a>
 
-        <section className="table-container">
-          <h2 style={{ marginTop: 0 }}>Facturas Recientes</h2>
-          <table>
+      </div>
+
+      {/* KPIS */}
+
+      <div className="row">
+
+        <div className="col s12 m6">
+
+          <div
+            className="
+              card-panel
+              blue
+              white-text
+            "
+          >
+
+            <h5>
+              Facturas
+            </h5>
+
+            <h3>
+              {facturas.length}
+            </h3>
+
+          </div>
+
+        </div>
+
+        <div className="col s12 m6">
+
+          <div
+            className="
+              card-panel
+              green
+              white-text
+            "
+          >
+
+            <h5>
+              Productos
+            </h5>
+
+            <h3>
+              {productos.length}
+            </h3>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* TABLA */}
+
+      <div className="card">
+
+        <div className="card-content">
+
+          <span className="card-title">
+            Facturas Registradas
+          </span>
+
+          <table
+            className="
+              striped
+              responsive-table
+            "
+          >
+
             <thead>
+
               <tr>
+
                 <th>ID</th>
+
                 <th>Cliente</th>
+
                 <th>Total</th>
-                <th>Método</th>
+
                 <th>Estado</th>
-                <th>Fecha</th>
+
+                <th>Acciones</th>
+
               </tr>
+
             </thead>
+
             <tbody>
-              {facturas.length === 0 ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center' }}>Sin facturas</td></tr>
-              ) : (
-                facturas.map((f) => (
-                  <tr key={f._id}>
-                    <td style={{ fontSize: '11px' }}>{f._id}</td>
-                    <td>{f.cliente_id?.nombre || "—"}</td>
-                    <td>${f.total?.toLocaleString()}</td>
-                    <td>{f.metodo_pago}</td>
-                    <td>
-                      <span className={`badge ${getEstadoClass(f.estado)}`}>
-                        {f.estado}
-                      </span>
-                    </td>
-                    <td>{new Date(f.createdAt).toLocaleDateString("es-CO")}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </section>
-      </main>
 
-      {isModalOpen && ReactDOM.createPortal(
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2 style={{ marginTop: 0 }}>Nueva Factura</h2>
+              {
+                facturas.map(
+                  factura => (
 
-            {/* Selector de cliente */}
-            <div style={{ marginBottom: '16px', textAlign: 'left' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px', color: '#374151' }}>
-                Cliente
-              </label>
-              <select
-                style={{ width: '100%', padding: '8px', border: '1px solid #9ca3af', borderRadius: '4px', backgroundColor: 'white', color: 'black', height: '38px', fontSize: '14px' }}
-                value={clienteId}
-                onChange={e => setClienteId(e.target.value)}
-              >
-                <option value="">-- Seleccionar cliente --</option>
-                {clientes.map(c => (
-                  <option key={c._id} value={c._id}>{c.nombre} — {c.email}</option>
-                ))}
-              </select>
-            </div>
+                    <tr
+                      key={
+                        factura._id
+                      }
+                    >
 
-            {/* Producto + cantidad */}
-            <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-end', marginBottom: '20px' }}>
-              <div style={{ flex: 2, display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '14px', color: '#374151' }}>Producto</label>
-                <select
-                  style={{ width: '100%', padding: '8px', border: '1px solid #9ca3af', borderRadius: '4px', backgroundColor: 'white', color: 'black', height: '38px', fontSize: '14px' }}
-                  value={productoSeleccionado}
-                  onChange={e => setProductoSeleccionado(e.target.value)}
-                >
-                  <option value="">-- Elige un producto --</option>
-                  {productos.map(p => (
-                    <option key={p._id} value={p._id}>
-                      {p.nombre} — ${p.precio.toLocaleString()}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '14px', color: '#374151' }}>Cant.</label>
-                <input
-                  style={{ width: '100%', padding: '8px', border: '1px solid #9ca3af', borderRadius: '4px', backgroundColor: 'white', color: 'black', height: '38px', boxSizing: 'border-box' }}
-                  type="number" min="1" value={cantidad}
-                  onChange={e => setCantidad(e.target.value)}
-                />
-              </div>
-              <button
-                style={{ backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', padding: '0 20px', height: '38px', cursor: 'pointer', fontWeight: 'bold' }}
-                onClick={agregarAlCarrito}
-              >
-                Agregar
-              </button>
-            </div>
+                      <td>
+                        {
+                          factura._id.slice(-6)
+                        }
+                      </td>
 
-            <table className="mini-table">
-              <thead><tr><th>Producto</th><th>Cant.</th><th>Subtotal</th></tr></thead>
-              <tbody>
-                {carrito.length === 0 ? (
-                  <tr><td colSpan="3" style={{ textAlign: 'center' }}>Sin productos</td></tr>
-                ) : (
-                  carrito.map((item, i) => (
-                    <tr key={i}>
-                      <td>{item.nombre}</td>
-                      <td>{item.cantidad}</td>
-                      <td>${item.subtotal.toLocaleString()}</td>
+                      <td>
+                        {
+                          factura
+                          ?.cliente_id
+                          ?.nombre
+                        }
+                      </td>
+
+                      <td>
+                        $
+                        {
+                          factura.total
+                        }
+                      </td>
+
+                      <td>
+                        {
+                          factura.estado
+                        }
+                      </td>
+
+                      <td>
+
+                        <button
+                          className="
+                            btn
+                            red
+                          "
+                          onClick={() =>
+                            eliminarFactura(
+                              factura._id
+                            )
+                          }
+                        >
+
+                          <i
+                            className="
+                              material-icons
+                            "
+                          >
+                            delete
+                          </i>
+
+                        </button>
+
+                      </td>
+
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  )
+                )
+              }
 
-            <div className="total-section">
-              <strong>Total: ${calcularTotal().toLocaleString()}</strong>
-            </div>
+            </tbody>
 
-            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px', color: '#374151' }}>Método de Pago</label>
-              <select
-                style={{ width: '100%', padding: '8px', border: '1px solid #9ca3af', borderRadius: '4px', backgroundColor: 'white', color: 'black', height: '38px', fontSize: '14px' }}
-                value={metodoPago}
-                onChange={e => setMetodoPago(e.target.value)}
-              >
-                <option value="Efectivo">Efectivo</option>
-                <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
-                <option value="Transferencia">Transferencia (Nequi/Daviplata)</option>
-              </select>
-            </div>
+          </table>
 
-            <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => { setIsModalOpen(false); setCarrito([]); }}>
-                Cancelar
-              </button>
-              <button className="btn-primary" onClick={guardarFactura} disabled={cargando}>
-                {cargando ? "Guardando..." : "Generar Factura"}
-              </button>
-            </div>
+        </div>
+
+      </div>
+
+      {/* MODAL */}
+
+      <div
+        id="modalFactura"
+        className="
+          modal
+          modal-fixed-footer
+        "
+      >
+
+        <div className="modal-content">
+
+          <h4>
+            Nueva Factura
+          </h4>
+
+          {/* CLIENTE */}
+
+          <div className="input-field">
+
+            <select
+              className="
+                browser-default
+              "
+              value={clienteId}
+              onChange={e =>
+                setClienteId(
+                  e.target.value
+                )
+              }
+            >
+
+              <option value="">
+                Selecciona cliente
+              </option>
+
+              {
+                clientes.map(
+                  cliente => (
+
+                    <option
+                      key={
+                        cliente._id
+                      }
+                      value={
+                        cliente._id
+                      }
+                    >
+
+                      {
+                        cliente.nombre
+                      }
+
+                    </option>
+                  )
+                )
+              }
+
+            </select>
+
           </div>
-        </div>,
-        document.body
-      )}
+
+          {/* PRODUCTOS */}
+
+          <div className="producto-box">
+
+            <select
+              className="
+                browser-default
+              "
+              value={
+                productoSeleccionado
+              }
+              onChange={e =>
+                setProductoSeleccionado(
+                  e.target.value
+                )
+              }
+            >
+
+              <option value="">
+                Selecciona producto
+              </option>
+
+              {
+                productos.map(
+                  producto => (
+
+                    <option
+                      key={
+                        producto._id
+                      }
+                      value={
+                        producto._id
+                      }
+                    >
+
+                      {
+                        producto.nombre
+                      }
+
+                      {" | $"}
+
+                      {
+                        producto.precio
+                      }
+
+                      {" | Stock: "}
+
+                      {
+                        producto.stock
+                      }
+
+                    </option>
+                  )
+                )
+              }
+
+            </select>
+
+            <input
+              type="number"
+              min="1"
+              value={cantidad}
+              onChange={e =>
+                setCantidad(
+                  e.target.value
+                )
+              }
+            />
+
+            <button
+              className="
+                btn
+                green
+              "
+              onClick={
+                agregarAlCarrito
+              }
+            >
+              Agregar
+            </button>
+
+          </div>
+
+          {/* CARRITO */}
+
+          <table className="striped">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Producto
+                </th>
+
+                <th>
+                  Cantidad
+                </th>
+
+                <th>
+                  Precio
+                </th>
+
+                <th>
+                  Subtotal
+                </th>
+
+                <th>
+                  Acción
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {
+                carrito.map(
+                  item => (
+
+                    <tr
+                      key={
+                        item._id
+                      }
+                    >
+
+                      <td>
+                        {
+                          item.nombre
+                        }
+                      </td>
+
+                      <td>
+                        {
+                          item.cantidad
+                        }
+                      </td>
+
+                      <td>
+                        $
+                        {
+                          item.precio
+                        }
+                      </td>
+
+                      <td>
+                        $
+                        {
+                          item.subtotal
+                        }
+                      </td>
+
+                      <td>
+
+                        <button
+                          className="
+                            btn
+                            red
+                          "
+                          onClick={() =>
+                            eliminarDelCarrito(
+                              item._id
+                            )
+                          }
+                        >
+                          X
+                        </button>
+
+                      </td>
+
+                    </tr>
+                  )
+                )
+              }
+
+            </tbody>
+
+          </table>
+
+          {/* TOTAL */}
+
+          <div className="total-box">
+
+            <h5>
+
+              TOTAL:
+              {" "}
+
+              $
+              {
+                calcularTotal()
+              }
+
+            </h5>
+
+          </div>
+
+          {/* METODO PAGO */}
+
+          <div className="input-field">
+
+            <select
+              className="
+                browser-default
+              "
+              value={metodoPago}
+              onChange={e =>
+                setMetodoPago(
+                  e.target.value
+                )
+              }
+            >
+
+              {/* VALORES EXACTOS DEL BACKEND */}
+
+              <option value="Efectivo">
+                Efectivo
+              </option>
+
+              <option value="Tarjeta">
+                Tarjeta
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+        {/* FOOTER */}
+
+        <div className="modal-footer">
+
+          <button
+            className="
+              modal-close
+              btn
+              grey
+            "
+          >
+            Cancelar
+          </button>
+
+          <button
+            className="
+              btn
+              green
+            "
+            onClick={
+              guardarFactura
+            }
+            disabled={cargando}
+          >
+
+            {
+              cargando
+                ? "Guardando..."
+                : "Crear Factura"
+            }
+
+          </button>
+
+        </div>
+
+      </div>
+
     </div>
   );
 }

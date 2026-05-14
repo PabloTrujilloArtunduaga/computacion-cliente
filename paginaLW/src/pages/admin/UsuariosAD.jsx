@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminNavbar from "../admin/AdminNavbar";
+
 // ─── 1. CONSTANTES ────────────────────────────────────────────────────────────
 
 const API = 'http://localhost:3000/api';
 
-// Función centralizada con token JWT para evitar errores 403
 const authFetch = (url, options = {}) => {
   const token = localStorage.getItem('token');
   return fetch(url, {
@@ -208,7 +208,15 @@ function UsuarioForm({ initial, onSave, onClose }) {
         <input
           style={inputStyle}
           value={form.nombre}
-          onChange={e => setForm({ ...form, nombre: e.target.value })}
+          onChange={e => {
+
+            console.log('Usuario seleccionado:', e.target.value);
+
+            setForm({
+              ...form,
+              usuario_id: String(e.target.value),
+            });
+          }}
           placeholder="Ej: Juan Pérez"
         />
       </Field>
@@ -328,6 +336,10 @@ function UsuarioForm({ initial, onSave, onClose }) {
   );
 }
 
+// ─── EmpleadoForm ─────────────────────────────────────────────────────────────
+// Muestra TODOS los usuarios que no tengan empleado asignado (sin filtrar por estado)
+// Al crear, cambia el rol del usuario seleccionado a 'empleado' automáticamente.
+
 function EmpleadoForm({ initial, usuariosLibres, onSave, onClose }) {
   const isEdit = Boolean(initial);
 
@@ -367,6 +379,9 @@ function EmpleadoForm({ initial, usuariosLibres, onSave, onClose }) {
     setLoading(false);
   };
 
+  // Usuario seleccionado actualmente para mostrar su estado
+  const usuarioSeleccionado = usuariosLibres.find(u => u._id === form.usuario_id);
+
   return (
     <>
       {!isEdit ? (
@@ -387,19 +402,33 @@ function EmpleadoForm({ initial, usuariosLibres, onSave, onClose }) {
             <option value="">Seleccione un usuario</option>
             {usuariosLibres.map(u => (
               <option key={u._id} value={u._id}>
-                {u.nombre} — {u.email} ({u.rol})
+                {u.nombre} — {u.email} ({u.rol}) {u.estado ? '' : '[Inactivo]'}
               </option>
             ))}
           </select>
+
           {usuariosLibres.length === 0 && (
-            <span style={{
-              color: '#888',
-              fontSize: 12,
-              marginTop: 6,
-              display: 'block'
-            }}>
-              No hay usuarios disponibles.
+            <span style={{ color: '#888', fontSize: 12, marginTop: 6, display: 'block' }}>
+              No hay usuarios disponibles sin empleado asignado.
             </span>
+          )}
+
+          {/* Info del usuario seleccionado */}
+          {usuarioSeleccionado && (
+            <div style={{
+              marginTop: 10, padding: '10px 14px', borderRadius: 8,
+              background: '#e3f2fd', border: '1px solid #90caf9', fontSize: 13,
+            }}>
+              <b>Rol actual:</b> {usuarioSeleccionado.rol} &nbsp;|&nbsp;
+              <b>Estado:</b>{' '}
+              <span style={{ color: usuarioSeleccionado.estado ? '#2e7d32' : '#c62828' }}>
+                {usuarioSeleccionado.estado ? 'Activo' : 'Inactivo'}
+              </span>
+              <br />
+              <span style={{ color: '#1565C0', fontSize: 12, marginTop: 4, display: 'block' }}>
+                Al guardar, el rol de este usuario cambiará a <b>empleado</b> automáticamente.
+              </span>
+            </div>
           )}
         </Field>
       ) : (
@@ -474,86 +503,119 @@ export default function UsuariosEmpleadosPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-const fetchUsuarios = async () => {
-  try {
-    const res = await authFetch(`${API}/usuarios`);
-
-    const data = await res.json();
-
-    console.log("RESPUESTA USUARIOS:", data);
-
-    // 👇 Soporta varios formatos
-    const lista = Array.isArray(data)
-      ? data
-      : data.usuarios
-      ? data.usuarios
-      : data.data
-      ? data.data
-      : [];
-
-    setUsuarios(lista);
-
-  } catch (err) {
-    console.error(err);
-    showToast('Error de conexión usuarios', '#c62828');
-  }
-};
-
-const fetchEmpleados = async () => {
-  try {
-    const res = await authFetch(`${API}/empleados`);
-
-    console.log("STATUS:", res.status);
-
-    const data = await res.json(); // 👈 CAMBIO CLAVE
-    console.log("DATA:", data);
-
-    if (!res.ok) {
-      showToast(data.message || 'Error empleados', '#c62828');
-      return;
+  const fetchUsuarios = async () => {
+    try {
+      const res  = await authFetch(`${API}/usuarios`);
+      const data = await res.json();
+      const lista = Array.isArray(data)
+        ? data
+        : data.usuarios ?? data.data ?? [];
+      setUsuarios(lista);
+    } catch (err) {
+      showToast('Error de conexión usuarios', '#c62828');
     }
+  };
 
-    setEmpleados(Array.isArray(data) ? data : []);
-
-  } catch (error) {
-    console.error('ERROR EMPLEADOS:', error);
-    showToast('Error al cargar empleados', '#c62828');
-  }
-};
+  const fetchEmpleados = async () => {
+    try {
+      const res  = await authFetch(`${API}/empleados`);
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.message || 'Error empleados', '#c62828');
+        return;
+      }
+      setEmpleados(Array.isArray(data) ? data : []);
+    } catch {
+      showToast('Error al cargar empleados', '#c62828');
+    }
+  };
 
   useEffect(() => {
-    fetchUsuarios();
-    fetchEmpleados();
-  }, []);
+  const loadData = async () => {
+    console.log('========== DEBUG INICIAL ==========');
 
-// CORRECCIÓN en UsuariosEmpleadosPage:
-const empleadoUserIds = useMemo(() => {
-  return new Set(
-    empleados.map(e => String(e.usuario_id?._id || e.usuario_id))
-  );
-}, [empleados]);
+    await fetchUsuarios();
+    await fetchEmpleados();
 
-const usuariosLibres = useMemo(() => {
-  return usuarios.filter(
-    u => u.estado === true && !empleadoUserIds.has(String(u._id))
+    console.log('Usuarios cargados:', usuarios);
+    console.log('Empleados cargados:', empleados);
+
+    console.log(
+      'Usuarios con estado:',
+      usuarios.map(u => ({
+        id: u._id,
+        nombre: u.nombre,
+        estado: u.estado,
+        tipoEstado: typeof u.estado,
+        rol: u.rol,
+      }))
+    );
+
+    console.log(
+      'Empleados usuario_id:',
+      empleados.map(e => ({
+        empleado: e._id,
+        usuario_id: e.usuario_id,
+      }))
+    );
+  };
+
+  loadData();
+}, []);
+
+  // IDs de usuarios que ya tienen registro de empleado
+  const empleadoUserIds = useMemo(() => {
+    return new Set(
+      empleados.map(e => String(e.usuario_id?._id || e.usuario_id))
+    );
+  }, [empleados]);
+
+  // Usuarios disponibles para asignar como empleado:
+  // cualquier usuario sin empleado asignado (activo o inactivo).
+  const usuariosLibres = useMemo(() => {
+
+  console.log('========== DEBUG USUARIOS LIBRES ==========');
+
+  console.log('Usuarios completos:', usuarios);
+
+  console.log(
+    'IDs empleados:',
+    [...empleadoUserIds]
   );
+
+  const filtrados = usuarios.filter(u => {
+
+    const userId = String(u._id).trim();
+
+    const tieneEmpleado = empleadoUserIds.has(userId);
+
+    console.log({
+      usuario: u.nombre,
+      id: userId,
+      tieneEmpleado,
+      estado: u.estado,
+      rol: u.rol,
+    });
+
+    return !tieneEmpleado;
+  });
+
+  console.log('Usuarios libres finales:', filtrados);
+
+  return filtrados;
+
 }, [usuarios, empleadoUserIds]);
-
-console.log("USUARIOS:", usuarios);
-console.log("EMPLEADOS:", empleados);
-console.log("IDS EMPLEADOS:", [...empleadoUserIds]);
-console.log("USUARIOS LIBRES:", usuariosLibres);
 
   const totalUsuarios   = usuarios.length;
   const usuariosActivos = usuarios.filter(u => u.estado === true).length;
   const usuariosInact   = usuarios.filter(u => u.estado === false).length;
   const totalEmpleados  = empleados.length;
 
-  // ── CRUD USUARIOS ─────────────────────────────────────────────────────────────
+  // ── CRUD USUARIOS ──────────────────────────────────────────────────────────
 
   const handleCreateUser = async (body) => {
     try {
-      const userRes = await authFetch(`${API}/usuarios`, {
+      const userRes  = await authFetch(`${API}/usuarios`, {
         method: 'POST',
         body: JSON.stringify({
           nombre:   body.nombre,
@@ -563,7 +625,6 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
           estado:   body.estado,
         }),
       });
-
       const userData = await userRes.json();
 
       if (!userRes.ok) {
@@ -571,9 +632,8 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
         return;
       }
 
-      // Si es empleado, crear automáticamente su registro en empleados
       if (body.rol === 'empleado') {
-        const empleadoRes = await authFetch(`${API}/empleados`, {
+        const empleadoRes  = await authFetch(`${API}/empleados`, {
           method: 'POST',
           body: JSON.stringify({
             usuario_id:         userData._id,
@@ -582,7 +642,6 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
             fecha_contratacion: body.fecha_contratacion || null,
           }),
         });
-
         const empleadoData = await empleadoRes.json();
 
         if (!empleadoRes.ok) {
@@ -604,117 +663,105 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
           ? 'Usuario y empleado creados exitosamente'
           : 'Usuario creado exitosamente'
       );
-    } catch (error) {
-      console.error(error);
-      showToast('Error de conexión', '#c62828');
-    }
-  };
-
-  const handleUpdateUser = async (id, body) => {
-  try {
-
-    // Buscar usuario actual
-    const usuarioActual = usuarios.find(u => u._id === id);
-
-    // Actualizar usuario
-    const res = await authFetch(`${API}/usuarios/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showToast(data.message || 'Error al actualizar', '#c62828');
-      return;
-    }
-
-    // ─────────────────────────────────────────────
-    // SI CAMBIÓ A EMPLEADO → CREAR EMPLEADO
-    // ─────────────────────────────────────────────
-
-    const yaEsEmpleado = empleados.some(emp =>
-      (emp.usuario_id?._id || emp.usuario_id) === id
-    );
-
-    if (
-      body.rol === 'empleado' &&
-      !yaEsEmpleado
-    ) {
-
-      const empleadoRes = await authFetch(`${API}/empleados`, {
-        method: 'POST',
-        body: JSON.stringify({
-          usuario_id: id,
-          cargo: body.cargo || 'Empleado',
-          salario: Number(body.salario) || 0,
-          fecha_contratacion:
-            body.fecha_contratacion || new Date(),
-        }),
-      });
-
-      const empleadoData = await empleadoRes.json();
-
-      if (!empleadoRes.ok) {
-        showToast(
-          empleadoData.message || 'Usuario actualizado pero empleado no creado',
-          '#ef6c00'
-        );
-      }
-    }
-
-    // ─────────────────────────────────────────────
-    // SI DEJÓ DE SER EMPLEADO → ELIMINAR EMPLEADO
-    // ─────────────────────────────────────────────
-
-    if (
-      usuarioActual?.rol === 'empleado' &&
-      body.rol !== 'empleado'
-    ) {
-
-      const empleado = empleados.find(emp =>
-        (emp.usuario_id?._id || emp.usuario_id) === id
-      );
-
-      if (empleado) {
-        await authFetch(`${API}/empleados/${empleado._id}`, {
-          method: 'DELETE',
-        });
-      }
-    }
-
-    await fetchUsuarios();
-    await fetchEmpleados();
-
-    setModal(null);
-
-    showToast('Usuario actualizado correctamente');
-
-  } catch (error) {
-    console.error(error);
-    showToast('Error de conexión', '#c62828');
-  }
-};
-
-  const handleToggleUser = async (usuario) => {
-    try {
-      const res = await authFetch(`${API}/usuarios/${usuario._id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ estado: !usuario.estado }),
-      });
-      if (!res.ok) { showToast('Error al cambiar estado', '#c62828'); return; }
-      await fetchUsuarios();
-      showToast(`Usuario ${!usuario.estado ? 'activado' : 'desactivado'}`);
     } catch {
       showToast('Error de conexión', '#c62828');
     }
   };
 
-  // ── CRUD EMPLEADOS ────────────────────────────────────────────────────────────
+  const handleUpdateUser = async (id, body) => {
+    try {
+      const usuarioActual = usuarios.find(u => u._id === id);
 
+      const res  = await authFetch(`${API}/usuarios/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.message || 'Error al actualizar', '#c62828');
+        return;
+      }
+
+      const yaEsEmpleado = empleados.some(
+        emp => String(emp.usuario_id?._id || emp.usuario_id) === String(id)
+      );
+
+      // Si cambió a empleado → crear registro empleado
+      if (body.rol === 'empleado' && !yaEsEmpleado) {
+        const empleadoRes  = await authFetch(`${API}/empleados`, {
+          method: 'POST',
+          body: JSON.stringify({
+            usuario_id:         id,
+            cargo:              body.cargo || 'Empleado',
+            salario:            Number(body.salario) || 0,
+            fecha_contratacion: body.fecha_contratacion || new Date(),
+          }),
+        });
+        const empleadoData = await empleadoRes.json();
+
+        if (!empleadoRes.ok) {
+          showToast(
+            empleadoData.message || 'Usuario actualizado pero empleado no creado',
+            '#ef6c00'
+          );
+        }
+      }
+
+      // Si dejó de ser empleado → eliminar registro empleado
+      if (usuarioActual?.rol === 'empleado' && body.rol !== 'empleado') {
+        const empleado = empleados.find(
+          emp => String(emp.usuario_id?._id || emp.usuario_id) === String(id)
+        );
+        if (empleado) {
+          await authFetch(`${API}/empleados/${empleado._id}`, { method: 'DELETE' });
+        }
+      }
+
+      await fetchUsuarios();
+      await fetchEmpleados();
+      setModal(null);
+      showToast('Usuario actualizado correctamente');
+    } catch {
+      showToast('Error de conexión', '#c62828');
+    }
+  };
+
+  // Softdelete: pone estado = false, nunca elimina físicamente
+  const handleSoftDeleteUser = async (usuario) => {
+    if (usuario.estado === false) return; // ya inactivo
+    if (!window.confirm(`¿Desactivar al usuario "${usuario.nombre}"? (soft delete)`)) return;
+    try {
+      const res = await authFetch(`${API}/usuarios/${usuario._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ estado: false }),
+      });
+      if (!res.ok) { showToast('Error al desactivar usuario', '#c62828'); return; }
+      await fetchUsuarios();
+      showToast(`Usuario "${usuario.nombre}" desactivado`);
+    } catch {
+      showToast('Error de conexión', '#c62828');
+    }
+  };
+
+  // ── CRUD EMPLEADOS ─────────────────────────────────────────────────────────
+
+  // Al crear empleado desde EmpleadoForm, también actualiza el rol del usuario a 'empleado'
   const handleCreateEmpleado = async (body) => {
     try {
-      const res = await authFetch(`${API}/empleados`, {
+      // 1. Cambiar rol del usuario seleccionado a 'empleado'
+      const rolRes = await authFetch(`${API}/usuarios/${body.usuario_id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ rol: 'empleado' }),
+      });
+      if (!rolRes.ok) {
+        const d = await rolRes.json();
+        showToast(d.message || 'Error al actualizar rol del usuario', '#c62828');
+        return;
+      }
+
+      // 2. Crear registro de empleado
+      const res  = await authFetch(`${API}/empleados`, {
         method: 'POST',
         body: JSON.stringify({
           usuario_id:         body.usuario_id,
@@ -723,7 +770,6 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
           fecha_contratacion: body.fecha_contratacion || null,
         }),
       });
-
       const data = await res.json();
 
       if (!res.ok) {
@@ -731,11 +777,11 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
         return;
       }
 
+      await fetchUsuarios();
       await fetchEmpleados();
       setModal(null);
       showToast('Empleado creado exitosamente');
-    } catch (error) {
-      console.error(error);
+    } catch {
       showToast('Error de conexión', '#c62828');
     }
   };
@@ -763,7 +809,7 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
     if (!window.confirm('¿Desactivar este empleado? (soft delete)')) return;
     try {
       const res = await authFetch(`${API}/empleados/${id}`, { method: 'DELETE' });
-      if (!res.ok) { showToast('Error al eliminar empleado', '#c62828'); return; }
+      if (!res.ok) { showToast('Error al desactivar empleado', '#c62828'); return; }
       await fetchEmpleados();
       showToast('Empleado desactivado');
     } catch {
@@ -771,7 +817,7 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
     }
   };
 
-  // ── HELPERS ───────────────────────────────────────────────────────────────────
+  // ── HELPERS ───────────────────────────────────────────────────────────────
 
   const formatSalario = (n) =>
     n ? `$${Number(n).toLocaleString('es-CO')}` : '—';
@@ -787,14 +833,14 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
     return new Date(iso).toLocaleDateString('es-CO');
   };
 
-  // ── RENDER ────────────────────────────────────────────────────────────────────
+  // ── RENDER ────────────────────────────────────────────────────────────────
 
   return (
     <div className="grey lighten-4" style={{ minHeight: '100vh' }}>
 
       <Toast toast={toast} />
 
-      <AdminNavbar/>
+      <AdminNavbar />
 
       <div className="container" style={{ width: '95%', marginTop: 30 }}>
 
@@ -877,7 +923,7 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
                         </td>
                       </tr>
                     ) : usuarios.map(u => (
-                      <tr key={u._id}>
+                      <tr key={u._id} style={{ opacity: u.estado ? 1 : 0.6 }}>
                         <td><b>{u.nombre}</b></td>
                         <td>{u.email}</td>
                         <td style={{ textTransform: 'capitalize' }}>{u.rol}</td>
@@ -890,6 +936,7 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
                           </span>
                         </td>
                         <td>
+                          {/* Editar */}
                           <a
                             className="btn-small blue"
                             title="Editar usuario"
@@ -898,21 +945,15 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
                           >
                             <i className="material-icons">edit</i>
                           </a>
-                          <a
-                            className={`btn-small ${u.estado ? 'orange' : 'green'}`}
-                            title={u.estado ? 'Desactivar' : 'Activar'}
-                            style={{ cursor: 'pointer', marginRight: 4 }}
-                            onClick={() => handleToggleUser(u)}
-                          >
-                            <i className="material-icons">
-                              {u.estado ? 'toggle_off' : 'toggle_on'}
-                            </i>
-                          </a>
+                          {/* Soft delete (basura) — solo si está activo */}
                           <a
                             className="btn-small red"
-                            title="Eliminar (soft delete)"
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => handleDeleteUser(u._id)}
+                            title={u.estado ? 'Desactivar usuario (soft delete)' : 'Ya inactivo'}
+                            style={{
+                              cursor: u.estado ? 'pointer' : 'not-allowed',
+                              opacity: u.estado ? 1 : 0.45,
+                            }}
+                            onClick={() => u.estado && handleSoftDeleteUser(u)}
                           >
                             <i className="material-icons">delete</i>
                           </a>
@@ -974,8 +1015,11 @@ console.log("USUARIOS LIBRES:", usuariosLibres);
                         <td>{formatSalario(emp.salario)}</td>
                         <td>{formatFecha(emp.fecha_contratacion)}</td>
                         <td>
-                          <span className="new badge green" data-badge-caption="">
-                            Activo
+                          <span
+                            className={`new badge ${emp.estado === false ? 'red' : 'green'}`}
+                            data-badge-caption=""
+                          >
+                            {emp.estado === false ? 'Inactivo' : 'Activo'}
                           </span>
                         </td>
                         <td>

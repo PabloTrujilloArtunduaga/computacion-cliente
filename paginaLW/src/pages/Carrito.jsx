@@ -13,13 +13,17 @@ export default function Carrito() {
 
   const {
     carrito,
-    setCarrito,
     total,
-    setTotal
+    actualizarCantidad,
+    eliminarProducto,
+    vaciarCarrito
   } = useContext(CarritoContext);
 
   const navigate = useNavigate();
 
+  // =========================================
+  // ESTADOS
+  // =========================================
   const [mostrarModal, setMostrarModal] =
     useState(false);
 
@@ -42,62 +46,40 @@ export default function Carrito() {
     useState("");
 
   // =========================================
-  // ACTUALIZAR CANTIDAD
+  // DEBUG GENERAL
   // =========================================
-  const actualizarCantidad = (index, delta) => {
+  console.log("=================================");
+  console.log("🛒 CARRITO ACTUAL:");
+  console.log(carrito);
 
-    const nuevoCarrito = [...carrito];
-
-    nuevoCarrito[index].cantidad += delta;
-
-    if (nuevoCarrito[index].cantidad < 1) {
-      nuevoCarrito[index].cantidad = 1;
-    }
-
-    setCarrito(nuevoCarrito);
-
-    setTotal(
-      nuevoCarrito.reduce(
-        (acc, item) =>
-          acc + item.precio * item.cantidad,
-        0
-      )
-    );
-  };
-
-  // =========================================
-  // ELIMINAR PRODUCTO
-  // =========================================
-  const eliminarProducto = (index) => {
-
-    const nuevoCarrito =
-      carrito.filter((_, i) => i !== index);
-
-    setCarrito(nuevoCarrito);
-
-    setTotal(
-      nuevoCarrito.reduce(
-        (acc, item) =>
-          acc + item.precio * item.cantidad,
-        0
-      )
-    );
-
-    M.toast({
-      html: "🗑️ Producto eliminado",
-      classes: "red darken-1"
-    });
-  };
+  console.log("💰 TOTAL:");
+  console.log(total);
 
   // =========================================
   // ABRIR MODAL
   // =========================================
   const handlePagarClick = () => {
 
+    console.log("=================================");
+    console.log("🟡 CLICK PAGAR");
+
     const token =
       localStorage.getItem("token");
 
+    const user =
+      JSON.parse(
+        localStorage.getItem("user")
+      );
+
+    console.log("TOKEN:");
+    console.log(token);
+
+    console.log("USER:");
+    console.log(user);
+
     if (!token) {
+
+      console.log("❌ NO HAY TOKEN");
 
       M.toast({
         html: "⚠️ Debes iniciar sesión",
@@ -105,6 +87,30 @@ export default function Carrito() {
       });
 
       navigate("/login");
+
+      return;
+    }
+
+    if (!user) {
+
+      console.log("❌ NO HAY USER");
+
+      M.toast({
+        html: "⚠️ Usuario inválido",
+        classes: "orange darken-2"
+      });
+
+      return;
+    }
+
+    if (carrito.length === 0) {
+
+      console.log("❌ CARRITO VACÍO");
+
+      M.toast({
+        html: "⚠️ El carrito está vacío",
+        classes: "orange darken-2"
+      });
 
       return;
     }
@@ -117,7 +123,12 @@ export default function Carrito() {
   // =========================================
   const cerrarModal = () => {
 
-    if (cargando) return;
+    if (cargando) {
+
+      console.log("⚠️ NO SE PUEDE CERRAR");
+
+      return;
+    }
 
     setMostrarModal(false);
   };
@@ -150,7 +161,7 @@ export default function Carrito() {
       return limpio;
     }
 
-    return `${limpio.slice(0,2)}/${limpio.slice(2,4)}`;
+    return `${limpio.slice(0, 2)}/${limpio.slice(2, 4)}`;
   };
 
   // =========================================
@@ -160,27 +171,33 @@ export default function Carrito() {
 
     e.preventDefault();
 
+    console.log("=================================");
+    console.log("💳 INICIANDO PAGO");
+
     setCargando(true);
 
     try {
 
+      // =====================================
+      // TOKEN + USER
+      // =====================================
       const token =
         localStorage.getItem("token");
 
-      const user = JSON.parse(
-        localStorage.getItem("user")
-      );
+      const user =
+        JSON.parse(
+          localStorage.getItem("user")
+        );
 
-      // =====================================
-      // DEBUG USER
-      // =====================================
-      console.log("=================================");
+      console.log("TOKEN:");
+      console.log(token);
+
       console.log("USER:");
       console.log(user);
 
       if (!token || !user || !user._id) {
 
-        console.log("❌ TOKEN O USER INVALIDO");
+        console.log("❌ SESIÓN INVÁLIDA");
 
         M.toast({
           html: "⚠️ Sesión inválida",
@@ -193,56 +210,72 @@ export default function Carrito() {
       }
 
       // =====================================
-      // DEBUG CARRITO
+      // VALIDAR CARRITO
       // =====================================
-      console.log("=================================");
-      console.log("CARRITO:");
-      console.log(carrito);
+      if (!carrito || carrito.length === 0) {
+
+        console.log("❌ CARRITO VACÍO");
+
+        M.toast({
+          html: "⚠️ No hay productos",
+          classes: "orange darken-2"
+        });
+
+        return;
+      }
 
       // =====================================
-      // PAYLOAD
+      // PAYLOAD PRODUCTOS
       // =====================================
       const productosPayload =
-        carrito.map((item) => {
+        carrito.map((item, index) => {
+
+          console.log("=================================");
+          console.log(`📦 PRODUCTO ${index}`);
+
+          console.log(item);
 
           const productoId =
             item._id ||
             item.id ||
             item.producto_id;
 
-          // DEBUG ITEM
-          console.log("ITEM:");
-          console.log(item);
-
-          console.log("PRODUCTO ID:");
+          console.log("🆔 PRODUCTO ID:");
           console.log(productoId);
+
+          if (!productoId) {
+
+            console.log("❌ PRODUCTO SIN ID");
+          }
 
           return {
 
             producto_id: productoId,
 
-            cantidad: item.cantidad,
+            cantidad:
+              Number(item.cantidad),
 
-            precio_unitario: item.precio,
+            precio_unitario:
+              Number(item.precio)
+
           };
         });
 
-      // DEBUG PAYLOAD
-      console.log("=================================");
-      console.log("PAYLOAD:");
-      console.log(productosPayload);
-
+      // =====================================
+      // BODY
+      // =====================================
       const bodyData = {
 
         cliente_id: user._id,
 
         productos: productosPayload,
 
-        metodo_pago: "tarjeta",
+        // ✅ IMPORTANTE
+        metodo_pago: "Tarjeta"
       };
 
       console.log("=================================");
-      console.log("BODY:");
+      console.log("📤 BODY ENVIADO:");
       console.log(bodyData);
 
       // =====================================
@@ -254,33 +287,69 @@ export default function Carrito() {
           method: "POST",
 
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`
           },
 
-          body: JSON.stringify(bodyData),
+          body: JSON.stringify(bodyData)
         }
       );
 
-      // DEBUG STATUS
       console.log("=================================");
-      console.log("STATUS:");
+      console.log("📡 STATUS:");
       console.log(res.status);
 
       const data = await res.json();
 
       console.log("=================================");
-      console.log("RESPUESTA BACKEND:");
+      console.log("📥 RESPUESTA BACKEND:");
       console.log(data);
 
+      // =====================================
+      // ERROR BACKEND
+      // =====================================
       if (!res.ok) {
 
+        console.log("❌ ERROR BACKEND");
+
+        console.log(data);
+
+        let mensaje =
+          data.message ||
+          "Error creando factura";
+
+        if (data.error) {
+
+          console.log("🛑 ERROR DETALLE:");
+          console.log(data.error);
+
+          // ZOD
+          if (Array.isArray(data.error)) {
+
+            mensaje =
+              data.error
+                .map(
+                  (e) =>
+                    `${e.field}: ${e.message}`
+                )
+                .join(" | ");
+          }
+
+          // MONGOOSE
+          else if (
+            typeof data.error === "string"
+          ) {
+
+            mensaje = data.error;
+          }
+        }
+
         M.toast({
-          html:
-            `❌ ${
-              data.message ||
-              "Error creando factura"
-            }`,
+          html: `❌ ${mensaje}`,
           classes: "red darken-1"
         });
 
@@ -290,27 +359,49 @@ export default function Carrito() {
       // =====================================
       // SUCCESS
       // =====================================
+      console.log("=================================");
+      console.log("✅ FACTURA CREADA");
+
+      console.log(data);
+
       M.toast({
         html: "✅ Compra realizada",
         classes: "green darken-2"
       });
 
-      // LIMPIAR
+      // =====================================
+      // LIMPIAR FORM
+      // =====================================
       setNombreTitular("");
+
       setNumeroTarjeta("");
+
       setFecha("");
+
       setCvv("");
 
-      setCarrito([]);
+      // =====================================
+      // LIMPIAR CARRITO
+      // =====================================
+      vaciarCarrito();
 
-      setTotal(0);
+      console.log("🧹 CARRITO LIMPIADO");
 
+      // =====================================
+      // CERRAR MODAL
+      // =====================================
       cerrarModal();
+
+      // =====================================
+      // REDIRIGIR
+      // =====================================
+      navigate("/historial");
 
     } catch (error) {
 
       console.log("=================================");
-      console.log("ERROR:");
+      console.log("💥 ERROR GENERAL:");
+
       console.error(error);
 
       M.toast({
@@ -322,6 +413,9 @@ export default function Carrito() {
     } finally {
 
       setCargando(false);
+
+      console.log("=================================");
+      console.log("🏁 FIN PROCESO PAGO");
     }
   };
 
@@ -335,245 +429,261 @@ export default function Carrito() {
 
       <div className="divider"></div>
 
-      {carrito.length === 0 ? (
+      {
+        carrito.length === 0
+          ? (
 
-        <p className="center vacio">
-          Tu carrito está vacío.
-        </p>
+            <p className="center vacio">
+              Tu carrito está vacío.
+            </p>
 
-      ) : (
+          )
+          : (
 
-        <>
+            <>
 
-          <ul className="carrito-lista">
+              <ul className="carrito-lista">
 
-            {carrito.map((item, index) => (
+                {
+                  carrito.map((item) => (
 
-              <li
-                key={index}
-                className="carrito-item"
+                    <li
+                      key={item._id}
+                      className="carrito-item"
+                    >
+
+                      <img
+                        src={item.imagen}
+                        alt={item.nombre}
+                        className="carrito-img"
+                      />
+
+                      <div className="carrito-info">
+
+                        <h6>
+                          {item.nombre}
+                        </h6>
+
+                        <p className="precio-text">
+
+                          $
+                          {
+                            Number(
+                              item.precio
+                            ).toLocaleString()
+                          }
+
+                        </p>
+
+                        <div className="cantidad-controles">
+
+                          {/* RESTAR */}
+                          <button
+                            className="btn-floating btn-small btn-cantidad"
+                            onClick={() =>
+                              actualizarCantidad(
+                                item._id,
+                                -1
+                              )
+                            }
+                          >
+
+                            <i className="material-icons">
+                              remove
+                            </i>
+
+                          </button>
+
+                          <span className="cantidad">
+
+                            {item.cantidad}
+
+                          </span>
+
+                          {/* SUMAR */}
+                          <button
+                            className="btn-floating btn-small btn-cantidad"
+                            onClick={() =>
+                              actualizarCantidad(
+                                item._id,
+                                1
+                              )
+                            }
+                          >
+
+                            <i className="material-icons">
+                              add
+                            </i>
+
+                          </button>
+
+                        </div>
+
+                      </div>
+
+                      {/* ELIMINAR */}
+                      <button
+                        className="btn-floating red lighten-1 btn-eliminar"
+                        onClick={() =>
+                          eliminarProducto(
+                            item._id
+                          )
+                        }
+                      >
+
+                        <i className="material-icons">
+                          delete
+                        </i>
+
+                      </button>
+
+                    </li>
+
+                  ))
+                }
+
+              </ul>
+
+              <h5 className="total center">
+
+                Total:
+
+                <b>
+                  $
+                  {
+                    Number(total)
+                      .toLocaleString()
+                  }
+                </b>
+
+              </h5>
+
+              <div className="center">
+
+                <button
+                  className="btn-large btn-pagar"
+                  onClick={handlePagarClick}
+                >
+
+                  💳 Pagar con Tarjeta
+
+                </button>
+
+              </div>
+
+            </>
+
+          )
+      }
+
+      {/* =====================================
+          MODAL
+      ===================================== */}
+      {
+        mostrarModal && (
+
+          <div className="custom-modal-overlay">
+
+            <div className="custom-modal">
+
+              <button
+                className="cerrar-modal"
+                onClick={cerrarModal}
               >
+                ✕
+              </button>
 
-                <img
-                  src={item.imagen}
-                  alt={item.nombre}
-                  className="carrito-img"
-                />
+              {/* TARJETA */}
+              <div className="tarjeta-preview">
 
-                <div className="carrito-info">
+                <div className="chip"></div>
 
-                  <h6>{item.nombre}</h6>
+                <div className="numero-preview">
 
-                  <p className="precio-text">
-                    $
-                    {item.precio.toLocaleString()}
-                  </p>
+                  {
+                    numeroTarjeta ||
+                    "•••• •••• •••• ••••"
+                  }
 
-                  <div className="cantidad-controles">
+                </div>
 
-                    <button
-                      className="btn-floating btn-small btn-cantidad"
-                      onClick={() =>
-                        actualizarCantidad(index, -1)
+                <div className="tarjeta-footer">
+
+                  <div>
+
+                    <small>
+                      Titular
+                    </small>
+
+                    <p>
+
+                      {
+                        nombreTitular ||
+                        "NOMBRE"
                       }
-                    >
-                      <i className="material-icons">
-                        remove
-                      </i>
-                    </button>
 
-                    <span className="cantidad">
-                      {item.cantidad}
-                    </span>
+                    </p>
 
-                    <button
-                      className="btn-floating btn-small btn-cantidad"
-                      onClick={() =>
-                        actualizarCantidad(index, 1)
-                      }
-                    >
-                      <i className="material-icons">
-                        add
-                      </i>
-                    </button>
+                  </div>
+
+                  <div>
+
+                    <small>
+                      Expira
+                    </small>
+
+                    <p>
+                      {fecha || "MM/AA"}
+                    </p>
 
                   </div>
 
                 </div>
 
-                <button
-                  className="btn-floating red lighten-1 btn-eliminar"
-                  onClick={() =>
-                    eliminarProducto(index)
-                  }
-                >
-                  <i className="material-icons">
-                    delete
-                  </i>
-                </button>
-
-              </li>
-
-            ))}
-
-          </ul>
-
-          <h5 className="total center">
-
-            Total:
-            <b>
-              ${total.toLocaleString()}
-            </b>
-
-          </h5>
-
-          <div className="center">
-
-            <button
-              className="btn-large btn-pagar"
-              onClick={handlePagarClick}
-            >
-              💳 Pagar con Tarjeta
-            </button>
-
-          </div>
-
-        </>
-
-      )}
-
-      {/* =====================================
-          MODAL
-      ===================================== */}
-      {mostrarModal && (
-
-        <div className="custom-modal-overlay">
-
-          <div className="custom-modal">
-
-            <button
-              className="cerrar-modal"
-              onClick={cerrarModal}
-            >
-              ✕
-            </button>
-
-            {/* TARJETA */}
-            <div className="tarjeta-preview">
-
-              <div className="chip"></div>
-
-              <div className="numero-preview">
-
-                {
-                  numeroTarjeta ||
-                  "•••• •••• •••• ••••"
-                }
-
               </div>
 
-              <div className="tarjeta-footer">
+              <h5 className="modal-title">
+                Información de Pago
+              </h5>
 
-                <div>
+              <form onSubmit={pagarTarjeta}>
 
-                  <small>
-                    Titular
-                  </small>
-
-                  <p>
-                    {
-                      nombreTitular ||
-                      "NOMBRE"
-                    }
-                  </p>
-
-                </div>
-
-                <div>
-
-                  <small>
-                    Expira
-                  </small>
-
-                  <p>
-                    {fecha || "MM/AA"}
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            <h5 className="modal-title">
-              Información de Pago
-            </h5>
-
-            <form onSubmit={pagarTarjeta}>
-
-              {/* NOMBRE */}
-              <div className="input-field-custom">
-
-                <label>
-                  Nombre del titular
-                </label>
-
-                <input
-                  type="text"
-                  autoComplete="cc-name"
-                  value={nombreTitular}
-                  onChange={(e) =>
-                    setNombreTitular(
-                      e.target.value
-                    )
-                  }
-                  required
-                />
-
-              </div>
-
-              {/* TARJETA */}
-              <div className="input-field-custom">
-
-                <label>
-                  Número de tarjeta
-                </label>
-
-                <input
-                  type="text"
-                  autoComplete="cc-number"
-                  maxLength="19"
-                  value={numeroTarjeta}
-                  onChange={(e) =>
-                    setNumeroTarjeta(
-                      formatearTarjeta(
-                        e.target.value
-                      )
-                    )
-                  }
-                  required
-                />
-
-              </div>
-
-              {/* FECHA + CVV */}
-              <div className="row-custom">
-
+                {/* NOMBRE */}
                 <div className="input-field-custom">
 
                   <label>
-                    Fecha
+                    Nombre del titular
                   </label>
 
                   <input
                     type="text"
-                    autoComplete="cc-exp"
-                    placeholder="MM/AA"
-                    maxLength="5"
-                    value={fecha}
+                    autoComplete="cc-name"
+                    value={nombreTitular}
                     onChange={(e) =>
-                      setFecha(
-                        formatearFecha(
+                      setNombreTitular(
+                        e.target.value
+                      )
+                    }
+                    required
+                  />
+
+                </div>
+
+                {/* TARJETA */}
+                <div className="input-field-custom">
+
+                  <label>
+                    Número de tarjeta
+                  </label>
+
+                  <input
+                    type="text"
+                    autoComplete="cc-number"
+                    maxLength="19"
+                    value={numeroTarjeta}
+                    onChange={(e) =>
+                      setNumeroTarjeta(
+                        formatearTarjeta(
                           e.target.value
                         )
                       )
@@ -583,51 +693,81 @@ export default function Carrito() {
 
                 </div>
 
-                <div className="input-field-custom">
+                {/* FECHA + CVV */}
+                <div className="row-custom">
 
-                  <label>
-                    CVV
-                  </label>
+                  <div className="input-field-custom">
 
-                  <input
-                    type="password"
-                    autoComplete="cc-csc"
-                    maxLength="3"
-                    value={cvv}
-                    onChange={(e) =>
-                      setCvv(
-                        e.target.value.replace(
-                          /\D/g,
-                          ""
+                    <label>
+                      Fecha
+                    </label>
+
+                    <input
+                      type="text"
+                      autoComplete="cc-exp"
+                      placeholder="MM/AA"
+                      maxLength="5"
+                      value={fecha}
+                      onChange={(e) =>
+                        setFecha(
+                          formatearFecha(
+                            e.target.value
+                          )
                         )
-                      )
-                    }
-                    required
-                  />
+                      }
+                      required
+                    />
+
+                  </div>
+
+                  <div className="input-field-custom">
+
+                    <label>
+                      CVV
+                    </label>
+
+                    <input
+                      type="password"
+                      autoComplete="cc-csc"
+                      maxLength="3"
+                      value={cvv}
+                      onChange={(e) =>
+                        setCvv(
+                          e.target.value.replace(
+                            /\D/g,
+                            ""
+                          )
+                        )
+                      }
+                      required
+                    />
+
+                  </div>
 
                 </div>
 
-              </div>
+                <button
+                  type="submit"
+                  className="btn-confirmar"
+                  disabled={cargando}
+                >
 
-              <button
-                type="submit"
-                className="btn-confirmar"
-                disabled={cargando}
-              >
-                {
-                  cargando
-                    ? "Procesando Pago..."
-                    : "Confirmar Pago"
-                }
-              </button>
+                  {
+                    cargando
+                      ? "Procesando Pago..."
+                      : "Confirmar Pago"
+                  }
 
-            </form>
+                </button>
+
+              </form>
+
+            </div>
 
           </div>
 
-        </div>
-
-      )}
+        )
+      }
 
     </div>
   );
