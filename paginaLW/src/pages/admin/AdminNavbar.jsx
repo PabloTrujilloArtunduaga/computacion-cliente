@@ -1,136 +1,229 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+// ======================================================
+// ADMIN NAVBAR CORREGIDO
+// ======================================================
+
+import {
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+
+import "../../styles/AdminNavbar.css";
 
 export default function AdminNavbar() {
+
   const navigate = useNavigate();
   const location = useLocation();
 
   let user = null;
 
   try {
+
     const storedUser = localStorage.getItem("user");
-    if (storedUser && storedUser !== "undefined") {
+
+    if (
+      storedUser &&
+      storedUser !== "undefined"
+    ) {
       user = JSON.parse(storedUser);
     }
+
   } catch (error) {
-    console.error("Error parsing user:", error);
+
+    console.error(
+      "Error parsing user:",
+      error
+    );
+
   }
 
+  // ======================================================
+  // LOGOUT
+  // ======================================================
+
   const handleLogout = () => {
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     navigate("/login");
+
   };
 
-  const isActive = (path) => location.pathname === path;
+  // ======================================================
+  // ACTIVE LINK
+  // ======================================================
+
+  const isActive = (path) => {
+
+    return (
+      location.pathname === path ||
+      location.pathname.startsWith(path + "/")
+    );
+
+  };
+
+  // ======================================================
+  // RENDER
+  // ======================================================
 
   return (
-    <header style={headerStyle}>
-      <div style={containerStyle}>
 
-        {/* 🔥 LOGO */}
-        <div onClick={() => navigate("/")} style={logoStyle}>
-          MalaCopa
-        </div>
+    <header className="admin-navbar-wrapper">
 
-        {/* 🔗 MENÚ */}
-        <nav>
-          <ul style={menuStyle}>
+      <nav className="admin-navbar">
 
-            <NavItem to="/admin" label="Dashboard" active={isActive("/admin")} />
-            <NavItem to="/admin/usuarios" label="Usuarios" active={isActive("/admin/usuarios")} />
-            <NavItem to="/admin/productos" label="Productos" active={isActive("/admin/productos")} />
-            <NavItem to="/admin/facturas" label="Facturas" active={isActive("/admin/facturas")} />
+        <div className="admin-nav-container">
 
-            {/* 👤 USER */}
-            <li style={userStyle}>
-              👤 {user?.nombre || "Admin"}
-            </li>
+          {/* =========================================
+              LOGO
+          ========================================= */}
 
-            {/* 🚪 LOGOUT */}
-            <li>
-              <span onClick={handleLogout} style={logoutStyle}>
-                Cerrar sesión
-              </span>
-            </li>
+          <div
+            className="admin-logo"
+            onClick={() => navigate("/")}
+          >
+            <span className="admin-logo-main">
+              MalaCopa
+            </span>
+
+            <span className="admin-logo-badge">
+              ADMIN
+            </span>
+          </div>
+
+          {/* =========================================
+              MENU
+          ========================================= */}
+
+          <ul className="admin-menu">
+
+            <NavItem
+              to="/admin"
+              label="Panel"
+              icon="dashboard"
+              active={
+                location.pathname === "/admin"
+              }
+            />
+
+            <NavItem
+              to="/admin/usuarios"
+              label="Usuarios y empleados"
+              icon="groups"
+              active={isActive("/admin/usuarios")}
+            />
+
+            <NavItem
+              to="/admin/productos"
+              label="Productos y categorias"
+              icon="inventory_2"
+              active={isActive("/admin/productos")}
+            />
+
+            <NavItem
+              to="/admin/facturas"
+              label="Facturas"
+              icon="receipt_long"
+              active={isActive("/admin/facturas")}
+            />
 
           </ul>
-        </nav>
 
-      </div>
+          {/* =========================================
+              USER + LOGOUT
+          ========================================= */}
+
+          <div className="admin-right-section">
+
+            {/* USER */}
+
+            <div className="admin-user-box">
+
+              <div className="admin-avatar">
+
+                {
+                  user?.nombre
+                    ? user.nombre.charAt(0).toUpperCase()
+                    : "A"
+                }
+
+              </div>
+
+              <div className="admin-user-info">
+
+                <span className="admin-user-name">
+
+                  {user?.nombre || "Admin"}
+
+                </span>
+
+              </div>
+
+            </div>
+
+            {/* LOGOUT */}
+
+            <button
+              type="button"
+              className="admin-logout-btn"
+              onClick={handleLogout}
+            >
+
+              <i className="material-icons">
+                logout
+              </i>
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </nav>
+
     </header>
+
   );
+
 }
 
-/* 🔹 COMPONENTE LINK */
-function NavItem({ to, label, active }) {
+// ======================================================
+// NAV ITEM
+// ======================================================
+
+function NavItem({
+  to,
+  label,
+  icon,
+  active,
+}) {
+
   return (
+
     <li>
+
       <Link
         to={to}
-        style={{
-          ...linkStyle,
-          borderBottom: active ? "2px solid #facc15" : "2px solid transparent",
-          color: active ? "#fff" : "#9ca3af",
-        }}
+        className={
+          active
+            ? "admin-link active-link"
+            : "admin-link"
+        }
       >
-        {label}
+
+        <i className="material-icons">
+          {icon}
+        </i>
+
+        <span>
+          {label}
+        </span>
+
       </Link>
+
     </li>
+
   );
+
 }
-
-/* 🎨 ESTILOS */
-
-const headerStyle = {
-  width: "100%",
-  background: "#0d1117",
-  borderBottom: "1px solid #1f2937",
-  position: "sticky",
-  top: 0,
-  zIndex: 1000,
-};
-
-const containerStyle = {
-  width: "100%",
-  padding: "0 40px",
-  height: "70px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-};
-
-const logoStyle = {
-  fontSize: "1.9rem",
-  fontWeight: "bold",
-  color: "#facc15",
-  cursor: "pointer",
-  letterSpacing: "1px",
-};
-
-const menuStyle = {
-  display: "flex",
-  gap: "25px",
-  listStyle: "none",
-  margin: 0,
-  alignItems: "center",
-};
-
-const linkStyle = {
-  textDecoration: "none",
-  fontWeight: "500",
-  paddingBottom: "5px",
-  transition: "all 0.2s ease",
-};
-
-const userStyle = {
-  color: "#9ca3af",
-  fontWeight: "500",
-  borderLeft: "1px solid #374151",
-  paddingLeft: "15px",
-};
-
-const logoutStyle = {
-  cursor: "pointer",
-  color: "#f87171",
-  fontWeight: "600",
-};

@@ -179,47 +179,56 @@ function UsuarioForm({ initial, onSave, onClose }) {
     return e;
   };
 
-  const handleSubmit = async () => {
-    const e = validate();
-    if (Object.keys(e).length) { setErrors(e); return; }
-    setLoading(true);
+const handleSubmit = async () => {
+  const e = validate();
 
+  if (Object.keys(e).length) {
+    setErrors(e);
+    return;
+  }
+
+  setLoading(true);
+
+  try {
     const body = {
-      nombre:  form.nombre.trim(),
-      email:   form.email.trim(),
-      rol:     form.rol,
-      estado:  form.estado,
+      nombre: form.nombre.trim(),
+      email: form.email.trim(),
+      rol: form.rol,
+      estado: form.estado,
     };
-    if (form.password.trim()) body.password = form.password.trim();
+
+    if (form.password.trim()) {
+      body.password = form.password.trim();
+    }
 
     if (form.rol === 'empleado') {
-      body.cargo              = form.cargo.trim();
-      body.salario            = form.salario;
-      body.fecha_contratacion = form.fecha_contratacion || null;
+      body.cargo = form.cargo.trim();
+      body.salario = Number(form.salario);
+      body.fecha_contratacion =
+        form.fecha_contratacion || null;
     }
 
     await onSave(body);
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   return (
     <>
       <Field label="Nombre completo *" error={errors.nombre}>
-        <input
-          style={inputStyle}
-          value={form.nombre}
-          onChange={e => {
-
-            console.log('Usuario seleccionado:', e.target.value);
-
-            setForm({
-              ...form,
-              usuario_id: String(e.target.value),
-            });
-          }}
-          placeholder="Ej: Juan Pérez"
-        />
-      </Field>
+  <input
+    style={inputStyle}
+    value={form.nombre}
+    onChange={e =>
+      setForm({
+        ...form,
+        nombre: e.target.value,
+      })
+    }
+    placeholder="Ej: Juan Pérez"
+  />
+</Field>
 
       <Field label="Email *" error={errors.email}>
         <input
@@ -256,10 +265,9 @@ function UsuarioForm({ initial, onSave, onClose }) {
           value={form.rol}
           onChange={e => setForm({ ...form, rol: e.target.value })}
         >
-          <option value="" disabled>Seleccione un rol</option>
+         <option value="cliente">Cliente</option>
           <option value="admin">Administrador</option>
           <option value="empleado">Empleado</option>
-          <option value="cliente">Cliente</option>
         </select>
       </Field>
 
@@ -363,21 +371,35 @@ function EmpleadoForm({ initial, usuariosLibres, onSave, onClose }) {
     return e;
   };
 
-  const handleSubmit = async () => {
-    const e = validate();
-    if (Object.keys(e).length) { setErrors(e); return; }
-    setLoading(true);
+const handleSubmit = async () => {
+  const e = validate();
 
+  if (Object.keys(e).length) {
+    setErrors(e);
+    return;
+  }
+
+  setLoading(true);
+
+  try {
     const body = {
-      cargo:   form.cargo.trim(),
+      cargo: form.cargo.trim(),
       salario: Number(form.salario),
     };
-    if (!isEdit) body.usuario_id = form.usuario_id;
-    if (form.fecha_contratacion) body.fecha_contratacion = form.fecha_contratacion;
+
+    if (!isEdit) {
+      body.usuario_id = form.usuario_id;
+    }
+
+    if (form.fecha_contratacion) {
+      body.fecha_contratacion = form.fecha_contratacion;
+    }
 
     await onSave(body);
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   // Usuario seleccionado actualmente para mostrar su estado
   const usuarioSeleccionado = usuariosLibres.find(u => u._id === form.usuario_id);
@@ -503,108 +525,84 @@ export default function UsuariosEmpleadosPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const fetchUsuarios = async () => {
-    try {
-      const res  = await authFetch(`${API}/usuarios`);
-      const data = await res.json();
-      const lista = Array.isArray(data)
-        ? data
-        : data.usuarios ?? data.data ?? [];
-      setUsuarios(lista);
-    } catch (err) {
-      showToast('Error de conexión usuarios', '#c62828');
+const fetchUsuarios = async () => {
+  try {
+    const res = await authFetch(`${API}/usuarios`);
+
+    if (!res.ok) {
+      showToast('Error al cargar usuarios', '#c62828');
+      return;
     }
-  };
 
-  const fetchEmpleados = async () => {
-    try {
-      const res  = await authFetch(`${API}/empleados`);
+    const data = await res.json();
+
+    const lista = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.usuarios)
+        ? data.usuarios
+        : Array.isArray(data?.data)
+          ? data.data
+          : [];
+
+    setUsuarios(lista);
+  } catch (err) {
+    console.error(err);
+    showToast('Error de conexión usuarios', '#c62828');
+  }
+};
+
+const fetchEmpleados = async () => {
+  try {
+    const res = await authFetch(`${API}/empleados`);
+
+    if (!res.ok) {
       const data = await res.json();
-      if (!res.ok) {
-        showToast(data.message || 'Error empleados', '#c62828');
-        return;
-      }
-      setEmpleados(Array.isArray(data) ? data : []);
-    } catch {
-      showToast('Error al cargar empleados', '#c62828');
+      showToast(data.message || 'Error empleados', '#c62828');
+      return;
     }
-  };
 
-  useEffect(() => {
-  const loadData = async () => {
-    console.log('========== DEBUG INICIAL ==========');
+    const data = await res.json();
 
-    await fetchUsuarios();
-    await fetchEmpleados();
+    setEmpleados(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error(err);
+    showToast('Error al cargar empleados', '#c62828');
+  }
+};
+useEffect(() => {
+        const loadData = async () => {
+          await Promise.all([
+            fetchUsuarios(),
+            fetchEmpleados(),
+          ]);
+        };
 
-    console.log('Usuarios cargados:', usuarios);
-    console.log('Empleados cargados:', empleados);
+        loadData();
+      }, []);
 
-    console.log(
-      'Usuarios con estado:',
-      usuarios.map(u => ({
-        id: u._id,
-        nombre: u.nombre,
-        estado: u.estado,
-        tipoEstado: typeof u.estado,
-        rol: u.rol,
-      }))
-    );
-
-    console.log(
-      'Empleados usuario_id:',
-      empleados.map(e => ({
-        empleado: e._id,
-        usuario_id: e.usuario_id,
-      }))
-    );
-  };
-
-  loadData();
-}, []);
 
   // IDs de usuarios que ya tienen registro de empleado
-  const empleadoUserIds = useMemo(() => {
-    return new Set(
-      empleados.map(e => String(e.usuario_id?._id || e.usuario_id))
-    );
-  }, [empleados]);
+const empleadoUserIds = useMemo(() => {
+  return new Set(
+    empleados
+      .filter((e) => e?.usuario_id)
+      .map((e) => String(e.usuario_id?._id || e.usuario_id))
+  );
+}, [empleados]);
 
   // Usuarios disponibles para asignar como empleado:
   // cualquier usuario sin empleado asignado (activo o inactivo).
-  const usuariosLibres = useMemo(() => {
-
-  console.log('========== DEBUG USUARIOS LIBRES ==========');
-
-  console.log('Usuarios completos:', usuarios);
-
-  console.log(
-    'IDs empleados:',
-    [...empleadoUserIds]
-  );
-
-  const filtrados = usuarios.filter(u => {
-
-    const userId = String(u._id).trim();
+const usuariosLibres = useMemo(() => {
+  return usuarios.filter((u) => {
+    const userId = String(u._id);
 
     const tieneEmpleado = empleadoUserIds.has(userId);
 
-    console.log({
-      usuario: u.nombre,
-      id: userId,
-      tieneEmpleado,
-      estado: u.estado,
-      rol: u.rol,
-    });
-
     return !tieneEmpleado;
   });
-
-  console.log('Usuarios libres finales:', filtrados);
-
-  return filtrados;
-
 }, [usuarios, empleadoUserIds]);
+
+
 
   const totalUsuarios   = usuarios.length;
   const usuariosActivos = usuarios.filter(u => u.estado === true).length;
@@ -728,21 +726,34 @@ export default function UsuariosEmpleadosPage() {
   };
 
   // Softdelete: pone estado = false, nunca elimina físicamente
-  const handleSoftDeleteUser = async (usuario) => {
-    if (usuario.estado === false) return; // ya inactivo
-    if (!window.confirm(`¿Desactivar al usuario "${usuario.nombre}"? (soft delete)`)) return;
-    try {
-      const res = await authFetch(`${API}/usuarios/${usuario._id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ estado: false }),
-      });
-      if (!res.ok) { showToast('Error al desactivar usuario', '#c62828'); return; }
-      await fetchUsuarios();
-      showToast(`Usuario "${usuario.nombre}" desactivado`);
-    } catch {
-      showToast('Error de conexión', '#c62828');
+const handleSoftDeleteUser = async (usuario) => {
+  if (usuario.estado === false) return;
+
+  const confirmacion = window.confirm(
+    `¿Desactivar al usuario "${usuario.nombre}"?`
+  );
+
+  if (!confirmacion) return;
+
+  try {
+    const res = await authFetch(`${API}/usuarios/${usuario._id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ estado: false }),
+    });
+
+    if (!res.ok) {
+      showToast('Error al desactivar usuario', '#c62828');
+      return;
     }
-  };
+
+    await fetchUsuarios();
+
+    showToast(`Usuario "${usuario.nombre}" desactivado`);
+  } catch (err) {
+    console.error(err);
+    showToast('Error de conexión', '#c62828');
+  }
+};
 
   // ── CRUD EMPLEADOS ─────────────────────────────────────────────────────────
 
@@ -805,17 +816,32 @@ export default function UsuariosEmpleadosPage() {
     }
   };
 
-  const handleDeleteEmpleado = async (id) => {
-    if (!window.confirm('¿Desactivar este empleado? (soft delete)')) return;
-    try {
-      const res = await authFetch(`${API}/empleados/${id}`, { method: 'DELETE' });
-      if (!res.ok) { showToast('Error al desactivar empleado', '#c62828'); return; }
-      await fetchEmpleados();
-      showToast('Empleado desactivado');
-    } catch {
-      showToast('Error de conexión', '#c62828');
+const handleDeleteEmpleado = async (id) => {
+  if (!window.confirm('¿Desactivar este empleado? (soft delete)')) {
+    return;
+  }
+
+  try {
+    const res = await authFetch(`${API}/empleados/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) {
+      showToast('Error al desactivar empleado', '#c62828');
+      return;
     }
-  };
+
+    await Promise.all([
+      fetchEmpleados(),
+      fetchUsuarios(),
+    ]);
+
+    showToast('Empleado desactivado');
+  } catch (err) {
+    console.error(err);
+    showToast('Error de conexión', '#c62828');
+  }
+};
 
   // ── HELPERS ───────────────────────────────────────────────────────────────
 
@@ -828,10 +854,17 @@ export default function UsuariosEmpleadosPage() {
   const getEmailUsuario = (emp) =>
     emp.usuario_id?.email || '—';
 
-  const formatFecha = (iso) => {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('es-CO');
-  };
+const formatFecha = (iso) => {
+  if (!iso) return '—';
+
+  const fecha = new Date(iso);
+
+  if (isNaN(fecha.getTime())) {
+    return '—';
+  }
+
+  return fecha.toLocaleDateString('es-CO');
+};
 
   // ── RENDER ────────────────────────────────────────────────────────────────
 

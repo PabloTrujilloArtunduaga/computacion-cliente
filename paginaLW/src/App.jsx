@@ -12,6 +12,8 @@ import { CarritoProvider } from "./context/CarritoContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
+import EmpleadoNavbar from "./pages/empleados/EmpleadoNavbar";
+
 import Inicio from "./pages/Inicio";
 import Nosotros from "./pages/Nosotros";
 import Contacto from "./pages/Contacto";
@@ -39,7 +41,12 @@ import FacturasPage from "./pages/admin/Fact.jsx";
 import ClienteDashboard from "./pages/cliente/ClienteDashboard";
 
 function Layout() {
+
   const location = useLocation();
+
+  // =========================================
+  // VALIDAR RUTAS
+  // =========================================
 
   const isAdmin =
     location.pathname.startsWith(
@@ -51,13 +58,35 @@ function Layout() {
       "/cliente"
     );
 
+  const isEmpleado =
+    location.pathname.startsWith(
+      "/dashboard-empleado"
+    );
+
   return (
+
     <>
-      {!isAdmin &&
-        !isCliente && <Navbar />}
+
+      {/* ===================================== */}
+      {/* NAVBAR */}
+      {/* ===================================== */}
+
+      {
+        isEmpleado
+          ? <EmpleadoNavbar />
+          : !isAdmin &&
+            !isCliente &&
+            <Navbar />
+      }
+
+      {/* ===================================== */}
+      {/* CONTENT */}
+      {/* ===================================== */}
 
       <main className="main-content">
+
         <Routes>
+
           {/* PUBLICO */}
           <Route
             path="/"
@@ -95,12 +124,12 @@ function Layout() {
             element={<Registro />}
           />
 
-            <Route
-              path="/recuperar-password"
-              element={
-                <RecuperarPassword />
-              }
-            />
+          <Route
+            path="/recuperar-password"
+            element={
+              <RecuperarPassword />
+            }
+          />
 
           {/* EMPLEADO */}
           <Route
@@ -156,21 +185,36 @@ function Layout() {
             path="*"
             element={<NotFound />}
           />
+
         </Routes>
+
       </main>
 
-      {!isAdmin &&
-        !isCliente && <Footer />}
+      {/* ===================================== */}
+      {/* FOOTER */}
+      {/* ===================================== */}
+
+      {
+        !isAdmin &&
+        !isCliente &&
+        !isEmpleado &&
+        <Footer />
+      }
+
     </>
   );
 }
 
 function App() {
+
   return (
+
     <CarritoProvider>
+
       <Router>
         <Layout />
       </Router>
+
     </CarritoProvider>
   );
 }

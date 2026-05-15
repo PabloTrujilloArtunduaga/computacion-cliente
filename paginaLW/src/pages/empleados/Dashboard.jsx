@@ -1,5 +1,7 @@
 // =====================================================
-// DASHBOARD EMPLEADO CORREGIDO
+// EMPLEADO DASHBOARD COMPLETO Y CORREGIDO
+// CRUD FACTURAS + VER FACTURA
+// DISEÑO COMPATIBLE CON Dashboard.css
 // =====================================================
 
 import React, {
@@ -9,9 +11,21 @@ import React, {
 
 import M from "materialize-css";
 
-import "../../styles/EmpleadoDashboard.css";
+import "../../styles/Dashboard.css";
 
 export default function EmpleadoDashboard() {
+
+  // =====================================================
+  // DEBUG
+  // =====================================================
+
+  const DEBUG = true;
+
+  const debug = (titulo, data = null) => {
+    if (!DEBUG) return;
+    console.log(`%c${titulo}`, "color:#d4af37;font-weight:bold;");
+    if (data) console.log(data);
+  };
 
   // =====================================================
   // STATES
@@ -44,14 +58,33 @@ export default function EmpleadoDashboard() {
     setCantidad] =
     useState(1);
 
-  // ✅ ENUM EXACTO DEL BACKEND/ZOD
   const [metodoPago,
     setMetodoPago] =
-    useState("efectivo");
+    useState("Efectivo");
+
+  const [estado,
+    setEstado] =
+    useState("pagada");
 
   const [cargando,
     setCargando] =
     useState(false);
+
+  const [editando,
+    setEditando] =
+    useState(false);
+
+  const [facturaEditandoId,
+    setFacturaEditandoId] =
+    useState(null);
+
+  const [facturaVista,
+    setFacturaVista] =
+    useState(null);
+
+  // =====================================================
+  // STORAGE
+  // =====================================================
 
   const token =
     localStorage.getItem("token");
@@ -67,27 +100,40 @@ export default function EmpleadoDashboard() {
 
   useEffect(() => {
 
-    M.AutoInit();
+    debug("INIT DASHBOARD");
 
-    console.log(
-      "🚀 DASHBOARD INICIADO"
-    );
+    // MODALS SOLAMENTE
+    const elems =
+      document.querySelectorAll(".modal");
 
-    console.log(
-      "👤 USER STORAGE:",
-      user
-    );
+    M.Modal.init(elems, {
+      onOpenStart: () => {
+        // Destruir Select de Materialize al abrir modal
+        // para que React controle los browser-default
+        document
+          .querySelectorAll(
+            "select:not(.browser-default)"
+          )
+          .forEach(el => {
+            const inst =
+              M.FormSelect.getInstance(el);
+            if (inst) inst.destroy();
+          });
+      }
+    });
 
-    console.log(
-      "🔑 TOKEN:",
-      token
-    );
+    // Destruir selects globales al montar
+    document
+      .querySelectorAll(
+        "select:not(.browser-default)"
+      )
+      .forEach(el => {
+        const inst =
+          M.FormSelect.getInstance(el);
+        if (inst) inst.destroy();
+      });
 
     if (!user) {
-
-      console.error(
-        "❌ USER NO EXISTE EN LOCALSTORAGE"
-      );
 
       M.toast({
         html:
@@ -116,6 +162,8 @@ export default function EmpleadoDashboard() {
 
       try {
 
+        debug("CARGANDO FACTURAS...");
+
         const res =
           await fetch(
             "http://localhost:3000/api/facturas",
@@ -130,10 +178,7 @@ export default function EmpleadoDashboard() {
         const data =
           await res.json();
 
-        console.log(
-          "✅ FACTURAS:",
-          data
-        );
+        debug("FACTURAS RESPONSE", data);
 
         if (!Array.isArray(data)) {
 
@@ -152,10 +197,7 @@ export default function EmpleadoDashboard() {
 
       } catch (error) {
 
-        console.error(
-          "❌ ERROR FACTURAS:",
-          error
-        );
+        console.error(error);
 
         M.toast({
           html:
@@ -173,6 +215,8 @@ export default function EmpleadoDashboard() {
 
       try {
 
+        debug("CARGANDO PRODUCTOS...");
+
         const res =
           await fetch(
             "http://localhost:3000/api/products"
@@ -181,10 +225,7 @@ export default function EmpleadoDashboard() {
         const data =
           await res.json();
 
-        console.log(
-          "✅ PRODUCTOS:",
-          data
-        );
+        debug("PRODUCTOS RESPONSE", data);
 
         if (!Array.isArray(data)) {
           return;
@@ -200,10 +241,7 @@ export default function EmpleadoDashboard() {
 
       } catch (error) {
 
-        console.error(
-          "❌ ERROR PRODUCTOS:",
-          error
-        );
+        console.error(error);
 
         M.toast({
           html:
@@ -221,6 +259,8 @@ export default function EmpleadoDashboard() {
 
       try {
 
+        debug("CARGANDO CLIENTES...");
+
         const res =
           await fetch(
             "http://localhost:3000/api/usuarios",
@@ -235,10 +275,7 @@ export default function EmpleadoDashboard() {
         const data =
           await res.json();
 
-        console.log(
-          "✅ CLIENTES:",
-          data
-        );
+        debug("CLIENTES RESPONSE", data);
 
         if (!Array.isArray(data)) {
           return;
@@ -254,10 +291,7 @@ export default function EmpleadoDashboard() {
 
       } catch (error) {
 
-        console.error(
-          "❌ ERROR CLIENTES:",
-          error
-        );
+        console.error(error);
 
         M.toast({
           html:
@@ -267,11 +301,13 @@ export default function EmpleadoDashboard() {
     };
 
   // =====================================================
-  // AGREGAR CARRITO
+  // AGREGAR AL CARRITO
   // =====================================================
 
   const agregarAlCarrito =
     () => {
+
+      debug("AGREGAR PRODUCTO", { productoSeleccionado, cantidad });
 
       if (!productoSeleccionado) {
 
@@ -285,10 +321,12 @@ export default function EmpleadoDashboard() {
 
       const producto =
         productos.find(
-          producto =>
-            producto._id ===
+          p =>
+            p._id ===
             productoSeleccionado
         );
+
+      debug("PRODUCTO ENCONTRADO", producto);
 
       if (!producto) {
 
@@ -303,9 +341,7 @@ export default function EmpleadoDashboard() {
       const cantidadNumero =
         Number(cantidad);
 
-      if (
-        isNaN(cantidadNumero)
-      ) {
+      if (cantidadNumero <= 0) {
 
         M.toast({
           html:
@@ -315,22 +351,7 @@ export default function EmpleadoDashboard() {
         return;
       }
 
-      if (
-        cantidadNumero <= 0
-      ) {
-
-        M.toast({
-          html:
-            "Cantidad inválida"
-        });
-
-        return;
-      }
-
-      if (
-        cantidadNumero >
-        producto.stock
-      ) {
+      if (cantidadNumero > producto.stock) {
 
         M.toast({
           html:
@@ -348,12 +369,10 @@ export default function EmpleadoDashboard() {
 
       if (existe) {
 
-        const nuevoCarrito =
+        const actualizado =
           carrito.map(item => {
 
-            if (
-              item._id === producto._id
-            ) {
+            if (item._id === producto._id) {
 
               const nuevaCantidad =
                 item.cantidad +
@@ -368,54 +387,51 @@ export default function EmpleadoDashboard() {
 
                 subtotal:
                   nuevaCantidad *
-                  Number(producto.precio)
+                  item.precio
               };
             }
 
             return item;
           });
 
-        setCarrito(nuevoCarrito);
+        setCarrito(actualizado);
 
       } else {
 
-        const nuevoItem = {
-
-          _id:
-            producto._id,
-
-          nombre:
-            producto.nombre,
-
-          precio:
-            Number(producto.precio),
-
-          cantidad:
-            cantidadNumero,
-
-          subtotal:
-            cantidadNumero *
-            Number(producto.precio)
-        };
-
         setCarrito([
           ...carrito,
-          nuevoItem
+          {
+            _id:
+              producto._id,
+
+            nombre:
+              producto.nombre,
+
+            precio:
+              Number(producto.precio),
+
+            cantidad:
+              cantidadNumero,
+
+            subtotal:
+              cantidadNumero *
+              Number(producto.precio)
+          }
         ]);
       }
+
+      setProductoSeleccionado("");
+
+      setCantidad(1);
 
       M.toast({
         html:
           "Producto agregado"
       });
-
-      setProductoSeleccionado("");
-
-      setCantidad(1);
     };
 
   // =====================================================
-  // ELIMINAR DEL CARRITO
+  // ELIMINAR CARRITO
   // =====================================================
 
   const eliminarDelCarrito =
@@ -428,11 +444,6 @@ export default function EmpleadoDashboard() {
         );
 
       setCarrito(nuevo);
-
-      M.toast({
-        html:
-          "Producto eliminado"
-      });
     };
 
   // =====================================================
@@ -443,18 +454,45 @@ export default function EmpleadoDashboard() {
     () => {
 
       return carrito.reduce(
-        (
-          acumulador,
-          item
-        ) =>
-          acumulador +
+        (acc, item) =>
+          acc +
           Number(item.subtotal),
         0
       );
     };
 
   // =====================================================
-  // CREAR FACTURA
+  // RESET
+  // =====================================================
+
+  const resetFormulario =
+    () => {
+
+      debug("RESET FORMULARIO");
+
+      setCarrito([]);
+
+      setClienteId("");
+
+      setCantidad(1);
+
+      setMetodoPago(
+        "Efectivo"
+      );
+
+      setEstado(
+        "pagada"
+      );
+
+      setProductoSeleccionado("");
+
+      setEditando(false);
+
+      setFacturaEditandoId(null);
+    };
+
+  // =====================================================
+  // GUARDAR
   // =====================================================
 
   const guardarFactura =
@@ -462,9 +500,7 @@ export default function EmpleadoDashboard() {
 
       try {
 
-        if (
-          carrito.length === 0
-        ) {
+        if (carrito.length === 0) {
 
           M.toast({
             html:
@@ -478,27 +514,13 @@ export default function EmpleadoDashboard() {
 
           M.toast({
             html:
-              "Selecciona un cliente"
-          });
-
-          return;
-        }
-
-        if (!user?._id) {
-
-          M.toast({
-            html:
-              "Empleado inválido"
+              "Selecciona cliente"
           });
 
           return;
         }
 
         setCargando(true);
-
-        // =================================================
-        // PRODUCTOS PAYLOAD
-        // =================================================
 
         const productosPayload =
           carrito.map(item => ({
@@ -519,16 +541,11 @@ export default function EmpleadoDashboard() {
               Number(item.subtotal)
           }));
 
-        // =================================================
-        // PAYLOAD FINAL
-        // =================================================
-
         const payload = {
 
           cliente_id:
             clienteId,
 
-          // ✅ EL BACKEND VALIDA CONTRA USUARIO
           empleado_id:
             user._id,
 
@@ -538,110 +555,85 @@ export default function EmpleadoDashboard() {
           total:
             calcularTotal(),
 
-          // ✅ DEBE SER MINUSCULA
           metodo_pago:
             metodoPago,
 
-          estado:
-            "pagada"
+          estado
         };
 
-        console.log(
-          "📦 PAYLOAD:",
-          payload
-        );
+        debug("PAYLOAD FACTURA", payload);
 
-        const res =
-          await fetch(
-            "http://localhost:3000/api/facturas",
-            {
-              method: "POST",
+        let res;
 
-              headers: {
+        if (editando) {
 
-                "Content-Type":
-                  "application/json",
+          res =
+            await fetch(
+              `http://localhost:3000/api/facturas/${facturaEditandoId}`,
+              {
+                method: "PUT",
 
-                Authorization:
-                  `Bearer ${token}`
-              },
+                headers: {
 
-              body:
-                JSON.stringify(payload)
-            }
-          );
+                  "Content-Type":
+                    "application/json",
 
-        console.log(
-          "📡 STATUS:",
-          res.status
-        );
+                  Authorization:
+                    `Bearer ${token}`
+                },
+
+                body:
+                  JSON.stringify(payload)
+              }
+            );
+
+        } else {
+
+          res =
+            await fetch(
+              "http://localhost:3000/api/facturas",
+              {
+                method: "POST",
+
+                headers: {
+
+                  "Content-Type":
+                    "application/json",
+
+                  Authorization:
+                    `Bearer ${token}`
+                },
+
+                body:
+                  JSON.stringify(payload)
+              }
+            );
+        }
 
         const data =
           await res.json();
 
-        console.log(
-          "✅ RESPUESTA:",
-          data
-        );
+        debug("RESPUESTA FACTURA", data);
 
         if (!res.ok) {
 
-          console.error(
-            "❌ ERROR BACKEND:",
-            data
-          );
-
-          // ZOD ERRORS
-          if (
-            Array.isArray(data.error)
-          ) {
-
-            data.error.forEach(err => {
-
-              console.error(err);
-
-              M.toast({
-                html:
-                  `${err.field || ""} ${err.message || ""}`
-              });
-            });
-
-          } else {
-
-            M.toast({
-              html:
-                data.message ||
-                "Error creando factura"
-            });
-          }
+          M.toast({
+            html:
+              data.message ||
+              "Error guardando factura"
+          });
 
           return;
         }
 
         M.toast({
           html:
-            "Factura creada correctamente"
+            editando
+              ? "Factura actualizada"
+              : "Factura creada"
         });
 
-        // =================================================
-        // RESET
-        // =================================================
-
-        setCarrito([]);
-
-        setClienteId("");
-
-        setCantidad(1);
-
-        setMetodoPago(
-          "efectivo"
-        );
-
-        setProductoSeleccionado("");
-
-        // =================================================
-        // CERRAR MODAL
-        // =================================================
+        resetFormulario();
 
         const modal =
           M.Modal.getInstance(
@@ -650,26 +642,17 @@ export default function EmpleadoDashboard() {
             )
           );
 
-        if (modal) {
-          modal.close();
-        }
-
-        // =================================================
-        // RECARGAR
-        // =================================================
+        modal?.close();
 
         cargarFacturas();
 
       } catch (error) {
 
-        console.error(
-          "❌ ERROR CREAR:",
-          error
-        );
+        console.error(error);
 
         M.toast({
           html:
-            "Error creando factura"
+            "Error guardando factura"
         });
 
       } finally {
@@ -679,7 +662,91 @@ export default function EmpleadoDashboard() {
     };
 
   // =====================================================
-  // DELETE
+  // EDITAR
+  // =====================================================
+
+  const editarFactura =
+    factura => {
+
+      debug("EDITAR FACTURA", factura);
+
+      setEditando(true);
+
+      setFacturaEditandoId(
+        factura._id
+      );
+
+      setClienteId(
+        factura?.cliente_id?._id || ""
+      );
+
+      setMetodoPago(
+        factura.metodo_pago || "Efectivo"
+      );
+
+      setEstado(
+        factura.estado || "pagada"
+      );
+
+      const carritoEditado =
+        factura.productos.map(
+          item => ({
+
+            _id:
+              item.producto_id?._id ||
+              item.producto_id,
+
+            nombre:
+              item.nombre,
+
+            precio:
+              item.precio_unitario,
+
+            cantidad:
+              item.cantidad,
+
+            subtotal:
+              item.subtotal
+          })
+        );
+
+      setCarrito(carritoEditado);
+
+      const modal =
+        M.Modal.getInstance(
+          document.getElementById(
+            "modalFactura"
+          )
+        );
+
+      modal?.open();
+    };
+
+  // =====================================================
+  // VER FACTURA
+  // =====================================================
+
+  const verFactura =
+    factura => {
+
+      setFacturaVista(factura);
+
+      setTimeout(() => {
+
+        const modal =
+          M.Modal.getInstance(
+            document.getElementById(
+              "modalVerFactura"
+            )
+          );
+
+        modal?.open();
+
+      }, 100);
+    };
+
+  // =====================================================
+  // ELIMINAR
   // =====================================================
 
   const eliminarFactura =
@@ -687,12 +754,20 @@ export default function EmpleadoDashboard() {
 
       try {
 
+        const confirmar =
+          window.confirm(
+            "¿Eliminar factura?"
+          );
+
+        if (!confirmar) {
+          return;
+        }
+
         const res =
           await fetch(
             `http://localhost:3000/api/facturas/${id}`,
             {
-              method:
-                "DELETE",
+              method: "DELETE",
 
               headers: {
                 Authorization:
@@ -703,6 +778,8 @@ export default function EmpleadoDashboard() {
 
         const data =
           await res.json();
+
+        debug("DELETE RESPONSE", data);
 
         if (!res.ok) {
 
@@ -720,10 +797,7 @@ export default function EmpleadoDashboard() {
 
       } catch (error) {
 
-        console.error(
-          "❌ ERROR DELETE:",
-          error
-        );
+        console.error(error);
 
         M.toast({
           html:
@@ -733,231 +807,484 @@ export default function EmpleadoDashboard() {
     };
 
   // =====================================================
+  // BADGE
+  // =====================================================
+
+  const obtenerClaseEstado =
+    estado => {
+
+      switch (estado) {
+
+        case "pagada":
+          return "badge-pagada";
+
+        case "pendiente":
+          return "badge-pendiente";
+
+        case "cancelada":
+          return "badge-cancelada";
+
+        default:
+          return "badge-default";
+      }
+    };
+
+  // =====================================================
   // JSX
   // =====================================================
 
   return (
 
-    <div className="dashboard-container">
+    <div className="emp-root">
 
-      {/* HEADER */}
+      {/* SIDEBAR */}
 
-      <div className="header-dashboard">
+      <aside className="emp-sidebar">
 
-        <div>
+        <div className="emp-sidebar__logo">
 
-          <h4>
-            Bienvenido,
-            {" "}
-            {empleado?.nombre}
-          </h4>
-
-          <p>
-            Panel de empleado
-          </p>
-
-        </div>
-
-        <a
-          href="#modalFactura"
-          className="
-            btn
-            amber
-            darken-2
-            modal-trigger
-          "
-        >
-          Nueva Factura
-        </a>
-
-      </div>
-
-      {/* KPIS */}
-
-      <div className="row">
-
-        <div className="col s12 m6">
-
-          <div
-            className="
-              card-panel
-              blue
-              white-text
-            "
-          >
-
-            <h5>
-              Facturas
-            </h5>
-
-            <h3>
-              {facturas.length}
-            </h3>
-
-          </div>
-
-        </div>
-
-        <div className="col s12 m6">
-
-          <div
-            className="
-              card-panel
-              green
-              white-text
-            "
-          >
-
-            <h5>
-              Productos
-            </h5>
-
-            <h3>
-              {productos.length}
-            </h3>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* TABLA */}
-
-      <div className="card">
-
-        <div className="card-content">
-
-          <span className="card-title">
-            Facturas Registradas
+          <span className="material-icons">
+            point_of_sale
           </span>
 
-          <table
-            className="
-              striped
-              responsive-table
-            "
-          >
-
-            <thead>
-
-              <tr>
-
-                <th>ID</th>
-
-                <th>Cliente</th>
-
-                <th>Total</th>
-
-                <th>Estado</th>
-
-                <th>Acciones</th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {
-                facturas.map(
-                  factura => (
-
-                    <tr
-                      key={
-                        factura._id
-                      }
-                    >
-
-                      <td>
-                        {
-                          factura._id.slice(-6)
-                        }
-                      </td>
-
-                      <td>
-                        {
-                          factura
-                          ?.cliente_id
-                          ?.nombre
-                        }
-                      </td>
-
-                      <td>
-                        $
-                        {
-                          factura.total
-                        }
-                      </td>
-
-                      <td>
-                        {
-                          factura.estado
-                        }
-                      </td>
-
-                      <td>
-
-                        <button
-                          className="
-                            btn
-                            red
-                          "
-                          onClick={() =>
-                            eliminarFactura(
-                              factura._id
-                            )
-                          }
-                        >
-
-                          <i
-                            className="
-                              material-icons
-                            "
-                          >
-                            delete
-                          </i>
-
-                        </button>
-
-                      </td>
-
-                    </tr>
-                  )
-                )
-              }
-
-            </tbody>
-
-          </table>
+          EMPLEADO
 
         </div>
 
-      </div>
+        <div className="emp-sidebar__nav">
 
-      {/* MODAL */}
+          <a
+            href="#!"
+            className="
+              emp-sidebar__link
+              active
+            "
+          >
+
+            <span className="material-icons">
+              receipt_long
+            </span>
+
+            Facturas
+
+          </a>
+
+        </div>
+
+        <div className="emp-sidebar__user">
+
+          <div className="emp-avatar">
+
+            {
+              empleado?.nombre?.charAt(0)
+            }
+
+          </div>
+
+          <div className="emp-sidebar__user-info">
+
+            <span className="emp-sidebar__user-name">
+              {empleado?.nombre}
+            </span>
+
+            <span className="emp-sidebar__user-role">
+              Empleado
+            </span>
+
+          </div>
+
+        </div>
+
+      </aside>
+
+      {/* MAIN */}
+
+      <main className="emp-main">
+
+        {/* TOPBAR */}
+
+        <div className="emp-topbar">
+
+          <div>
+
+            <h1 className="emp-page-title">
+              Dashboard de Facturas
+            </h1>
+
+            <p className="emp-page-sub">
+              Gestión completa de ventas
+            </p>
+
+          </div>
+
+          {/* FIX: onClick puro, sin modal-trigger para evitar conflictos */}
+
+          <button
+            type="button"
+            className="
+              emp-btn
+              emp-btn--primary
+            "
+            onClick={() => {
+
+              resetFormulario();
+
+              const modal =
+                M.Modal.getInstance(
+                  document.getElementById(
+                    "modalFactura"
+                  )
+                );
+
+              modal?.open();
+            }}
+          >
+
+            <span className="material-icons">
+              add
+            </span>
+
+            Nueva Factura
+
+          </button>
+
+        </div>
+
+        <br />
+
+        {/* KPIS */}
+
+        <div className="emp-kpis">
+
+          <div className="
+            emp-kpi
+            emp-kpi--blue
+          ">
+
+            <div className="emp-kpi__icon">
+
+              <span className="material-icons">
+                receipt
+              </span>
+
+            </div>
+
+            <div className="emp-kpi__body">
+
+              <span className="emp-kpi__label">
+                Facturas
+              </span>
+
+              <span className="emp-kpi__value">
+                {facturas.length}
+              </span>
+
+            </div>
+
+          </div>
+
+          <div className="
+            emp-kpi
+            emp-kpi--green
+          ">
+
+            <div className="emp-kpi__icon">
+
+              <span className="material-icons">
+                inventory_2
+              </span>
+
+            </div>
+
+            <div className="emp-kpi__body">
+
+              <span className="emp-kpi__label">
+                Productos
+              </span>
+
+              <span className="emp-kpi__value">
+                {productos.length}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <br />
+
+        {/* TABLA */}
+
+        <div className="emp-card">
+
+          <div className="emp-card__header">
+
+            <h3 className="emp-card__title">
+              Facturas Registradas
+            </h3>
+
+          </div>
+
+          <div className="emp-table-wrap">
+
+            <table className="emp-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>ID</th>
+
+                  <th>Cliente</th>
+
+                  <th>Total</th>
+
+                  <th>Método</th>
+
+                  <th>Estado</th>
+
+                  <th>Acciones</th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {
+                  facturas.map(
+                    factura => (
+
+                      <tr
+                        key={
+                          factura._id
+                        }
+                        className="emp-table__row"
+                      >
+
+                        <td>
+
+                          <span className="emp-id">
+
+                            #
+                            {
+                              factura._id.slice(-6)
+                            }
+
+                          </span>
+
+                        </td>
+
+                        <td>
+
+                          <div className="emp-cliente-cell">
+
+                            <div className="
+                              emp-avatar
+                              emp-avatar--sm
+                            ">
+
+                              {
+                                factura
+                                ?.cliente_id
+                                ?.nombre
+                                ?.charAt(0)
+                              }
+
+                            </div>
+
+                            {
+                              factura
+                              ?.cliente_id
+                              ?.nombre
+                            }
+
+                          </div>
+
+                        </td>
+
+                        <td className="emp-total-cell">
+
+                          $
+                          {factura.total}
+
+                        </td>
+
+                        <td>
+
+                          <span className="emp-metodo">
+
+                            {
+                              factura.metodo_pago
+                            }
+
+                          </span>
+
+                        </td>
+
+                        <td>
+
+                          <span className={`
+                            emp-badge
+                            ${obtenerClaseEstado(
+                              factura.estado
+                            )}
+                          `}>
+
+                            {
+                              factura.estado
+                            }
+
+                          </span>
+
+                        </td>
+
+                        <td>
+
+                          <div className="emp-actions">
+
+                            <button
+                              className="
+                                emp-icon-btn
+                                emp-icon-btn--view
+                              "
+                              onClick={() =>
+                                verFactura(
+                                  factura
+                                )
+                              }
+                            >
+
+                              <span className="material-icons">
+                                visibility
+                              </span>
+
+                            </button>
+
+                            <button
+                              className="
+                                emp-icon-btn
+                                emp-icon-btn--edit
+                              "
+                              onClick={() =>
+                                editarFactura(
+                                  factura
+                                )
+                              }
+                            >
+
+                              <span className="material-icons">
+                                edit
+                              </span>
+
+                            </button>
+
+                            <button
+                              className="
+                                emp-icon-btn
+                                emp-icon-btn--delete
+                              "
+                              onClick={() =>
+                                eliminarFactura(
+                                  factura._id
+                                )
+                              }
+                            >
+
+                              <span className="material-icons">
+                                delete
+                              </span>
+
+                            </button>
+
+                          </div>
+
+                        </td>
+
+                      </tr>
+                    )
+                  )
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </main>
+
+      {/* ================================================= */}
+      {/* MODAL CREAR / EDITAR */}
+      {/* ================================================= */}
 
       <div
         id="modalFactura"
         className="
           modal
+          emp-modal
           modal-fixed-footer
         "
       >
 
-        <div className="modal-content">
+        <div className="
+          modal-content
+          emp-modal__content
+        ">
 
-          <h4>
-            Nueva Factura
-          </h4>
+          <div className="emp-modal__header">
+
+            <div className="emp-modal__header-icon">
+
+              <span className="material-icons">
+                receipt_long
+              </span>
+
+            </div>
+
+            <div>
+
+              <h3>
+
+                {
+                  editando
+                    ? "Editar Factura"
+                    : "Nueva Factura"
+                }
+
+              </h3>
+
+              <p>
+                Gestión de productos y pagos
+              </p>
+
+            </div>
+
+          </div>
 
           {/* CLIENTE */}
 
-          <div className="input-field">
+          <div className="emp-form-section">
+
+            <label className="emp-label">
+
+              <span className="material-icons">
+                person
+              </span>
+
+              Cliente
+
+            </label>
+
+            {/* FIX: browser-default para que React controle el select */}
 
             <select
               className="
                 browser-default
+                emp-select
               "
               value={clienteId}
               onChange={e =>
@@ -999,229 +1326,294 @@ export default function EmpleadoDashboard() {
 
           {/* PRODUCTOS */}
 
-          <div className="producto-box">
+          <div className="emp-form-section">
 
-            <select
-              className="
-                browser-default
-              "
-              value={
-                productoSeleccionado
-              }
-              onChange={e =>
-                setProductoSeleccionado(
-                  e.target.value
-                )
-              }
-            >
+            <label className="emp-label">
 
-              <option value="">
-                Selecciona producto
-              </option>
+              <span className="material-icons">
+                inventory_2
+              </span>
 
-              {
-                productos.map(
-                  producto => (
+              Productos
 
-                    <option
-                      key={
-                        producto._id
-                      }
-                      value={
-                        producto._id
-                      }
-                    >
+            </label>
 
-                      {
-                        producto.nombre
-                      }
+            <div className="emp-producto-row">
 
-                      {" | $"}
+              {/* FIX: browser-default para que React controle el select */}
 
-                      {
-                        producto.precio
-                      }
-
-                      {" | Stock: "}
-
-                      {
-                        producto.stock
-                      }
-
-                    </option>
+              <select
+                className="
+                  browser-default
+                  emp-select
+                  emp-select--grow
+                "
+                value={
+                  productoSeleccionado
+                }
+                onChange={e =>
+                  setProductoSeleccionado(
+                    e.target.value
                   )
-                )
-              }
+                }
+              >
 
-            </select>
+                <option value="">
+                  Selecciona producto
+                </option>
 
-            <input
-              type="number"
-              min="1"
-              value={cantidad}
-              onChange={e =>
-                setCantidad(
-                  e.target.value
-                )
-              }
-            />
+                {
+                  productos.map(
+                    producto => (
 
-            <button
-              className="
-                btn
-                green
-              "
-              onClick={
-                agregarAlCarrito
-              }
-            >
-              Agregar
-            </button>
+                      <option
+                        key={
+                          producto._id
+                        }
+                        value={
+                          producto._id
+                        }
+                      >
+
+                        {
+                          producto.nombre
+                        }
+
+                        {" | $"}
+
+                        {
+                          producto.precio
+                        }
+
+                      </option>
+                    )
+                  )
+                }
+
+              </select>
+
+              <input
+                type="number"
+                min="1"
+                className="
+                  emp-input
+                  emp-input--qty
+                "
+                value={cantidad}
+                onChange={e =>
+                  setCantidad(
+                    e.target.value
+                  )
+                }
+              />
+
+              <button
+                type="button"
+                className="
+                  emp-btn
+                  emp-btn--add
+                "
+                onClick={
+                  agregarAlCarrito
+                }
+              >
+
+                <span className="material-icons">
+                  add
+                </span>
+
+              </button>
+
+            </div>
 
           </div>
 
-          {/* CARRITO */}
+          {/* TABLA CARRITO */}
 
-          <table className="striped">
+          <div className="emp-carrito-table-wrap">
 
-            <thead>
+            <table className="emp-carrito-table">
 
-              <tr>
+              <thead>
 
-                <th>
-                  Producto
-                </th>
+                <tr>
 
-                <th>
-                  Cantidad
-                </th>
+                  <th>Producto</th>
 
-                <th>
-                  Precio
-                </th>
+                  <th>Cantidad</th>
 
-                <th>
-                  Subtotal
-                </th>
+                  <th>Precio</th>
 
-                <th>
-                  Acción
-                </th>
+                  <th>Subtotal</th>
 
-              </tr>
+                  <th></th>
 
-            </thead>
+                </tr>
 
-            <tbody>
+              </thead>
 
-              {
-                carrito.map(
-                  item => (
+              <tbody>
 
-                    <tr
-                      key={
-                        item._id
-                      }
-                    >
+                {
+                  carrito.map(
+                    item => (
 
-                      <td>
-                        {
-                          item.nombre
+                      <tr
+                        key={
+                          item._id
                         }
-                      </td>
+                      >
 
-                      <td>
-                        {
-                          item.cantidad
-                        }
-                      </td>
+                        <td>
+                          {item.nombre}
+                        </td>
 
-                      <td>
-                        $
-                        {
-                          item.precio
-                        }
-                      </td>
+                        <td>
+                          {item.cantidad}
+                        </td>
 
-                      <td>
-                        $
-                        {
-                          item.subtotal
-                        }
-                      </td>
+                        <td>
+                          ${item.precio}
+                        </td>
 
-                      <td>
+                        <td>
+                          ${item.subtotal}
+                        </td>
 
-                        <button
-                          className="
-                            btn
-                            red
-                          "
-                          onClick={() =>
-                            eliminarDelCarrito(
-                              item._id
-                            )
-                          }
-                        >
-                          X
-                        </button>
+                        <td>
 
-                      </td>
+                          <button
+                            type="button"
+                            className="
+                              emp-icon-btn
+                              emp-icon-btn--delete
+                            "
+                            onClick={() =>
+                              eliminarDelCarrito(
+                                item._id
+                              )
+                            }
+                          >
 
-                    </tr>
+                            <span className="material-icons">
+                              close
+                            </span>
+
+                          </button>
+
+                        </td>
+
+                      </tr>
+                    )
                   )
-                )
-              }
+                }
 
-            </tbody>
+              </tbody>
 
-          </table>
+            </table>
+
+          </div>
 
           {/* TOTAL */}
 
-          <div className="total-box">
+          <div className="emp-total-banner">
 
             <h5>
+              TOTAL
+            </h5>
 
-              TOTAL:
-              {" "}
-
+            <strong>
               $
               {
                 calcularTotal()
               }
-
-            </h5>
+            </strong>
 
           </div>
 
-          {/* METODO PAGO */}
+          {/* METODO + ESTADO */}
 
-          <div className="input-field">
+          <div className="emp-form-row">
 
-            <select
-              className="
-                browser-default
-              "
-              value={metodoPago}
-              onChange={e =>
-                setMetodoPago(
-                  e.target.value
-                )
-              }
-            >
+            <div className="
+              emp-form-section
+              emp-form-section--half
+            ">
 
-              {/* VALORES EXACTOS DEL BACKEND */}
+              <label className="emp-label">
+                Método de pago
+              </label>
 
-              <option value="Efectivo">
-                Efectivo
-              </option>
+              {/* FIX: browser-default */}
 
-              <option value="Tarjeta">
-                Tarjeta
-              </option>
+              <select
+                className="
+                  browser-default
+                  emp-select
+                "
+                value={metodoPago}
+                onChange={e =>
+                  setMetodoPago(
+                    e.target.value
+                  )
+                }
+              >
 
-            </select>
+                <option value="Efectivo">
+                  Efectivo
+                </option>
+
+                <option value="Tarjeta">
+                  Tarjeta
+                </option>
+
+                <option value="Transferencia">
+                  Transferencia
+                </option>
+
+              </select>
+
+            </div>
+
+            <div className="
+              emp-form-section
+              emp-form-section--half
+            ">
+
+              <label className="emp-label">
+                Estado
+              </label>
+
+              {/* FIX: browser-default */}
+
+              <select
+                className="
+                  browser-default
+                  emp-select
+                "
+                value={estado}
+                onChange={e =>
+                  setEstado(
+                    e.target.value
+                  )
+                }
+              >
+
+                <option value="pagada">
+                  Pagada
+                </option>
+
+                <option value="pendiente">
+                  Pendiente
+                </option>
+
+                <option value="cancelada">
+                  Cancelada
+                </option>
+
+              </select>
+
+            </div>
 
           </div>
 
@@ -1229,22 +1621,27 @@ export default function EmpleadoDashboard() {
 
         {/* FOOTER */}
 
-        <div className="modal-footer">
+        <div className="
+          modal-footer
+          emp-modal__footer
+        ">
 
           <button
+            type="button"
             className="
               modal-close
-              btn
-              grey
+              emp-btn
+              emp-btn--ghost
             "
           >
             Cancelar
           </button>
 
           <button
+            type="button"
             className="
-              btn
-              green
+              emp-btn
+              emp-btn--primary
             "
             onClick={
               guardarFactura
@@ -1255,9 +1652,261 @@ export default function EmpleadoDashboard() {
             {
               cargando
                 ? "Guardando..."
+                : editando
+                ? "Actualizar"
                 : "Crear Factura"
             }
 
+          </button>
+
+        </div>
+
+      </div>
+
+      {/* ================================================= */}
+      {/* MODAL VER FACTURA */}
+      {/* ================================================= */}
+
+      <div
+        id="modalVerFactura"
+        className="
+          modal
+          emp-modal
+          emp-modal--view
+        "
+      >
+
+        <div className="
+          modal-content
+          emp-modal__content
+        ">
+
+          {
+            facturaVista && (
+              <>
+
+                <div className="emp-factura-header">
+
+                  <div>
+
+                    <div className="emp-factura-logo">
+
+                      <span className="material-icons">
+                        receipt_long
+                      </span>
+
+                      FACTURA
+
+                    </div>
+
+                    <p className="emp-factura-sub">
+                      Sistema de ventas
+                    </p>
+
+                  </div>
+
+                  <div className="emp-factura-header__right">
+
+                    <span className="emp-factura-id">
+
+                      #
+                      {
+                        facturaVista
+                        ._id
+                        .slice(-6)
+                      }
+
+                    </span>
+
+                    <span className={`
+                      emp-badge
+                      ${obtenerClaseEstado(
+                        facturaVista.estado
+                      )}
+                    `}>
+
+                      {
+                        facturaVista.estado
+                      }
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+                <div className="emp-factura-grid">
+
+                  <div className="emp-factura-info-block">
+
+                    <span className="emp-factura-info-label">
+                      Cliente
+                    </span>
+
+                    <span className="emp-factura-info-value">
+
+                      {
+                        facturaVista
+                        ?.cliente_id
+                        ?.nombre
+                      }
+
+                    </span>
+
+                  </div>
+
+                  <div className="emp-factura-info-block">
+
+                    <span className="emp-factura-info-label">
+                      Método Pago
+                    </span>
+
+                    <span className="emp-factura-info-value">
+
+                      {
+                        facturaVista
+                        .metodo_pago
+                      }
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+                <div className="emp-factura-section-title">
+
+                  <span className="material-icons">
+                    shopping_cart
+                  </span>
+
+                  Productos
+
+                </div>
+
+                <div className="emp-carrito-table-wrap">
+
+                  <table className="emp-carrito-table">
+
+                    <thead>
+
+                      <tr>
+
+                        <th>#</th>
+
+                        <th>Producto</th>
+
+                        <th>Cantidad</th>
+
+                        <th>Precio</th>
+
+                        <th>Subtotal</th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                      {
+                        facturaVista
+                        .productos
+                        .map(
+                          (item, index) => (
+
+                            <tr
+                              key={index}
+                            >
+
+                              <td>
+                                {
+                                  index + 1
+                                }
+                              </td>
+
+                              <td>
+                                {
+                                  item.nombre
+                                }
+                              </td>
+
+                              <td>
+                                {
+                                  item.cantidad
+                                }
+                              </td>
+
+                              <td>
+                                $
+                                {
+                                  item.precio_unitario
+                                }
+                              </td>
+
+                              <td>
+                                $
+                                {
+                                  item.subtotal
+                                }
+                              </td>
+
+                            </tr>
+                          )
+                        )
+                      }
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+                <div className="
+                  emp-total-banner
+                  emp-total-banner--view
+                ">
+
+                  <div>
+
+                    <span className="emp-total-banner__label">
+                      Total Factura
+                    </span>
+
+                    <span className="emp-total-banner__total">
+
+                      $
+                      {
+                        facturaVista.total
+                      }
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </>
+            )
+          }
+
+        </div>
+
+        {/* FIX: Botón de cierre para el modal Ver Factura */}
+
+        <div className="
+          modal-footer
+          emp-modal__footer
+        ">
+
+          <button
+            type="button"
+            className="
+              modal-close
+              emp-btn
+              emp-btn--ghost
+            "
+          >
+            Cerrar
           </button>
 
         </div>

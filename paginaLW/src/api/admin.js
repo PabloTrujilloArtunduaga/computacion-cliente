@@ -29,6 +29,8 @@ api.interceptors.request.use(
     const token =
       localStorage.getItem("token");
 
+    console.log("🔑 TOKEN ENVIADO:", token);
+
     if (token) {
 
       config.headers.Authorization =
@@ -58,6 +60,16 @@ const handleError = (
     error.message
   );
 
+  console.error(
+    "📌 STATUS:",
+    error?.response?.status
+  );
+
+  console.error(
+    "📌 URL:",
+    error?.config?.url
+  );
+
   throw (
     error?.response?.data ||
     error
@@ -74,10 +86,19 @@ export const getUsuarios =
 
     try {
 
+      console.log(
+        "📡 GET /api/usuarios"
+      );
+
       const res =
         await api.get(
           "/api/usuarios"
         );
+
+      console.log(
+        "✅ USUARIOS:",
+        res.data
+      );
 
       return res.data;
 
@@ -101,10 +122,19 @@ export const getProductos =
 
     try {
 
+      console.log(
+        "📡 GET /api/products"
+      );
+
       const res =
         await api.get(
-          "/api/productos"
+          "/api/products"
         );
+
+      console.log(
+        "✅ PRODUCTOS:",
+        res.data
+      );
 
       return res.data;
 
@@ -128,10 +158,19 @@ export const getCategorias =
 
     try {
 
+      console.log(
+        "📡 GET /api/categories"
+      );
+
       const res =
         await api.get(
-          "/api/categorias"
+          "/api/categories"
         );
+
+      console.log(
+        "✅ CATEGORIAS:",
+        res.data
+      );
 
       return res.data;
 
@@ -155,10 +194,19 @@ export const getEmpleados =
 
     try {
 
+      console.log(
+        "📡 GET /api/empleados"
+      );
+
       const res =
         await api.get(
           "/api/empleados"
         );
+
+      console.log(
+        "✅ EMPLEADOS:",
+        res.data
+      );
 
       return res.data;
 
@@ -182,10 +230,19 @@ export const getFacturas =
 
     try {
 
+      console.log(
+        "📡 GET /api/facturas"
+      );
+
       const res =
         await api.get(
           "/api/facturas"
         );
+
+      console.log(
+        "✅ FACTURAS:",
+        res.data
+      );
 
       return res.data;
 
@@ -209,10 +266,19 @@ export const getVentasPorMes =
 
     try {
 
+      console.log(
+        "📡 GET /api/facturas/ventas-mes"
+      );
+
       const res =
         await api.get(
           "/api/facturas/ventas-mes"
         );
+
+      console.log(
+        "✅ VENTAS POR MES:",
+        res.data
+      );
 
       return res.data;
 
@@ -226,7 +292,6 @@ export const getVentasPorMes =
     }
 
   };
-
 
 // ============================================
 // EXPORT DEFAULT

@@ -1,15 +1,25 @@
 /* =========================================
-   REGISTRO PAGE ONLY
-   src/styles/Registro.css
+   LOGIN PAGE ONLY
+   src/styles/Login.css
+   ESTILO AISLADO SOLO PARA LOGIN
 ========================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+/* =========================================
+   ROOT LOGIN
+========================================= */
+
+.login-container,
+.login-container * {
+  box-sizing: border-box;
+}
 
 /* =========================================
    CONTAINER
 ========================================= */
 
-.registro-container {
+.login-container {
   position: relative;
 
   min-height: 100vh;
@@ -22,7 +32,7 @@
 
   padding: 30px 16px;
 
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 
   background:
     linear-gradient(
@@ -31,9 +41,15 @@
       #0f172a 40%,
       #1e293b 100%
     );
+
+  isolation: isolate;
 }
 
-.registro-container::before {
+/* =========================================
+   OVERLAY
+========================================= */
+
+.login-container::before {
   content: "";
 
   position: absolute;
@@ -52,25 +68,29 @@
     );
 
   pointer-events: none;
+
+  z-index: 0;
 }
 
 /* =========================================
    FLOATING CIRCLES
 ========================================= */
 
-.registro-circle {
+.login-circle {
   position: absolute;
 
   border-radius: 50%;
 
   opacity: 0.2;
 
-  filter: blur(6px);
+  filter: blur(10px);
 
   z-index: 1;
+
+  pointer-events: none;
 }
 
-.registro-circle-1 {
+.login-circle-1 {
   width: 240px;
   height: 240px;
 
@@ -85,7 +105,7 @@
   left: -60px;
 }
 
-.registro-circle-2 {
+.login-circle-2 {
   width: 170px;
   height: 170px;
 
@@ -100,7 +120,7 @@
   right: -40px;
 }
 
-.registro-circle-3 {
+.login-circle-3 {
   width: 110px;
   height: 110px;
 
@@ -119,17 +139,17 @@
    CARD
 ========================================= */
 
-.registro-card {
+.login-card {
   position: relative;
+
   z-index: 5;
 
   width: 100%;
-  max-width: 410px;
+  max-width: 450px;
 
   padding:
-    34px
-    28px
-    28px !important;
+    40px
+    30px !important;
 
   border-radius: 22px !important;
 
@@ -143,13 +163,79 @@
 
   box-shadow:
     0 20px 55px rgba(0,0,0,0.35) !important;
+
+  overflow: hidden;
+}
+
+/* =========================================
+   CARD EFFECT
+========================================= */
+
+.login-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: -100px;
+  right: -100px;
+
+  width: 220px;
+  height: 220px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(245,158,11,0.12),
+      transparent 70%
+    );
+
+  z-index: -1;
+}
+
+/* =========================================
+   LOGO
+========================================= */
+
+.login-logo-wrapper {
+  margin-bottom: 10px;
+}
+
+.login-logo {
+  width: 78px;
+  height: 78px;
+
+  margin:
+    0 auto
+    18px auto;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b,
+      #fbbf24
+    );
+
+  box-shadow:
+    0 10px 25px rgba(245,158,11,0.28);
+}
+
+.login-logo i {
+  font-size: 38px !important;
+
+  color: white !important;
 }
 
 /* =========================================
    TITLE
 ========================================= */
 
-.registro-title {
+.login-title {
   margin: 0 0 10px 0;
 
   font-size: 2rem;
@@ -158,16 +244,19 @@
   color: #111827;
 }
 
-.registro-subtitle {
+.login-subtitle {
   margin-bottom: 28px;
 
   color: #6b7280;
 
   line-height: 1.6;
+
+  font-size: 0.96rem;
 }
 
-.registro-subtitle strong {
+.login-subtitle strong {
   color: #f59e0b;
+
   font-weight: 700;
 }
 
@@ -175,22 +264,28 @@
    INPUTS
 ========================================= */
 
-.registro-card .input-field {
-  margin-bottom: 18px;
+.login-card .input-field {
+  position: relative;
+
+  margin-bottom: 24px;
 }
 
-.registro-card .input-field input {
+.login-card .input-field input {
+  width: 100%;
+
   border-bottom:
     1px solid #d1d5db !important;
 
-  color: #111827;
+  color: #111827 !important;
+
+  font-size: 0.98rem !important;
+
+  background: transparent !important;
+
+  box-shadow: none !important;
 }
 
-.registro-card .input-field label {
-  color: #6b7280 !important;
-}
-
-.registro-card .input-field input:focus {
+.login-card .input-field input:focus {
   border-bottom:
     1px solid #f59e0b !important;
 
@@ -198,84 +293,199 @@
     0 1px 0 0 #f59e0b !important;
 }
 
-.registro-card
-.input-field
-input:focus + label {
+.login-card .input-field label {
+  color: #6b7280 !important;
+}
+
+.login-card .input-field input:focus + label {
   color: #f59e0b !important;
 }
 
-.registro-card .prefix {
-  color: #9ca3af;
+.login-card .prefix {
+  color: #9ca3af !important;
+
   transition: 0.3s ease;
 }
 
-.registro-card
-.input-field
-input:focus
-~ .prefix {
-  color: #f59e0b;
+.login-card .input-field input:focus ~ .prefix {
+  color: #f59e0b !important;
+}
+
+/* =========================================
+   PASSWORD BUTTON
+========================================= */
+
+.password-toggle-btn {
+  position: absolute !important;
+
+  top: 8px;
+  right: -8px;
+
+  width: 40px;
+  height: 40px;
+
+  min-width: auto !important;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 !important;
+
+  border: none !important;
+
+  background: transparent !important;
+
+  box-shadow: none !important;
+
+  cursor: pointer;
+}
+
+.password-toggle-btn i {
+  font-size: 22px !important;
+
+  color: #9ca3af !important;
+
+  transition: 0.3s ease;
+}
+
+.password-toggle-btn:hover i {
+  color: #f59e0b !important;
 }
 
 /* =========================================
    BUTTON
 ========================================= */
 
-.registro-btn-wrapper {
-  margin-top: 28px;
+.login-btn-wrapper {
+  margin-top: 30px;
 }
 
-.registro-btn {
+.login-btn {
   width: 100%;
 
-  height: 48px;
-  line-height: 48px;
+  height: 50px !important;
+  line-height: 50px !important;
 
-  border-radius: 12px !important;
+  border: none !important;
 
-  font-weight: 700;
+  border-radius: 14px !important;
 
-  text-transform: none;
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b,
+      #fbbf24
+    ) !important;
 
-  letter-spacing: 0.5px;
+  color: #111827 !important;
+
+  font-weight: 700 !important;
+
+  text-transform: none !important;
+
+  letter-spacing: 0.4px;
 
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease !important;
+
+  box-shadow:
+    0 10px 22px rgba(245,158,11,0.25) !important;
 }
 
-.registro-btn:hover {
-  transform: translateY(-2px);
+.login-btn:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 16px 30px rgba(245,158,11,0.32) !important;
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+
+  cursor: not-allowed;
+}
+
+.login-btn i {
+  color: #111827 !important;
 }
 
 /* =========================================
    LINKS
 ========================================= */
 
-.registro-links {
-  margin-top: 24px;
+.login-links {
+  margin-top: 28px;
 }
 
-.registro-links p {
-  margin: 0;
+.login-links p {
+  margin: 8px 0;
+
   font-size: 0.94rem;
 }
 
-.registro-link-bold {
+.forgot-link,
+.bold-link {
+  text-decoration: none;
+
+  transition:
+    opacity 0.3s ease,
+    color 0.3s ease;
+}
+
+.forgot-link {
+  color: #d97706 !important;
+
+  font-weight: 500;
+}
+
+.bold-link {
+  color: #b45309 !important;
+
   font-weight: 700;
+}
+
+.forgot-link:hover,
+.bold-link:hover {
+  opacity: 0.8;
+}
+
+/* =========================================
+   MATERIALIZE FIXES
+   SOLO LOGIN
+========================================= */
+
+.login-container .btn,
+.login-container .btn-large,
+.login-container .btn-flat {
+  text-transform: none !important;
+}
+
+.login-container .material-icons {
+  user-select: none;
+}
+
+.login-container .waves-effect .waves-ripple {
+  background-color:
+    rgba(255,255,255,0.2) !important;
 }
 
 /* =========================================
    AUTOFILL FIX
 ========================================= */
 
-.registro-card input:-webkit-autofill,
-.registro-card input:-webkit-autofill:hover,
-.registro-card input:-webkit-autofill:focus {
+.login-card input:-webkit-autofill,
+.login-card input:-webkit-autofill:hover,
+.login-card input:-webkit-autofill:focus {
   -webkit-box-shadow:
-    0 0 0px 1000px white inset !important;
+    0 0 0 1000px white inset !important;
 
   -webkit-text-fill-color:
     #111827 !important;
+
+  transition:
+    background-color 9999s ease-in-out 0s;
 }
 
 /* =========================================
@@ -284,41 +494,50 @@ input:focus
 
 @media (max-width: 600px) {
 
-  .registro-container {
+  .login-container {
     padding: 20px 14px;
   }
 
-  .registro-card {
+  .login-card {
     max-width: 345px;
 
     padding:
-      28px
-      22px
-      24px !important;
+      30px
+      22px !important;
 
     border-radius: 18px !important;
   }
 
-  .registro-title {
+  .login-title {
     font-size: 1.7rem;
   }
 
-  .registro-subtitle {
+  .login-subtitle {
     font-size: 0.92rem;
   }
 
-  .registro-circle-1 {
+  .login-logo {
+    width: 66px;
+    height: 66px;
+  }
+
+  .login-logo i {
+    font-size: 32px !important;
+  }
+
+  .login-circle-1 {
     width: 180px;
     height: 180px;
   }
 
-  .registro-circle-2 {
+  .login-circle-2 {
     width: 120px;
     height: 120px;
   }
 
-  .registro-circle-3 {
+  .login-circle-3 {
     width: 80px;
     height: 80px;
   }
 }
+

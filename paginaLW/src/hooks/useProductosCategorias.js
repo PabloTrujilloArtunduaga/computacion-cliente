@@ -1,298 +1,970 @@
-import { useState, useEffect, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+
 import { API } from "../constants/api";
 import { fetchConToken } from "../utils/api";
 
 export function useProductosCategorias() {
-  const [productos, setProductos] = useState([]);
-  const [categorias, setCategorias] = useState([]);
-  const [toast, setToast] = useState(null);
 
-  // ───────── TOAST ─────────
-  const showToast = useCallback((msg, color = "#388e3c") => {
-    setToast({ msg, color });
-    setTimeout(() => setToast(null), 3000);
-  }, []);
+  /*
+  ==========================================
+  STATES
+  ==========================================
+  */
 
-  // ───────── NORMALIZAR PRODUCTO ─────────
-  const normalizeProducto = (p) => ({
-    ...p,
-    categoria_id: p.categoria_id?._id || p.categoria_id || null,
-    categoria_nombre: p.categoria_id?.nombre || "—",
-  });
+  const [productos, setProductos] =
+    useState([]);
 
-  // ───────── FETCH PRODUCTOS ─────────
-  const fetchProductos = useCallback(async () => {
-    try {
-      const res = await fetchConToken(`${API}/products`);
-      const data = await res.json();
+  const [categorias, setCategorias] =
+    useState([]);
 
-      if (!res.ok) {
-        throw new Error(data.message || "Error productos");
+  const [toast, setToast] =
+    useState(null);
+
+  /*
+  ==========================================
+  TOAST
+  ==========================================
+  */
+
+  const showToast = useCallback(
+    (
+      msg,
+      color = "#388e3c"
+    ) => {
+
+      setToast({
+        msg,
+        color,
+      });
+
+      setTimeout(() => {
+        setToast(null);
+      }, 3000);
+
+    },
+    []
+  );
+
+  /*
+  ==========================================
+  NORMALIZAR PRODUCTO
+  ==========================================
+  */
+
+  const normalizeProducto =
+    (producto) => ({
+
+      ...producto,
+
+      categoria_id:
+        producto?.categoria_id?._id ||
+        producto?.categoria_id ||
+        "",
+
+      categoria_nombre:
+        producto?.categoria_id?.nombre ||
+        producto?.categoria_nombre ||
+        "—",
+
+      /*
+      ======================================
+      BOOLEAN REAL
+      ======================================
+      */
+
+      estado:
+        producto?.estado === true,
+
+      deleted:
+        producto?.deleted === true,
+
+    });
+
+  /*
+  ==========================================
+  FETCH PRODUCTOS
+  ==========================================
+  */
+
+  const fetchProductos =
+    useCallback(async () => {
+
+      try {
+
+        const res =
+          await fetchConToken(
+            `${API}/products`
+          );
+
+        const data =
+          await res.json();
+
+        if (!res.ok) {
+
+          throw new Error(
+            data?.message ||
+            "Error cargando productos"
+          );
+        }
+
+        let productosArray = [];
+
+        if (
+          Array.isArray(data)
+        ) {
+
+          productosArray = data;
+
+        } else if (
+          Array.isArray(
+            data?.products
+          )
+        ) {
+
+          productosArray =
+            data.products;
+        }
+
+        const normalized =
+          productosArray.map(
+            normalizeProducto
+          );
+
+        setProductos(
+          normalized
+        );
+
+      } catch (error) {
+
+        console.error(
+          "ERROR PRODUCTOS:",
+          error
+        );
+
+        showToast(
+          "Error al cargar productos",
+          "#c62828"
+        );
       }
 
-      const normalized = Array.isArray(data)
-        ? data.map(normalizeProducto)
-        : [];
+    }, [showToast]);
 
-      setProductos(normalized);
-    } catch (err) {
-      console.error(err);
-      showToast("Error al cargar productos", "#c62828");
-    }
-  }, [showToast]);
+  /*
+  ==========================================
+  FETCH CATEGORÍAS
+  ==========================================
+  */
 
-  // ───────── FETCH CATEGORÍAS ─────────
-  const fetchCategorias = useCallback(async () => {
-    try {
-      const res = await fetchConToken(`${API}/categories`);
-      const data = await res.json();
+  const fetchCategorias =
+    useCallback(async () => {
 
-      if (!res.ok) {
-        throw new Error(data.message || "Error categorías");
+      try {
+
+        const res =
+          await fetchConToken(
+            `${API}/categories`
+          );
+
+        const data =
+          await res.json();
+
+        if (!res.ok) {
+
+          throw new Error(
+            data?.message ||
+            "Error cargando categorías"
+          );
+        }
+
+        let categoriasArray = [];
+
+        if (
+          Array.isArray(data)
+        ) {
+
+          categoriasArray = data;
+
+        } else if (
+          Array.isArray(
+            data?.categories
+          )
+        ) {
+
+          categoriasArray =
+            data.categories;
+        }
+
+        setCategorias(
+          categoriasArray
+        );
+
+      } catch (error) {
+
+        console.error(
+          "ERROR CATEGORÍAS:",
+          error
+        );
+
+        showToast(
+          "Error al cargar categorías",
+          "#c62828"
+        );
       }
 
-      setCategorias(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
-      showToast("Error al cargar categorías", "#c62828");
-    }
-  }, [showToast]);
+    }, [showToast]);
 
-  // ───────── INIT ─────────
+  /*
+  ==========================================
+  INIT
+  ==========================================
+  */
+
   useEffect(() => {
+
     fetchProductos();
     fetchCategorias();
-  }, [fetchProductos, fetchCategorias]);
 
-  // ───────── VALIDACIÓN ─────────
-  const validateCategoria = (id) =>
-    categorias.some((c) => String(c._id) === String(id));
+  }, [
+    fetchProductos,
+    fetchCategorias,
+  ]);
 
-  // ───────── CREATE PRODUCT ─────────
-  const handleCreateProduct = useCallback(
-    async (body) => {
-      try {
-        if (!validateCategoria(body.categoria_id)) {
-          showToast("Categoría inválida", "#c62828");
-          return false;
-        }
+  /*
+  ==========================================
+  VALIDAR CATEGORÍA
+  ==========================================
+  */
 
-        const res = await fetchConToken(`${API}/products`, {
-          method: "POST",
-          body: JSON.stringify({
-            ...body,
-            categoria_id: String(body.categoria_id),
-          }),
-        });
+  const validateCategoria =
+    (id) => {
 
-        const data = await res.json();
+      return categorias.some(
+        (categoria) =>
+          String(
+            categoria._id
+          ) === String(id)
+      );
+    };
 
-        if (!res.ok) {
-          showToast(data.message || "Error al crear", "#c62828");
-          return false;
-        }
+  /*
+  ==========================================
+  BUILD PRODUCT BODY
+  ==========================================
+  */
 
-        await fetchProductos();
-        showToast("Producto creado");
-        return true;
-      } catch (err) {
-        console.error(err);
-        showToast("Error de conexión", "#c62828");
-        return false;
-      }
-    },
-    [fetchProductos, showToast, categorias]
-  );
+  const buildProductBody =
+    (body) => ({
 
-  // ───────── UPDATE PRODUCT ─────────
-  const handleUpdateProduct = useCallback(
-    async (id, body) => {
-      try {
-        if (!validateCategoria(body.categoria_id)) {
-          showToast("Categoría inválida", "#c62828");
-          return false;
-        }
+      nombre:
+        body?.nombre?.trim() || "",
 
-        const res = await fetchConToken(`${API}/products/${id}`, {
-          method: "PUT",
-          body: JSON.stringify({
-            ...body,
-            categoria_id: String(body.categoria_id),
-          }),
-        });
+      descripcion:
+        body?.descripcion?.trim() || "",
 
-        const data = await res.json();
+      precio:
+        Number(
+          body?.precio || 0
+        ),
 
-        if (!res.ok) {
-          showToast(data.message || "Error al actualizar", "#c62828");
-          return false;
-        }
+      stock:
+        Number(
+          body?.stock || 0
+        ),
 
-        await fetchProductos();
-        showToast("Producto actualizado");
-        return true;
-      } catch (err) {
-        console.error(err);
-        showToast("Error de conexión", "#c62828");
-        return false;
-      }
-    },
-    [fetchProductos, showToast, categorias]
-  );
+      categoria_id:
+        String(
+          body?.categoria_id || ""
+        ),
 
-  // ───────── DELETE PRODUCT ─────────
-  const handleDeleteProduct = useCallback(
-    async (id) => {
-      if (!window.confirm("¿Eliminar producto?")) return;
+      codigo_barras:
+        body?.codigo_barras?.trim() || "",
 
-      try {
-        const res = await fetchConToken(`${API}/products/${id}`, {
-          method: "DELETE",
-        });
+      /*
+      ======================================
+      IMAGEN
+      ======================================
+      */
 
-        const data = await res.json();
+      imagen:
+        body?.imagen?.trim()
+          ? body.imagen.trim()
+          : undefined,
 
-        if (!res.ok) {
-          showToast(data.message || "Error al eliminar", "#c62828");
-          return;
-        }
+      /*
+      ======================================
+      ESTADO
+      ======================================
+      */
 
-        await fetchProductos();
-        showToast("Producto eliminado");
-      } catch (err) {
-        console.error(err);
-        showToast("Error de conexión", "#c62828");
-      }
-    },
-    [fetchProductos, showToast]
-  );
+      estado:
+        body?.estado === true,
 
-  // ───────── TOGGLE PRODUCT ─────────
-  const handleToggleProduct = useCallback(
-    async (producto) => {
-      try {
-        const res = await fetchConToken(
-          `${API}/products/${producto._id}`,
-          {
-            method: "PUT",
-            body: JSON.stringify({
-              ...producto,
-              categoria_id: String(producto.categoria_id),
-              estado: !producto.estado,
-            }),
+      /*
+      ======================================
+      DELETE
+      ======================================
+      */
+
+      deleted:
+        body?.deleted === true,
+
+    });
+
+  /*
+  ==========================================
+  CREATE PRODUCT
+  ==========================================
+  */
+
+  const handleCreateProduct =
+    useCallback(
+      async (body) => {
+
+        try {
+
+          if (
+            !validateCategoria(
+              body.categoria_id
+            )
+          ) {
+
+            showToast(
+              "Categoría inválida",
+              "#c62828"
+            );
+
+            return false;
           }
-        );
 
-        if (!res.ok) {
-          showToast("Error al cambiar estado", "#c62828");
-          return;
-        }
+          const payload =
+            buildProductBody({
+              ...body,
+              deleted: false,
+            });
 
-        await fetchProductos();
-        showToast("Estado actualizado");
-      } catch (err) {
-        console.error(err);
-        showToast("Error de conexión", "#c62828");
-      }
-    },
-    [fetchProductos, showToast]
-  );
+          const res =
+            await fetchConToken(
+              `${API}/products`,
+              {
+                method: "POST",
 
-  // ───────── CATEGORY ─────────
-  const handleCreateCat = useCallback(
-    async (body) => {
-      try {
-        const res = await fetchConToken(`${API}/categories`, {
-          method: "POST",
-          body: JSON.stringify(body),
-        });
+                body: JSON.stringify(
+                  payload
+                ),
+              }
+            );
 
-        const data = await res.json();
+          const data =
+            await res.json();
 
-        if (!res.ok) {
-          showToast(data.message || "Error categoría", "#c62828");
-          return false;
-        }
+          if (!res.ok) {
 
-        await fetchCategorias();
-        showToast("Categoría creada");
-        return true;
-      } catch (err) {
-        console.error(err);
-        showToast("Error de conexión", "#c62828");
-        return false;
-      }
-    },
-    [fetchCategorias, showToast]
-  );
+            console.log(
+              "ERROR CREATE:",
+              data
+            );
 
-  const handleUpdateCat = useCallback(
-    async (id, body) => {
-      try {
-        const res = await fetchConToken(
-          `${API}/categories/${id}`,
-          {
-            method: "PUT",
-            body: JSON.stringify(body),
+            showToast(
+              data?.message ||
+              "Error al crear producto",
+              "#c62828"
+            );
+
+            return false;
           }
-        );
 
-        const data = await res.json();
+          await fetchProductos();
 
-        if (!res.ok) {
-          showToast(data.message || "Error categoría", "#c62828");
+          showToast(
+            "Producto creado"
+          );
+
+          return true;
+
+        } catch (error) {
+
+          console.error(
+            "ERROR CREATE:",
+            error
+          );
+
+          showToast(
+            "Error de conexión",
+            "#c62828"
+          );
+
           return false;
         }
 
-        await fetchCategorias();
-        showToast("Categoría actualizada");
-        return true;
-      } catch (err) {
-        console.error(err);
-        showToast("Error de conexión", "#c62828");
-        return false;
-      }
-    },
-    [fetchCategorias, showToast]
-  );
+      },
+      [
+        categorias,
+        fetchProductos,
+        showToast,
+      ]
+    );
 
-  const handleDeleteCat = useCallback(
-    async (id) => {
-      if (!window.confirm("¿Eliminar categoría?")) return;
+  /*
+  ==========================================
+  UPDATE PRODUCT
+  ==========================================
+  */
 
-      try {
-        const res = await fetchConToken(
-          `${API}/categories/${id}`,
-          { method: "DELETE" }
-        );
+  const handleUpdateProduct =
+    useCallback(
+      async (
+        id,
+        body
+      ) => {
 
-        const data = await res.json();
+        try {
 
-        if (!res.ok) {
-          showToast(data.message || "Error categoría", "#c62828");
+          if (
+            !validateCategoria(
+              body.categoria_id
+            )
+          ) {
+
+            showToast(
+              "Categoría inválida",
+              "#c62828"
+            );
+
+            return false;
+          }
+
+          const payload =
+            buildProductBody(body);
+
+          console.log(
+            "UPDATE PAYLOAD:",
+            payload
+          );
+
+          const res =
+            await fetchConToken(
+              `${API}/products/${id}`,
+              {
+                method: "PUT",
+
+                body: JSON.stringify(
+                  payload
+                ),
+              }
+            );
+
+          const data =
+            await res.json();
+
+          if (!res.ok) {
+
+            console.log(
+              "ERROR UPDATE:",
+              data
+            );
+
+            showToast(
+              data?.message ||
+              "Error al actualizar producto",
+              "#c62828"
+            );
+
+            return false;
+          }
+
+          await fetchProductos();
+
+          showToast(
+            "Producto actualizado"
+          );
+
+          return true;
+
+        } catch (error) {
+
+          console.error(
+            "ERROR UPDATE:",
+            error
+          );
+
+          showToast(
+            "Error de conexión",
+            "#c62828"
+          );
+
+          return false;
+        }
+
+      },
+      [
+        categorias,
+        fetchProductos,
+        showToast,
+      ]
+    );
+
+  /*
+  ==========================================
+  DELETE PRODUCT
+  ==========================================
+  */
+
+  const handleDeleteProduct =
+    useCallback(
+      async (id) => {
+
+        const confirmacion =
+          window.confirm(
+            "¿Eliminar producto?"
+          );
+
+        if (!confirmacion) {
           return;
         }
 
-        await fetchCategorias();
-        showToast("Categoría eliminada");
-      } catch (err) {
-        console.error(err);
-        showToast("Error de conexión", "#c62828");
-      }
-    },
-    [fetchCategorias, showToast]
-  );
+        try {
+
+          const res =
+            await fetchConToken(
+              `${API}/products/${id}`,
+              {
+                method: "DELETE",
+              }
+            );
+
+          const data =
+            await res.json();
+
+          if (!res.ok) {
+
+            showToast(
+              data?.message ||
+              "Error eliminando producto",
+              "#c62828"
+            );
+
+            return;
+          }
+
+          /*
+          ======================================
+          SOFT DELETE
+          deleted = true
+          ======================================
+          */
+
+          await fetchProductos();
+
+          showToast(
+            "Producto eliminado"
+          );
+
+        } catch (error) {
+
+          console.error(
+            "ERROR DELETE:",
+            error
+          );
+
+          showToast(
+            "Error de conexión",
+            "#c62828"
+          );
+        }
+
+      },
+      [
+        fetchProductos,
+        showToast,
+      ]
+    );
+
+  /*
+  ==========================================
+  TOGGLE PRODUCT
+  ==========================================
+  */
+
+  const handleToggleProduct =
+    useCallback(
+      async (producto) => {
+
+        try {
+
+          /*
+          ======================================
+          CAMBIAR ESTADO
+          true -> false
+          false -> true
+          ======================================
+          */
+
+          const nuevoEstado =
+            producto.estado === true
+              ? false
+              : true;
+
+          const payload = {
+
+            nombre:
+              producto?.nombre || "",
+
+            descripcion:
+              producto?.descripcion || "",
+
+            precio:
+              Number(
+                producto?.precio || 0
+              ),
+
+            stock:
+              Number(
+                producto?.stock || 0
+              ),
+
+            categoria_id:
+              String(
+                producto?.categoria_id || ""
+              ),
+
+            codigo_barras:
+              producto?.codigo_barras || "",
+
+            imagen:
+              producto?.imagen || "",
+
+            /*
+            ==================================
+            ESTADO
+            ==================================
+            */
+
+            estado:
+              nuevoEstado,
+
+            /*
+            ==================================
+            NO TOCAR DELETE
+            ==================================
+            */
+
+            deleted:
+              producto?.deleted === true,
+
+          };
+
+          console.log(
+            "TOGGLE PAYLOAD:",
+            payload
+          );
+
+          const res =
+            await fetchConToken(
+              `${API}/products/${producto._id}`,
+              {
+                method: "PUT",
+
+                body: JSON.stringify(
+                  payload
+                ),
+              }
+            );
+
+          const data =
+            await res.json();
+
+          console.log(
+            "TOGGLE RESPONSE:",
+            data
+          );
+
+          if (!res.ok) {
+
+            console.log(
+              "ERROR TOGGLE:",
+              data
+            );
+
+            showToast(
+              data?.message ||
+              "Error al cambiar estado",
+              "#c62828"
+            );
+
+            return false;
+          }
+
+          await fetchProductos();
+
+          showToast(
+            nuevoEstado
+              ? "Producto disponible"
+              : "Producto no disponible"
+          );
+
+          return true;
+
+        } catch (error) {
+
+          console.error(
+            "ERROR TOGGLE:",
+            error
+          );
+
+          showToast(
+            "Error de conexión",
+            "#c62828"
+          );
+
+          return false;
+        }
+
+      },
+      [
+        fetchProductos,
+        showToast,
+      ]
+    );
+
+  /*
+  ==========================================
+  CREATE CATEGORY
+  ==========================================
+  */
+
+  const handleCreateCat =
+    useCallback(
+      async (body) => {
+
+        try {
+
+          const res =
+            await fetchConToken(
+              `${API}/categories`,
+              {
+                method: "POST",
+
+                body: JSON.stringify(
+                  body
+                ),
+              }
+            );
+
+          const data =
+            await res.json();
+
+          if (!res.ok) {
+
+            showToast(
+              data?.message ||
+              "Error creando categoría",
+              "#c62828"
+            );
+
+            return false;
+          }
+
+          await fetchCategorias();
+
+          showToast(
+            "Categoría creada"
+          );
+
+          return true;
+
+        } catch (error) {
+
+          console.error(
+            "ERROR CREATE CAT:",
+            error
+          );
+
+          showToast(
+            "Error de conexión",
+            "#c62828"
+          );
+
+          return false;
+        }
+
+      },
+      [
+        fetchCategorias,
+        showToast,
+      ]
+    );
+
+  /*
+  ==========================================
+  UPDATE CATEGORY
+  ==========================================
+  */
+
+  const handleUpdateCat =
+    useCallback(
+      async (
+        id,
+        body
+      ) => {
+
+        try {
+
+          const res =
+            await fetchConToken(
+              `${API}/categories/${id}`,
+              {
+                method: "PUT",
+
+                body: JSON.stringify(
+                  body
+                ),
+              }
+            );
+
+          const data =
+            await res.json();
+
+          if (!res.ok) {
+
+            showToast(
+              data?.message ||
+              "Error actualizando categoría",
+              "#c62828"
+            );
+
+            return false;
+          }
+
+          await fetchCategorias();
+
+          showToast(
+            "Categoría actualizada"
+          );
+
+          return true;
+
+        } catch (error) {
+
+          console.error(
+            "ERROR UPDATE CAT:",
+            error
+          );
+
+          showToast(
+            "Error de conexión",
+            "#c62828"
+          );
+
+          return false;
+        }
+
+      },
+      [
+        fetchCategorias,
+        showToast,
+      ]
+    );
+
+  /*
+  ==========================================
+  DELETE CATEGORY
+  ==========================================
+  */
+
+  const handleDeleteCat =
+    useCallback(
+      async (id) => {
+
+        const confirmacion =
+          window.confirm(
+            "¿Eliminar categoría?"
+          );
+
+        if (!confirmacion) {
+          return;
+        }
+
+        try {
+
+          const res =
+            await fetchConToken(
+              `${API}/categories/${id}`,
+              {
+                method: "DELETE",
+              }
+            );
+
+          const data =
+            await res.json();
+
+          if (!res.ok) {
+
+            showToast(
+              data?.message ||
+              "Error eliminando categoría",
+              "#c62828"
+            );
+
+            return;
+          }
+
+          await fetchCategorias();
+
+          showToast(
+            "Categoría eliminada"
+          );
+
+        } catch (error) {
+
+          console.error(
+            "ERROR DELETE CAT:",
+            error
+          );
+
+          showToast(
+            "Error de conexión",
+            "#c62828"
+          );
+        }
+
+      },
+      [
+        fetchCategorias,
+        showToast,
+      ]
+    );
+
+  /*
+  ==========================================
+  RETURN
+  ==========================================
+  */
 
   return {
+
     productos,
+
     categorias,
+
     toast,
+
     handleCreateProduct,
+
     handleUpdateProduct,
+
     handleDeleteProduct,
+
     handleToggleProduct,
+
     handleCreateCat,
+
     handleUpdateCat,
+
     handleDeleteCat,
+
   };
 }

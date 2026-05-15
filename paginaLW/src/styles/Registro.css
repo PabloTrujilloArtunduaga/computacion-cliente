@@ -1,40 +1,296 @@
-/* Pega este código tanto en Login.css como en Registro.css */
+/* =========================================
+   SOLO REGISTRO
+   src/styles/Registro.css
+========================================= */
 
-.contenedor-formulario {
-  min-height: 80vh;
+/* =========================================
+   CONTENEDOR
+========================================= */
+
+.registro-container {
+  position: relative;
+
+  min-height: 100vh;
+
+  overflow: hidden;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+
+  padding: 30px 16px;
+
+  font-family: 'Poppins', sans-serif;
+
+  background:
+    linear-gradient(
+      135deg,
+      #111827 0%,
+      #0f172a 40%,
+      #1e293b 100%
+    );
 }
 
-/* Tarjeta blanca limpia y del mismo tamaño para ambos */
-.tarjeta-blanca {
-  background-color: #ffffff !important;
-  max-width: 450px; /* Esto asegura que el Registro no se vea más gordo que el Login */
+/* =========================================
+   CONTENEDOR FORMULARIO
+   SOLO REGISTRO
+========================================= */
+
+.registro-container .contenedor-formulario {
+  min-height: 80vh;
+
   width: 100%;
-  border-radius: 8px !important;
-  padding: 40px 30px !important;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  position: relative;
+  z-index: 5;
 }
 
-.tarjeta-blanca h4 {
-  font-weight: bold;
-  color: #333333; /* Texto oscuro para que se vea en el fondo blanco */
-  margin-bottom: 5px;
+/* =========================================
+   TARJETA BLANCA
+   SOLO REGISTRO
+========================================= */
+
+.registro-container .tarjeta-blanca {
+  background-color: #ffffff !important;
+
+  width: 100%;
+  max-width: 450px;
+
+  border-radius: 22px !important;
+
+  padding:
+    40px
+    30px !important;
+
+  border:
+    1px solid rgba(255,255,255,0.15);
+
+  box-shadow:
+    0 20px 55px rgba(0,0,0,0.35) !important;
+
+  backdrop-filter: blur(10px);
 }
 
-/* Detalles naranjas al hacer clic en los campos */
-.tarjeta-blanca .input-field input[type=text]:focus,
-.tarjeta-blanca .input-field input[type=email]:focus,
-.tarjeta-blanca .input-field input[type=password]:focus {
-  border-bottom: 1px solid #ff8f00 !important;
-  box-shadow: 0 1px 0 0 #ff8f00 !important;
+/* =========================================
+   TITULOS
+========================================= */
+
+.registro-container .tarjeta-blanca h4,
+.registro-title {
+  font-weight: 700;
+
+  color: #111827;
+
+  margin-bottom: 8px;
 }
 
-.tarjeta-blanca .input-field input:focus + label {
+.registro-subtitle {
+  margin-bottom: 28px;
+
+  color: #6b7280;
+
+  line-height: 1.6;
+}
+
+.registro-subtitle strong {
+  color: #f59e0b;
+
+  font-weight: 700;
+}
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.registro-container .tarjeta-blanca .input-field {
+  margin-bottom: 20px;
+}
+
+.registro-container
+.tarjeta-blanca
+.input-field
+input[type="text"],
+.registro-container
+.tarjeta-blanca
+.input-field
+input[type="email"],
+.registro-container
+.tarjeta-blanca
+.input-field
+input[type="password"] {
+  border-bottom:
+    1px solid #d1d5db !important;
+
+  color: #111827 !important;
+}
+
+/* FOCUS */
+
+.registro-container
+.tarjeta-blanca
+.input-field
+input[type="text"]:focus,
+
+.registro-container
+.tarjeta-blanca
+.input-field
+input[type="email"]:focus,
+
+.registro-container
+.tarjeta-blanca
+.input-field
+input[type="password"]:focus {
+  border-bottom:
+    1px solid #ff8f00 !important;
+
+  box-shadow:
+    0 1px 0 0 #ff8f00 !important;
+}
+
+/* LABEL */
+
+.registro-container
+.tarjeta-blanca
+.input-field
+label {
+  color: #6b7280 !important;
+}
+
+.registro-container
+.tarjeta-blanca
+.input-field
+input:focus + label {
   color: #ff8f00 !important;
 }
 
-.texto-gris {
+/* ICONOS */
+
+.registro-container
+.tarjeta-blanca
+.input-field
+.prefix {
+  color: #9ca3af;
+
+  transition: 0.3s ease;
+}
+
+.registro-container
+.tarjeta-blanca
+.input-field
+input:focus
+~ .prefix {
+  color: #ff8f00 !important;
+}
+
+/* =========================================
+   TEXTO GRIS
+========================================= */
+
+.registro-container .texto-gris {
   color: #757575 !important;
+}
+
+/* =========================================
+   BOTON
+========================================= */
+
+.registro-btn-wrapper {
+  margin-top: 28px;
+}
+
+.registro-btn {
+  width: 100%;
+
+  height: 48px;
+
+  border-radius: 12px !important;
+
+  font-weight: 700;
+
+  text-transform: none;
+
+  letter-spacing: 0.5px;
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease !important;
+}
+
+.registro-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================
+   LINKS
+========================================= */
+
+.registro-links {
+  margin-top: 24px;
+}
+
+.registro-links p {
+  margin: 0;
+
+  font-size: 0.94rem;
+}
+
+.registro-link-bold {
+  font-weight: 700;
+}
+
+/* =========================================
+   AUTOFILL FIX
+========================================= */
+
+.registro-container
+.tarjeta-blanca
+input:-webkit-autofill,
+
+.registro-container
+.tarjeta-blanca
+input:-webkit-autofill:hover,
+
+.registro-container
+.tarjeta-blanca
+input:-webkit-autofill:focus {
+  -webkit-box-shadow:
+    0 0 0px 1000px white inset !important;
+
+  -webkit-text-fill-color:
+    #111827 !important;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .registro-container {
+    padding: 20px 14px;
+  }
+
+  .registro-container .tarjeta-blanca {
+    max-width: 345px;
+
+    padding:
+      30px
+      22px !important;
+
+    border-radius: 18px !important;
+  }
+
+  .registro-title {
+    font-size: 1.7rem;
+  }
+
+  .registro-subtitle {
+    font-size: 0.92rem;
+  }
 }

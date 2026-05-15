@@ -1,7 +1,8 @@
 import {
   useEffect,
   useRef,
-  useState
+  useState,
+  useMemo
 } from "react";
 
 import Chart from "chart.js/auto";
@@ -9,6 +10,8 @@ import Chart from "chart.js/auto";
 import {
   useNavigate
 } from "react-router-dom";
+
+import M from "materialize-css";
 
 import AdminNavbar from "../admin/AdminNavbar";
 
@@ -33,7 +36,7 @@ export default function AdminDashboardMaterialize() {
     useRef(null);
 
   // =========================================
-  // NAVIGATE
+  // NAVIGATION
   // =========================================
 
   const navigate =
@@ -55,13 +58,27 @@ export default function AdminDashboardMaterialize() {
   const [facturas, setFacturas] =
     useState([]);
 
-  const [ventasMes, setVentasMes] =
-    useState([]);
-
+  // GRAFICA USUARIOS ACTIVOS
   const [
-    productosMasVendidos,
-    setProductosMasVendidos
+    usuariosActivosGrafica,
+    setUsuariosActivosGrafica
   ] = useState([]);
+
+  // PRODUCTOS DE LA TIENDA
+  const [
+    productosTienda,
+    setProductosTienda
+  ] = useState([]);
+
+  // =========================================
+  // INIT MATERIALIZE
+  // =========================================
+
+  useEffect(() => {
+
+    M.AutoInit();
+
+  }, []);
 
   // =========================================
   // LOAD DATA
@@ -89,6 +106,8 @@ export default function AdminDashboardMaterialize() {
 
         try {
 
+          setLoading(true);
+
           console.log(
             "📡 CARGANDO DASHBOARD..."
           );
@@ -112,7 +131,26 @@ export default function AdminDashboardMaterialize() {
           ]);
 
           // =====================================
-          // NORMALIZAR RESPUESTAS
+          // DEBUG RESPUESTAS
+          // =====================================
+
+          console.log(
+            "🟡 RESPUESTA USUARIOS:",
+            usuariosRes
+          );
+
+          console.log(
+            "🟡 RESPUESTA PRODUCTOS:",
+            productosRes
+          );
+
+          console.log(
+            "🟡 RESPUESTA FACTURAS:",
+            facturasRes
+          );
+
+          // =====================================
+          // NORMALIZAR DATOS
           // =====================================
 
           const usuariosData =
@@ -136,20 +174,28 @@ export default function AdminDashboardMaterialize() {
               ? facturasRes
               : facturasRes?.facturas || [];
 
+          // =====================================
+          // DEBUGS
+          // =====================================
+
           console.log(
-            "✅ USUARIOS:",
+            "✅ USUARIOS NORMALIZADOS:",
             usuariosData
           );
 
           console.log(
-            "✅ PRODUCTOS:",
+            "✅ PRODUCTOS NORMALIZADOS:",
             productosData
           );
 
           console.log(
-            "✅ FACTURAS:",
+            "✅ FACTURAS NORMALIZADAS:",
             facturasData
           );
+
+          // =====================================
+          // SET STATES
+          // =====================================
 
           setUsuarios(
             usuariosData
@@ -164,25 +210,58 @@ export default function AdminDashboardMaterialize() {
           );
 
           // =====================================
-          // VENTAS POR MES
+          // USUARIOS ACTIVOS
           // =====================================
 
-          const ventasAgrupadas =
+          const usuariosActivos =
+            usuariosData.filter(
+              (usuario) => {
+
+                console.log(
+                  "👤 VALIDANDO USUARIO:",
+                  usuario
+                );
+
+                return (
+                  usuario?.estado === true
+                );
+
+              }
+            );
+
+          console.log(
+            "✅ USUARIOS ACTIVOS:",
+            usuariosActivos
+          );
+
+          // =====================================
+          // GRAFICA USUARIOS ACTIVOS
+          // =====================================
+
+          const agrupados =
             {};
 
-          facturasData.forEach(
-            (factura) => {
+          usuariosActivos.forEach(
+            (usuario) => {
 
               try {
 
                 const fecha =
-                  factura?.createdAt
+                  usuario?.createdAt
                     ? new Date(
-                        factura.createdAt
+                        usuario.createdAt
                       )
                     : null;
 
-                if (!fecha) return;
+                if (!fecha) {
+
+                  console.warn(
+                    "⚠️ USUARIO SIN FECHA:",
+                    usuario
+                  );
+
+                  return;
+                }
 
                 const mes =
                   fecha.toLocaleString(
@@ -192,22 +271,17 @@ export default function AdminDashboardMaterialize() {
                     }
                   );
 
-                ventasAgrupadas[
-                  mes
-                ] =
+                agrupados[mes] =
                   (
-                    ventasAgrupadas[
+                    agrupados[
                       mes
                     ] || 0
-                  ) +
-                  Number(
-                    factura?.total || 0
-                  );
+                  ) + 1;
 
               } catch (error) {
 
                 console.error(
-                  "❌ ERROR FACTURA:",
+                  "❌ ERROR GRAFICA USUARIOS:",
                   error
                 );
 
@@ -216,9 +290,9 @@ export default function AdminDashboardMaterialize() {
             }
           );
 
-          const ventasFormateadas =
+          const usuariosGrafica =
             Object.entries(
-              ventasAgrupadas
+              agrupados
             ).map(
               ([mes, total]) => ({
 
@@ -229,105 +303,64 @@ export default function AdminDashboardMaterialize() {
               })
             );
 
-          setVentasMes(
-            ventasFormateadas
+          console.log(
+            "📊 DATOS GRAFICA:",
+            usuariosGrafica
+          );
+
+          setUsuariosActivosGrafica(
+            usuariosGrafica
           );
 
           // =====================================
-          // PRODUCTOS MÁS VENDIDOS
+          // PRODUCTOS TIENDA
+          // SOLO ACTIVOS
           // =====================================
 
-          const contadorProductos =
-            {};
+          const productosActivos =
+            productosData.filter(
+              (producto) => {
 
-          facturasData.forEach(
-            (factura) => {
+                console.log(
+                  "📦 VALIDANDO PRODUCTO:",
+                  producto
+                );
 
-              factura?.productos?.forEach(
-                (prod) => {
+                return (
+                  producto?.estado === true
+                );
 
-                  try {
+              }
+            );
 
-                    const nombre =
-                      prod?.nombre ||
-                      prod?.producto_id
-                        ?.nombre ||
-                      "Sin nombre";
-
-                    if (
-                      !contadorProductos[
-                        nombre
-                      ]
-                    ) {
-
-                      contadorProductos[
-                        nombre
-                      ] = {
-
-                        nombre,
-
-                        ventas: 0,
-
-                        stock:
-                          prod
-                            ?.producto_id
-                            ?.stock || 0
-
-                      };
-
-                    }
-
-                    contadorProductos[
-                      nombre
-                    ].ventas +=
-                      Number(
-                        prod?.cantidad || 0
-                      );
-
-                  } catch (error) {
-
-                    console.error(
-                      "❌ ERROR PRODUCTO:",
-                      error
-                    );
-
-                  }
-
-                }
-              );
-
-            }
+          console.log(
+            "✅ PRODUCTOS ACTIVOS:",
+            productosActivos
           );
 
-          const topProductos =
-            Object.values(
-              contadorProductos
-            )
-
-              .sort(
-                (a, b) =>
-                  b.ventas -
-                  a.ventas
-              )
-
-              .slice(0, 10);
-
-          setProductosMasVendidos(
-            topProductos
+          setProductosTienda(
+            productosActivos
           );
 
         } catch (error) {
 
           console.error(
-            "❌ ERROR GENERAL:",
+            "❌ ERROR GENERAL DASHBOARD:",
             error
           );
 
           setUsuarios([]);
           setProductos([]);
           setFacturas([]);
-          setVentasMes([]);
-          setProductosMasVendidos([]);
+          setUsuariosActivosGrafica([]);
+          setProductosTienda([]);
+
+          M.toast({
+            html:
+              "❌ Error cargando dashboard",
+            classes:
+              "red rounded"
+          });
 
         } finally {
 
@@ -349,8 +382,12 @@ export default function AdminDashboardMaterialize() {
 
     if (
       !salesChartRef.current ||
-      ventasMes.length === 0
+      usuariosActivosGrafica.length === 0
     ) {
+
+      console.warn(
+        "⚠️ NO HAY DATOS PARA LA GRAFICA"
+      );
 
       return;
 
@@ -371,13 +408,13 @@ export default function AdminDashboardMaterialize() {
           salesChartRef.current,
           {
 
-            type: "line",
+            type: "bar",
 
             data: {
 
               labels:
-                ventasMes.map(
-                  (v) => v.mes
+                usuariosActivosGrafica.map(
+                  (item) => item.mes
                 ),
 
               datasets: [
@@ -385,27 +422,26 @@ export default function AdminDashboardMaterialize() {
                 {
 
                   label:
-                    "Ventas",
+                    "Usuarios Activos",
 
                   data:
-                    ventasMes.map(
-                      (v) => v.total
+                    usuariosActivosGrafica.map(
+                      (item) => item.total
                     ),
 
-                  borderWidth: 3,
+                  borderRadius: 12,
 
-                  tension: 0.4,
+                  borderWidth: 1,
 
-                  fill: true,
-
-                  backgroundColor:
-                    "rgba(212,175,55,0.15)",
-
-                  borderColor:
-                    "#d4af37",
-
-                  pointBackgroundColor:
-                    "#d4af37"
+                  backgroundColor: [
+                    "#64B5F6",
+                    "#81C784",
+                    "#FFB74D",
+                    "#BA68C8",
+                    "#4DD0E1",
+                    "#AED581",
+                    "#FFD54F"
+                  ]
 
                 }
 
@@ -426,7 +462,13 @@ export default function AdminDashboardMaterialize() {
                   labels: {
 
                     color:
-                      "#333"
+                      "#555",
+
+                    font: {
+
+                      size: 14
+
+                    }
 
                   }
 
@@ -441,14 +483,14 @@ export default function AdminDashboardMaterialize() {
                   ticks: {
 
                     color:
-                      "#555"
+                      "#666"
 
                   },
 
                   grid: {
 
                     color:
-                      "#ececec"
+                      "#eeeeee"
 
                   }
 
@@ -456,17 +498,19 @@ export default function AdminDashboardMaterialize() {
 
                 y: {
 
+                  beginAtZero: true,
+
                   ticks: {
 
                     color:
-                      "#555"
+                      "#666"
 
                   },
 
                   grid: {
 
                     color:
-                      "#ececec"
+                      "#eeeeee"
 
                   }
 
@@ -482,7 +526,7 @@ export default function AdminDashboardMaterialize() {
     } catch (error) {
 
       console.error(
-        "❌ ERROR GRAFICA:",
+        "❌ ERROR CREANDO GRAFICA:",
         error
       );
 
@@ -500,7 +544,42 @@ export default function AdminDashboardMaterialize() {
 
     };
 
-  }, [ventasMes]);
+  }, [usuariosActivosGrafica]);
+
+  // =========================================
+  // MEMOS
+  // =========================================
+
+  const usuariosActivos =
+    useMemo(
+      () =>
+        usuarios.filter(
+          (u) =>
+            u?.estado === true
+        ).length,
+      [usuarios]
+    );
+
+  const productosActivos =
+    useMemo(
+      () =>
+        productos.filter(
+          (p) =>
+            p?.estado === true
+        ).length,
+      [productos]
+    );
+
+  const facturasActivas =
+    useMemo(
+      () =>
+        facturas.filter(
+          (f) =>
+            f?.estado !==
+            "cancelada"
+        ).length,
+      [facturas]
+    );
 
   // =========================================
   // CARDS
@@ -511,48 +590,57 @@ export default function AdminDashboardMaterialize() {
     {
 
       title:
-        "Usuarios",
+        "Usuarios Activos",
 
       value:
-        usuarios.length,
+        usuariosActivos,
 
       icon:
         "people",
 
-      color:
-        "linear-gradient(135deg,#d4af37,#f4d76a)"
+      bg:
+        "#E3F2FD",
+
+      iconColor:
+        "#1E88E5"
 
     },
 
     {
 
       title:
-        "Productos",
+        "Productos Activos",
 
       value:
-        productos.length,
+        productosActivos,
 
       icon:
         "inventory_2",
 
-      color:
-        "linear-gradient(135deg,#ffffff,#f5f5f5)"
+      bg:
+        "#E8F5E9",
+
+      iconColor:
+        "#43A047"
 
     },
 
     {
 
       title:
-        "Facturas",
+        "Facturas Activas",
 
       value:
-        facturas.length,
+        facturasActivas,
 
       icon:
         "receipt_long",
 
-      color:
-        "linear-gradient(135deg,#111111,#2a2a2a)"
+      bg:
+        "#FFF3E0",
+
+      iconColor:
+        "#FB8C00"
 
     }
 
@@ -566,11 +654,53 @@ export default function AdminDashboardMaterialize() {
 
     return (
 
-      <div className="admin-loading">
+      <div
+        className="
+          valign-wrapper
+          center-align
+        "
+        style={{
+          height: "100vh",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: 20,
+        }}
+      >
 
-        <h4>
+        <div
+          className="
+            preloader-wrapper
+            big
+            active
+          "
+        >
+
+          <div className="spinner-layer spinner-blue-only">
+
+            <div className="circle-clipper left">
+              <div className="circle"></div>
+            </div>
+
+            <div className="gap-patch">
+              <div className="circle"></div>
+            </div>
+
+            <div className="circle-clipper right">
+              <div className="circle"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <h5
+          style={{
+            color: "#555",
+            fontWeight: 600,
+          }}
+        >
           Cargando dashboard...
-        </h4>
+        </h5>
 
       </div>
 
@@ -584,11 +714,60 @@ export default function AdminDashboardMaterialize() {
 
   return (
 
-    <div className="admin-dashboard">
+    <div
+      className="admin-dashboard"
+      style={{
+        background:
+          "#f5f7fb",
+        minHeight: "100vh",
+      }}
+    >
 
       <AdminNavbar />
 
-      <div className="container admin-container">
+      <div
+        className="container"
+        style={{
+          paddingTop: 30,
+          paddingBottom: 40,
+        }}
+      >
+
+        {/* HEADER */}
+
+        <div
+          className="card-panel"
+          style={{
+            borderRadius: 24,
+            background:
+              "linear-gradient(135deg,#42A5F5,#64B5F6)",
+            color: "#fff",
+            padding: 30,
+            marginBottom: 30,
+          }}
+        >
+
+          <h4
+            style={{
+              fontWeight: 800,
+              marginTop: 0,
+            }}
+          >
+            📊 Dashboard Administrativo
+          </h4>
+
+          <p
+            style={{
+              marginBottom: 0,
+              opacity: 0.95,
+              fontSize: 16,
+            }}
+          >
+            Gestión visual de usuarios,
+            productos y facturas.
+          </p>
+
+        </div>
 
         {/* CARDS */}
 
@@ -603,32 +782,91 @@ export default function AdminDashboardMaterialize() {
               >
 
                 <div
-                  className="card dashboard-card"
+                  className="card"
                   style={{
+                    borderRadius: 24,
                     background:
-                      card.color
+                      card.bg,
+                    boxShadow:
+                      "0 4px 18px rgba(0,0,0,0.06)",
                   }}
                 >
 
-                  <div className="card-content">
+                  <div
+                    className="card-content"
+                    style={{
+                      padding: 28,
+                    }}
+                  >
 
-                    <div className="dashboard-card-top">
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent:
+                          "space-between",
+                        alignItems:
+                          "center",
+                      }}
+                    >
 
                       <div>
 
-                        <h3>
-                          {card.value}
+                        <h3
+                          style={{
+                            margin: 0,
+                            fontWeight: 800,
+                            color: "#333",
+                          }}
+                        >
+                          {
+                            card.value
+                          }
                         </h3>
 
-                        <p>
-                          {card.title}
+                        <p
+                          style={{
+                            marginTop: 8,
+                            color: "#666",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {
+                            card.title
+                          }
                         </p>
 
                       </div>
 
-                      <i className="material-icons dashboard-icon">
-                        {card.icon}
-                      </i>
+                      <div
+                        style={{
+                          width: 70,
+                          height: 70,
+                          borderRadius:
+                            "50%",
+                          background:
+                            "#fff",
+                          display: "flex",
+                          alignItems:
+                            "center",
+                          justifyContent:
+                            "center",
+                        }}
+                      >
+
+                        <i
+                          className="material-icons"
+                          style={{
+                            fontSize: 38,
+                            color:
+                              card.iconColor,
+                          }}
+                        >
+                          {
+                            card.icon
+                          }
+                        </i>
+
+                      </div>
 
                     </div>
 
@@ -643,21 +881,41 @@ export default function AdminDashboardMaterialize() {
 
         </div>
 
-        {/* GRAFICA */}
+        {/* GRAFICA + BOTONES */}
 
         <div className="row">
 
+          {/* GRAFICA */}
+
           <div className="col s12 l8">
 
-            <div className="card admin-card">
+            <div
+              className="card"
+              style={{
+                borderRadius: 24,
+                boxShadow:
+                  "0 4px 18px rgba(0,0,0,0.05)",
+              }}
+            >
 
               <div className="card-content">
 
-                <span className="card-title">
-                  📈 Resumen de Ventas
+                <span
+                  className="card-title"
+                  style={{
+                    fontWeight: 700,
+                    color: "#444",
+                  }}
+                >
+                  👥 Usuarios Activos Registrados
                 </span>
 
-                <div className="chart-container">
+                <div
+                  style={{
+                    height: 350,
+                    marginTop: 20,
+                  }}
+                >
 
                   <canvas
                     ref={
@@ -677,18 +935,48 @@ export default function AdminDashboardMaterialize() {
 
           <div className="col s12 l4">
 
-            <div className="card admin-card">
+            <div
+              className="card"
+              style={{
+                borderRadius: 24,
+                boxShadow:
+                  "0 4px 18px rgba(0,0,0,0.05)",
+              }}
+            >
 
               <div className="card-content">
 
-                <span className="card-title">
-                  ⚡ Accesos Rápidos
+                <span
+                  className="card-title"
+                  style={{
+                    fontWeight: 700,
+                    color: "#444",
+                  }}
+                >
+                  Accesos Rápidos
                 </span>
 
-                <div className="quick-buttons">
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection:
+                      "column",
+                    gap: 15,
+                    marginTop: 25,
+                  }}
+                >
 
                   <button
-                    className="quick-access-btn"
+                    className="
+                      btn-large
+                      waves-effect
+                      waves-light
+                    "
+                    style={{
+                      borderRadius: 14,
+                      background:
+                        "#42A5F5",
+                    }}
                     onClick={() =>
                       navigate(
                         "/admin/usuarios"
@@ -700,12 +988,21 @@ export default function AdminDashboardMaterialize() {
                       people
                     </i>
 
-                    Usuarios
+                    Usuarios y empleados
 
                   </button>
 
                   <button
-                    className="quick-access-btn"
+                    className="
+                      btn-large
+                      waves-effect
+                      waves-light
+                    "
+                    style={{
+                      borderRadius: 14,
+                      background:
+                        "#66BB6A",
+                    }}
                     onClick={() =>
                       navigate(
                         "/admin/productos"
@@ -717,12 +1014,21 @@ export default function AdminDashboardMaterialize() {
                       inventory_2
                     </i>
 
-                    Productos
+                    Productos y categorias
 
                   </button>
 
                   <button
-                    className="quick-access-btn"
+                    className="
+                      btn-large
+                      waves-effect
+                      waves-light
+                    "
+                    style={{
+                      borderRadius: 14,
+                      background:
+                        "#FFA726",
+                    }}
                     onClick={() =>
                       navigate(
                         "/admin/facturas"
@@ -748,21 +1054,39 @@ export default function AdminDashboardMaterialize() {
 
         </div>
 
-        {/* TABLA */}
+        {/* PRODUCTOS TIENDA */}
 
         <div className="row">
 
           <div className="col s12">
 
-            <div className="card admin-card">
+            <div
+              className="card"
+              style={{
+                borderRadius: 24,
+                boxShadow:
+                  "0 4px 18px rgba(0,0,0,0.05)",
+              }}
+            >
 
               <div className="card-content">
 
-                <span className="card-title">
-                  🔥 Productos Más Vendidos
+                <span
+                  className="card-title"
+                  style={{
+                    fontWeight: 700,
+                    color: "#444",
+                  }}
+                >
+                  🔥 Productos de la Tienda
                 </span>
 
-                <table className="highlight responsive-table">
+                <table
+                  className="
+                    highlight
+                    responsive-table
+                  "
+                >
 
                   <thead>
 
@@ -773,11 +1097,15 @@ export default function AdminDashboardMaterialize() {
                       </th>
 
                       <th>
-                        Ventas
+                        Precio
                       </th>
 
                       <th>
                         Stock
+                      </th>
+
+                      <th>
+                        Estado
                       </th>
 
                     </tr>
@@ -787,16 +1115,16 @@ export default function AdminDashboardMaterialize() {
                   <tbody>
 
                     {
-                      productosMasVendidos.length === 0
+                      productosTienda.length === 0
                         ? (
 
                           <tr>
 
                             <td
-                              colSpan="3"
+                              colSpan="4"
                               className="center"
                             >
-                              No hay datos
+                              No hay productos activos
                             </td>
 
                           </tr>
@@ -804,37 +1132,70 @@ export default function AdminDashboardMaterialize() {
                         )
                         : (
 
-                          productosMasVendidos.map(
+                          productosTienda.map(
                             (
-                              prod,
+                              producto,
                               index
-                            ) => (
+                            ) => {
 
-                              <tr
-                                key={index}
-                              >
+                              console.log(
+                                "📦 RENDER PRODUCTO:",
+                                producto
+                              );
 
-                                <td>
-                                  {
-                                    prod.nombre
+                              return (
+
+                                <tr
+                                  key={
+                                    producto._id ||
+                                    index
                                   }
-                                </td>
+                                >
 
-                                <td>
-                                  {
-                                    prod.ventas
-                                  }
-                                </td>
+                                  <td>
+                                    {
+                                      producto?.nombre ||
+                                      "Sin nombre"
+                                    }
+                                  </td>
 
-                                <td>
-                                  {
-                                    prod.stock
-                                  }
-                                </td>
+                                  <td>
+                                    $
+                                    {
+                                      Number(
+                                        producto?.precio || 0
+                                      ).toLocaleString(
+                                        "es-CO"
+                                      )
+                                    }
+                                  </td>
 
-                              </tr>
+                                  <td>
+                                    {
+                                      producto?.stock || 0
+                                    }
+                                  </td>
 
-                            )
+                                  <td>
+
+                                    <span
+                                      className="
+                                        new
+                                        badge
+                                        green
+                                      "
+                                      data-badge-caption=""
+                                    >
+                                      Activo
+                                    </span>
+
+                                  </td>
+
+                                </tr>
+
+                              );
+
+                            }
                           )
 
                         )

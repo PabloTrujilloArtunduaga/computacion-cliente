@@ -43,7 +43,7 @@ export default function ProductoCard({
     stock = 0,
     imagen =
       "https://via.placeholder.com/400x300?text=Producto",
-    estado = false,
+    estado = true,
   } = producto;
 
   // =========================================
@@ -119,24 +119,27 @@ export default function ProductoCard({
     }, [precio]);
 
   // =========================================
-  // DEBUG
+  // DEBUGS
   // =========================================
 
   console.log("=================================");
-  console.log("📦 PRODUCTO:");
-  console.log(nombre);
+  console.log("📦 PRODUCTO:", nombre);
 
-  console.log("🆔 ID:");
-  console.log(_id);
+  console.log("🆔 ID:", _id);
 
-  console.log("📦 STOCK DB:");
-  console.log(stock);
+  console.log("📦 STOCK DB:", stock);
 
-  console.log("🛒 EN CARRITO:");
-  console.log(cantidadEnCarrito);
+  console.log("🛒 EN CARRITO:", cantidadEnCarrito);
 
-  console.log("✅ STOCK DISPONIBLE:");
-  console.log(stockDisponible);
+  console.log("✅ STOCK DISPONIBLE:", stockDisponible);
+
+  console.log("🚫 DISPONIBLE:", disponible);
+
+  if (!disponible) {
+
+    console.warn("⚠️ PRODUCTO AGOTADO");
+
+  }
 
   // =========================================
   // MATERIALIZE
@@ -172,12 +175,12 @@ export default function ProductoCard({
     () => {
 
       // =====================================
-      // NO DISPONIBLE
+      // PRODUCTO AGOTADO
       // =====================================
 
       if (!disponible) {
 
-        console.log("❌ SIN STOCK");
+        console.log("❌ NO SE PUEDE AGREGAR");
 
         M.toast({
 
@@ -185,7 +188,7 @@ export default function ProductoCard({
             "⚠️ Producto agotado",
 
           classes:
-            "red darken-2"
+            "red darken-3 rounded"
 
         });
 
@@ -201,7 +204,7 @@ export default function ProductoCard({
 
       console.log(producto);
 
-      console.log("STOCK ACTUAL:");
+      console.log("📦 STOCK ACTUAL:");
       console.log(stockDisponible);
 
       // =====================================
@@ -214,30 +217,21 @@ export default function ProductoCard({
       // TOAST
       // =====================================
 
-      if (
-        typeof M?.toast ===
-        "function"
-      ) {
+      M.toast({
 
-        M.toast({
+        html: `
+          <span>
+            <strong>${nombre}</strong>
+            agregado al carrito
+          </span>
+        `,
 
-          html: `
+        classes:
+          "green darken-2 rounded",
 
-            <span>
-              <strong>${nombre}</strong>
-              agregado al carrito
-            </span>
+        displayLength: 1800,
 
-          `,
-
-          classes:
-            "green darken-2 rounded",
-
-          displayLength: 2000,
-
-        });
-
-      }
+      });
 
     };
 
@@ -251,8 +245,6 @@ export default function ProductoCard({
       <article
 
         className={`
-          card
-          hoverable
           producto-card
           ${
             !disponible
@@ -263,8 +255,11 @@ export default function ProductoCard({
 
       >
 
-        {/* IMAGE */}
-        <div className="card-image producto-img-wrapper">
+        {/* =====================================
+            IMAGE
+        ===================================== */}
+
+        <div className="producto-img-wrapper">
 
           <img
             src={imagen}
@@ -274,28 +269,37 @@ export default function ProductoCard({
             decoding="async"
             onError={(e) => {
 
+              console.log(
+                "❌ ERROR IMAGEN"
+              );
+
               e.target.src =
                 "https://via.placeholder.com/400x300?text=Sin+Imagen";
 
             }}
           />
 
+          {/* BADGE */}
+
           {
             !disponible && (
 
-              <span className="card-title producto-badge">
+              <div className="producto-badge">
 
                 Agotado
 
-              </span>
+              </div>
 
             )
           }
 
         </div>
 
-        {/* CONTENT */}
-        <div className="card-content producto-content">
+        {/* =====================================
+            CONTENT
+        ===================================== */}
+
+        <div className="producto-content">
 
           <h5 className="producto-titulo">
             {nombre}
@@ -307,58 +311,63 @@ export default function ProductoCard({
 
           <div className="producto-info">
 
-            <p className="producto-precio">
+            <div className="producto-precio-box">
 
-              $
-              {
-                precioFormateado
-              }
+              <span className="precio-label">
+                Precio
+              </span>
 
-            </p>
+              <p className="producto-precio">
 
-            <p
+                $
+                {
+                  precioFormateado
+                }
 
-              className={
-                disponible
-                  ? "green-text text-darken-2"
-                  : "red-text text-darken-2"
-              }
+              </p>
 
-            >
+            </div>
 
-              <strong>
+            <div className="producto-stock-wrapper">
+
+              <span
+                className={
+                  disponible
+                    ? "stock-disponible"
+                    : "stock-agotado"
+                }
+              >
 
                 {
                   disponible
                     ? "Disponible"
-                    : "No disponible"
+                    : "Agotado"
                 }
 
-              </strong>
+              </span>
 
-            </p>
+              <span className="producto-stock">
 
-            {/* =====================================
-                STOCK DINÁMICO
-            ===================================== */}
+                Stock:
+                {" "}
 
-            <p className="grey-text text-darken-1">
+                <strong>
+                  {stockDisponible}
+                </strong>
 
-              Stock:
-              {" "}
+              </span>
 
-              <strong>
-                {stockDisponible}
-              </strong>
-
-            </p>
+            </div>
 
           </div>
 
         </div>
 
-        {/* ACTION */}
-        <div className="card-action center-align">
+        {/* =====================================
+            ACTION
+        ===================================== */}
+
+        <div className="producto-action">
 
           <button
 
@@ -379,14 +388,24 @@ export default function ProductoCard({
               producto-btn
               ${
                 disponible
-                  ? "amber darken-2"
-                  : "grey"
+                  ? ""
+                  : "producto-btn-disabled"
               }
             `}
 
             aria-label={`Agregar ${nombre} al carrito`}
 
           >
+
+            <i className="material-icons left">
+
+              {
+                disponible
+                  ? "shopping_cart"
+                  : "block"
+              }
+
+            </i>
 
             {
               disponible

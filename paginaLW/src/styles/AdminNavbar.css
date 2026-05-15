@@ -1,0 +1,279 @@
+/* ======================================================
+   ADMIN NAVBAR SIMPLE Y LIMPIO
+====================================================== */
+
+.admin-navbar-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.admin-navbar {
+  background:
+    linear-gradient(
+      90deg,
+      #000,
+      #111
+    ) !important;
+
+  height: 72px;
+
+  border-bottom:
+    1px solid rgba(212, 175, 55, 0.15);
+}
+
+.admin-nav-container {
+  height: 72px;
+
+  padding:
+    0 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ======================================================
+   LOGO
+====================================================== */
+
+.admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  cursor: pointer;
+
+  font-family:
+    'Playfair Display',
+    serif;
+
+  font-size: 2rem;
+  font-weight: 800;
+
+  color:
+    var(--color-acento);
+}
+
+.admin-logo span {
+  font-size: 0.8rem;
+
+  padding:
+    4px 10px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(212, 175, 55, 0.12);
+
+  color:
+    var(--color-acento);
+
+  font-family:
+    var(--font-base);
+
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+/* ======================================================
+   MENU
+====================================================== */
+
+.admin-menu {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin: 0;
+}
+
+.admin-menu li {
+  list-style: none;
+}
+
+/* ======================================================
+   LINKS
+====================================================== */
+
+.admin-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  height: 72px;
+
+  padding:
+    0 18px !important;
+
+  color:
+    rgba(255, 255, 255, 0.72) !important;
+
+  font-weight: 700;
+
+  border-bottom:
+    3px solid transparent;
+
+  transition:
+    all 0.25s ease;
+}
+
+.admin-link i {
+  font-size: 20px;
+}
+
+.admin-link:hover {
+  color:
+    var(--color-acento) !important;
+
+  background:
+    rgba(255, 255, 255, 0.03);
+}
+
+.active-link {
+  color:
+    var(--color-acento) !important;
+
+  border-bottom:
+    3px solid var(--color-acento);
+
+  background:
+    rgba(212, 175, 55, 0.06);
+}
+
+/* ======================================================
+   RIGHT
+====================================================== */
+
+.admin-right-section {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+}
+
+/* ======================================================
+   USER
+====================================================== */
+
+.admin-user-box {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.admin-avatar {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    var(--color-acento);
+
+  color: #111;
+
+  font-weight: 800;
+}
+
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-role {
+  font-size: 0.72rem;
+
+  color:
+    rgba(255, 255, 255, 0.45);
+
+  text-transform: uppercase;
+}
+
+.admin-user-name {
+  color: white;
+
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* ======================================================
+   LOGOUT
+====================================================== */
+
+.admin-logout-btn {
+  height: 46px;
+
+  padding:
+    0 22px !important;
+
+  border-radius: 12px !important;
+
+  background:
+    var(--color-acento) !important;
+
+  color: #111 !important;
+
+  font-weight: 800;
+
+  box-shadow: none !important;
+}
+
+.admin-logout-btn:hover {
+  background:
+    var(--color-acento-hover) !important;
+}
+
+/* ======================================================
+   RESPONSIVE
+====================================================== */
+
+@media (max-width: 992px) {
+
+  .admin-user-info {
+    display: none;
+  }
+
+  .admin-logo span {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .admin-nav-container {
+    padding:
+      0 10px;
+  }
+
+  .admin-menu {
+    gap: 2px;
+  }
+
+  .admin-link {
+    padding:
+      0 10px !important;
+
+    font-size: 0.9rem;
+  }
+
+  .admin-link span {
+    display: none;
+  }
+
+  .admin-right-section {
+    gap: 10px;
+  }
+
+  .admin-logout-btn {
+    padding:
+      0 14px !important;
+  }
+}

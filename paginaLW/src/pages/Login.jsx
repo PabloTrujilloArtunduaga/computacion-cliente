@@ -27,6 +27,16 @@ export default function Login() {
   const [password, setPassword] =
     useState("");
 
+  const [
+    showPassword,
+    setShowPassword
+  ] = useState(false);
+
+  const [
+    loading,
+    setLoading
+  ] = useState(false);
+
   const navigate =
     useNavigate();
 
@@ -54,171 +64,281 @@ export default function Login() {
   const buttonRef =
     useRef(null);
 
+  const logoRef =
+    useRef(null);
+
   const circlesRef =
     useRef([]);
 
   /*
     ======================================
     GSAP ANIMATIONS
+    SOLO LOGIN
     ======================================
   */
 
   useEffect(() => {
 
-    const tl =
-      gsap.timeline();
-
-    /*
-      BG
-    */
-
-    gsap.fromTo(
-      containerRef.current,
-      {
-        opacity: 0
-      },
-      {
-        opacity: 1,
-        duration: 1
-      }
+    console.log(
+      "🎬 INICIANDO ANIMACIONES LOGIN"
     );
 
-    /*
-      FLOATING CIRCLES
-    */
+    const ctx =
+      gsap.context(() => {
 
-    circlesRef.current.forEach(
-      (circle, index) => {
+        const tl =
+          gsap.timeline();
+
+        /*
+          PAGE
+        */
+
+        gsap.fromTo(
+          containerRef.current,
+          {
+            opacity: 0
+          },
+          {
+            opacity: 1,
+            duration: 1
+          }
+        );
+
+        /*
+          BG CIRCLES
+        */
+
+        circlesRef.current.forEach(
+          (
+            circle,
+            index
+          ) => {
+
+            if (!circle) return;
+
+            gsap.to(
+              circle,
+              {
+                y:
+                  index % 2 === 0
+                    ? -35
+                    : 35,
+
+                x:
+                  index % 2 === 0
+                    ? 25
+                    : -25,
+
+                duration:
+                  5 + index,
+
+                repeat: -1,
+
+                yoyo: true,
+
+                ease:
+                  "sine.inOut"
+              }
+            );
+
+          }
+        );
+
+        /*
+          LOGO
+        */
+
+        gsap.fromTo(
+          logoRef.current,
+          {
+            scale: 0,
+            rotate: -180,
+            opacity: 0
+          },
+          {
+            scale: 1,
+            rotate: 0,
+            opacity: 1,
+            duration: 1.1,
+            ease:
+              "back.out(1.8)"
+          }
+        );
+
+        /*
+          CARD
+        */
+
+        tl.fromTo(
+          cardRef.current,
+          {
+            opacity: 0,
+            y: 80,
+            scale: 0.85,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1,
+            ease:
+              "power4.out"
+          }
+        )
+
+        /*
+          TITLE
+        */
+
+        .fromTo(
+          titleRef.current,
+          {
+            opacity: 0,
+            y: -20
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7
+          },
+          "-=0.5"
+        )
+
+        /*
+          TEXT
+        */
+
+        .fromTo(
+          textRef.current,
+          {
+            opacity: 0,
+            y: 20
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7
+          },
+          "-=0.4"
+        )
+
+        /*
+          FORM
+        */
+
+        .fromTo(
+          formRef.current.children,
+          {
+            opacity: 0,
+            y: 25
+          },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.15,
+            duration: 0.8,
+            ease:
+              "power3.out"
+          },
+          "-=0.3"
+        );
+
+        /*
+          BUTTON GLOW
+        */
 
         gsap.to(
-          circle,
+          buttonRef.current,
           {
-            y:
-              index % 2 === 0
-                ? -30
-                : 30,
-
-            x:
-              index % 2 === 0
-                ? 20
-                : -20,
-
-            duration:
-              4 + index,
+            boxShadow:
+              "0 0 24px rgba(37,99,235,0.35)",
 
             repeat: -1,
 
             yoyo: true,
 
+            duration: 1.6,
+
             ease:
               "sine.inOut"
           }
         );
-      }
-    );
+
+      }, containerRef);
 
     /*
-      CARD
+      CLEAN GSAP
     */
 
-    tl.fromTo(
-      cardRef.current,
-      {
-        opacity: 0,
-        scale: 0.8,
-        y: 80,
-        rotateX: 20
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        rotateX: 0,
-        duration: 1.2,
-        ease:
-          "power4.out"
-      }
-    )
+    return () => {
 
-    /*
-      TITLE
-    */
+      console.log(
+        "🧹 LIMPIANDO GSAP LOGIN"
+      );
 
-    .fromTo(
-      titleRef.current,
-      {
-        opacity: 0,
-        y: -25
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.7
-      },
-      "-=0.6"
-    )
+      ctx.revert();
 
-    /*
-      TEXT
-    */
-
-    .fromTo(
-      textRef.current,
-      {
-        opacity: 0,
-        y: 20
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.7
-      },
-      "-=0.4"
-    )
-
-    /*
-      FORM
-    */
-
-    .fromTo(
-      formRef.current.children,
-      {
-        opacity: 0,
-        y: 30
-      },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.18,
-        duration: 0.8,
-        ease:
-          "power3.out"
-      },
-      "-=0.4"
-    );
-
-    /*
-      BUTTON PULSE
-    */
-
-    gsap.to(
-      buttonRef.current,
-      {
-        boxShadow:
-          "0 0 28px rgba(255,193,7,0.55)",
-
-        repeat: -1,
-
-        yoyo: true,
-
-        duration: 1.5,
-
-        ease:
-          "sine.inOut"
-      }
-    );
+    };
 
   }, []);
+
+  /*
+    ======================================
+    SIMPLE TOAST
+    SIN MATERIALIZE JS
+    ======================================
+  */
+
+  const showToast = (
+    message,
+    type = "error"
+  ) => {
+
+    const toast =
+      document.createElement(
+        "div"
+      );
+
+    toast.className =
+      `login-toast ${type}`;
+
+    toast.innerText =
+      message;
+
+    document.body.appendChild(
+      toast
+    );
+
+    gsap.fromTo(
+      toast,
+      {
+        opacity: 0,
+        y: -20
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.4
+      }
+    );
+
+    setTimeout(() => {
+
+      gsap.to(
+        toast,
+        {
+          opacity: 0,
+          y: -20,
+          duration: 0.4,
+          onComplete: () => {
+            toast.remove();
+          }
+        }
+      );
+
+    }, 3000);
+
+  };
 
   /*
     ======================================
@@ -231,19 +351,32 @@ export default function Login() {
 
       e.preventDefault();
 
+      console.log(
+        "🔐 INTENTANDO LOGIN..."
+      );
+
+      console.log(
+        "👤 USUARIO:",
+        usuario
+      );
+
       if (
         !usuario.trim() ||
         !password.trim()
       ) {
 
-        alert(
-          "Usuario y contraseña obligatorios"
+        showToast(
+          "❌ Completa todos los campos",
+          "error"
         );
 
         return;
+
       }
 
       try {
+
+        setLoading(true);
 
         const res =
           await fetch(
@@ -264,8 +397,18 @@ export default function Login() {
             }
           );
 
+        console.log(
+          "📡 STATUS LOGIN:",
+          res.status
+        );
+
         const data =
           await res.json();
+
+        console.log(
+          "✅ RESPUESTA LOGIN:",
+          data
+        );
 
         /*
           ERROR
@@ -286,20 +429,22 @@ export default function Login() {
             }
           );
 
-          alert(
+          showToast(
             "❌ " +
             (
-              data.mensaje ||
-              data.message ||
-              "Error en login"
-            )
+              data?.mensaje ||
+              data?.message ||
+              "Error al iniciar sesión"
+            ),
+            "error"
           );
 
           return;
+
         }
 
         /*
-          SUCCESS
+          SAVE
         */
 
         localStorage.setItem(
@@ -313,9 +458,7 @@ export default function Login() {
         );
 
         if (
-          data.usuario &&
-          typeof data.usuario ===
-          "object"
+          data.usuario
         ) {
 
           localStorage.setItem(
@@ -325,15 +468,19 @@ export default function Login() {
             )
           );
 
-        } else {
-
-          localStorage.removeItem(
-            "user"
-          );
         }
 
+        console.log(
+          "💾 LOGIN GUARDADO"
+        );
+
+        showToast(
+          "✅ Bienvenido",
+          "success"
+        );
+
         /*
-          EXIT ANIMATION
+          EXIT
         */
 
         gsap.to(
@@ -341,24 +488,40 @@ export default function Login() {
           {
             scale: 1.08,
             opacity: 0,
-            y: -60,
-            duration: 0.8,
+            y: -50,
+            duration: 0.7,
             ease:
               "power4.in",
             onComplete: () => {
+
+              console.log(
+                "🚀 REDIRECCIONANDO..."
+              );
+
               navigate("/");
+
             }
           }
         );
 
       } catch (error) {
 
-        console.error(error);
-
-        alert(
-          "❌ Error al conectar con el servidor"
+        console.error(
+          "❌ ERROR LOGIN:",
+          error
         );
+
+        showToast(
+          "❌ Error conectando con servidor",
+          "error"
+        );
+
+      } finally {
+
+        setLoading(false);
+
       }
+
     };
 
   return (
@@ -369,7 +532,7 @@ export default function Login() {
     >
 
       {/* ======================================
-          BACKGROUND EFFECTS
+          BACKGROUND
       ====================================== */}
 
       <div
@@ -415,31 +578,48 @@ export default function Login() {
       <div
         ref={cardRef}
         className="
-          card-panel
           tarjeta-login
-          z-depth-5
         "
       >
+
+        {/* LOGO */}
+
+        <div
+          ref={logoRef}
+          className="
+            login-logo-wrapper
+          "
+        >
+
+          <div className="login-logo">
+
+            <i className="material-icons">
+              storefront
+            </i>
+
+          </div>
+
+        </div>
+
+        {/* TITLE */}
 
         <h3
           ref={titleRef}
           className="
-            center-align
             login-title
           "
         >
-          Iniciar Sesión
+          Bienvenido
         </h3>
 
         <p
           ref={textRef}
           className="
-            center-align
             login-subtitle
           "
         >
 
-          Bienvenido a
+          Ingresa a
           {" "}
 
           <strong>
@@ -474,6 +654,7 @@ export default function Login() {
               id="usuarioLogin"
               type="text"
               value={usuario}
+              autoComplete="username"
               onChange={(e) =>
                 setUsuario(
                   e.target.value
@@ -481,7 +662,14 @@ export default function Login() {
               }
             />
 
-            <label htmlFor="usuarioLogin">
+            <label
+              className={
+                usuario
+                  ? "active"
+                  : ""
+              }
+              htmlFor="usuarioLogin"
+            >
               Usuario
             </label>
 
@@ -502,8 +690,13 @@ export default function Login() {
 
             <input
               id="passwordLogin"
-              type="password"
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
               value={password}
+              autoComplete="current-password"
               onChange={(e) =>
                 setPassword(
                   e.target.value
@@ -511,9 +704,38 @@ export default function Login() {
               }
             />
 
-            <label htmlFor="passwordLogin">
+            <label
+              className={
+                password
+                  ? "active"
+                  : ""
+              }
+              htmlFor="passwordLogin"
+            >
               Contraseña
             </label>
+
+            <button
+              type="button"
+              className="
+                password-toggle-btn
+              "
+              onClick={() =>
+                setShowPassword(
+                  !showPassword
+                )
+              }
+            >
+
+              <i className="material-icons">
+                {
+                  showPassword
+                    ? "visibility_off"
+                    : "visibility"
+                }
+              </i>
+
+            </button>
 
           </div>
 
@@ -521,7 +743,6 @@ export default function Login() {
 
           <div
             className="
-              center-align
               login-btn-wrapper
             "
           >
@@ -529,22 +750,31 @@ export default function Login() {
             <button
               ref={buttonRef}
               className="
-                btn
-                waves-effect
-                waves-light
-                amber
-                darken-2
-                black-text
                 login-btn
               "
               type="submit"
+              disabled={loading}
             >
 
-              <i className="material-icons left">
-                login
-              </i>
+              {
+                loading ? (
+                  <>
+                    <i className="material-icons left">
+                      autorenew
+                    </i>
 
-              Ingresar
+                    Ingresando...
+                  </>
+                ) : (
+                  <>
+                    <i className="material-icons left">
+                      login
+                    </i>
+
+                    Ingresar
+                  </>
+                )
+              }
 
             </button>
 
@@ -556,37 +786,37 @@ export default function Login() {
             LINKS
         ====================================== */}
 
-        <div className="center-align login-links">
+        <div
+          className="
+            login-links
+          "
+        >
 
           <p>
 
             <Link
-            to="/recuperar-password"
-            className="
-              red-text
-              text-lighten-1
-              forgot-link
-            "
-          >
-            ¿Olvidó su contraseña?
-          </Link>
+              to="/recuperar-password"
+              className="
+                forgot-link
+              "
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
 
           </p>
 
-          <p className="grey-text text-darken-2">
+          <p>
 
-            Nuevo aquí,
+            ¿No tienes cuenta?
             {" "}
 
             <Link
               to="/register"
               className="
-                amber-text
-                text-darken-4
                 bold-link
               "
             >
-              crear cuenta
+              Crear cuenta
             </Link>
 
           </p>

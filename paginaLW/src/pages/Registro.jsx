@@ -35,6 +35,11 @@ export default function Registro() {
     setConfirmPassword
   ] = useState("");
 
+  const [
+    loading,
+    setLoading
+  ] = useState(false);
+
   const navigate =
     useNavigate();
 
@@ -67,159 +72,188 @@ export default function Registro() {
 
   /*
     ======================================
-    GSAP
+    GSAP ONLY FOR REGISTRO
     ======================================
   */
 
   useEffect(() => {
 
-    const tl =
-      gsap.timeline();
-
     /*
-      FADE PAGE
+      CONTEXT:
+      evita afectar otros componentes
+      y limpia automáticamente
     */
 
-    gsap.fromTo(
-      containerRef.current,
-      {
-        opacity: 0
-      },
-      {
-        opacity: 1,
-        duration: 1
-      }
-    );
+    const ctx =
+      gsap.context(() => {
 
-    /*
-      FLOATING BG
-    */
+        const tl =
+          gsap.timeline();
 
-    circlesRef.current.forEach(
-      (circle, index) => {
+        /*
+          PAGE FADE
+        */
+
+        gsap.fromTo(
+          containerRef.current,
+          {
+            opacity: 0
+          },
+          {
+            opacity: 1,
+            duration: 1
+          }
+        );
+
+        /*
+          FLOATING BG
+        */
+
+        circlesRef.current.forEach(
+          (circle, index) => {
+
+            if (!circle) return;
+
+            gsap.to(
+              circle,
+              {
+                y:
+                  index % 2 === 0
+                    ? -25
+                    : 25,
+
+                x:
+                  index % 2 === 0
+                    ? 20
+                    : -20,
+
+                duration:
+                  5 + index,
+
+                repeat: -1,
+
+                yoyo: true,
+
+                ease:
+                  "sine.inOut"
+              }
+            );
+
+          }
+        );
+
+        /*
+          CARD
+        */
+
+        tl.fromTo(
+          cardRef.current,
+          {
+            opacity: 0,
+            y: 60,
+            scale: 0.88
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1,
+            ease:
+              "power4.out"
+          }
+        )
+
+        /*
+          TITLE
+        */
+
+        .fromTo(
+          titleRef.current,
+          {
+            opacity: 0,
+            y: -20
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7
+          },
+          "-=0.5"
+        )
+
+        /*
+          TEXT
+        */
+
+        .fromTo(
+          textRef.current,
+          {
+            opacity: 0,
+            y: 20
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7
+          },
+          "-=0.4"
+        )
+
+        /*
+          INPUTS
+        */
+
+        .fromTo(
+          formRef.current?.children,
+          {
+            opacity: 0,
+            y: 25
+          },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.15,
+            duration: 0.7,
+            ease:
+              "power3.out"
+          },
+          "-=0.3"
+        );
+
+        /*
+          BUTTON GLOW
+        */
 
         gsap.to(
-          circle,
+          buttonRef.current,
           {
-            y:
-              index % 2 === 0
-                ? -25
-                : 25,
-
-            x:
-              index % 2 === 0
-                ? 20
-                : -20,
-
-            duration:
-              5 + index,
+            boxShadow:
+              "0 0 22px rgba(245,158,11,0.45)",
 
             repeat: -1,
 
             yoyo: true,
 
+            duration: 1.4,
+
             ease:
               "sine.inOut"
           }
         );
-      }
-    );
+
+      }, containerRef);
 
     /*
-      CARD
+      CLEANUP:
+      elimina TODAS las animaciones
+      al desmontar el componente
     */
 
-    tl.fromTo(
-      cardRef.current,
-      {
-        opacity: 0,
-        y: 60,
-        scale: 0.88
-      },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 1,
-        ease:
-          "power4.out"
-      }
-    )
+    return () => {
 
-    /*
-      TITLE
-    */
+      ctx.revert();
 
-    .fromTo(
-      titleRef.current,
-      {
-        opacity: 0,
-        y: -20
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.7
-      },
-      "-=0.5"
-    )
-
-    /*
-      TEXT
-    */
-
-    .fromTo(
-      textRef.current,
-      {
-        opacity: 0,
-        y: 20
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.7
-      },
-      "-=0.4"
-    )
-
-    /*
-      INPUTS
-    */
-
-    .fromTo(
-      formRef.current.children,
-      {
-        opacity: 0,
-        y: 25
-      },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.15,
-        duration: 0.7,
-        ease:
-          "power3.out"
-      },
-      "-=0.3"
-    );
-
-    /*
-      BUTTON GLOW
-    */
-
-    gsap.to(
-      buttonRef.current,
-      {
-        boxShadow:
-          "0 0 22px rgba(245,158,11,0.45)",
-
-        repeat: -1,
-
-        yoyo: true,
-
-        duration: 1.4
-      }
-    );
+    };
 
   }, []);
 
@@ -284,6 +318,8 @@ export default function Registro() {
 
       try {
 
+        setLoading(true);
+
         const res =
           await fetch(
             "http://localhost:3000/api/users/register",
@@ -331,7 +367,7 @@ export default function Registro() {
           );
 
           /*
-            EXIT ANIMATION
+            EXIT
           */
 
           gsap.to(
@@ -351,6 +387,10 @@ export default function Registro() {
 
         } else {
 
+          /*
+            ERROR SHAKE
+          */
+
           gsap.fromTo(
             cardRef.current,
             {
@@ -368,6 +408,7 @@ export default function Registro() {
             data.mensaje ||
             "Error al registrar"
           );
+
         }
 
       } catch (error) {
@@ -377,7 +418,13 @@ export default function Registro() {
         alert(
           "❌ Error al conectar con el servidor"
         );
+
+      } finally {
+
+        setLoading(false);
+
       }
+
     };
 
   return (
@@ -617,13 +664,28 @@ export default function Registro() {
                 registro-btn
               "
               type="submit"
+              disabled={loading}
             >
 
-              <i className="material-icons left">
-                person_add
-              </i>
+              {
+                loading ? (
+                  <>
+                    <i className="material-icons left">
+                      autorenew
+                    </i>
 
-              Crear Cuenta
+                    Creando...
+                  </>
+                ) : (
+                  <>
+                    <i className="material-icons left">
+                      person_add
+                    </i>
+
+                    Crear Cuenta
+                  </>
+                )
+              }
 
             </button>
 
