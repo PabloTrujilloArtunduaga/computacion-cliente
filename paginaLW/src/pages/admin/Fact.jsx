@@ -733,8 +733,7 @@ const totalVentas =
                     htmlFor="busqueda"
                     className="active"
                   >
-                    Buscar factura,
-                    cliente o empleado
+                    Buscar cliente
                   </label>
 
                 </div>

@@ -89,20 +89,99 @@ export default function ProductoCard({
     ]);
 
   // =========================================
-  // DISPONIBILIDAD
+  // ESTADOS PROFESIONALES
   // =========================================
 
+  /*
+    =======================================
+    CASOS:
+
+    1. stock = 0
+       => AGOTADO
+
+    2. estado = false
+       => NO DISPONIBLE
+
+    3. estado = true && stock > 0
+       => DISPONIBLE
+    =======================================
+  */
+
+  const agotado =
+    Number(stockDisponible) <= 0;
+
+  const noDisponible =
+    !Boolean(estado) &&
+    !agotado;
+
   const disponible =
+    Boolean(estado) &&
+    Number(stockDisponible) > 0;
+
+  // =========================================
+  // TEXTO ESTADO
+  // =========================================
+
+  const estadoTexto =
     useMemo(() => {
 
-      return (
-        Boolean(estado) &&
-        Number(stockDisponible) > 0
-      );
+      if (agotado) {
+        return "Agotado";
+      }
+
+      if (noDisponible) {
+        return "No disponible";
+      }
+
+      return "Disponible";
 
     }, [
-      estado,
-      stockDisponible
+      agotado,
+      noDisponible
+    ]);
+
+  // =========================================
+  // CLASE ESTADO
+  // =========================================
+
+  const estadoClase =
+    useMemo(() => {
+
+      if (agotado) {
+        return "stock-agotado";
+      }
+
+      if (noDisponible) {
+        return "stock-no-disponible";
+      }
+
+      return "stock-disponible";
+
+    }, [
+      agotado,
+      noDisponible
+    ]);
+
+  // =========================================
+  // BADGE
+  // =========================================
+
+  const badgeTexto =
+    useMemo(() => {
+
+      if (agotado) {
+        return "Agotado";
+      }
+
+      if (noDisponible) {
+        return "No disponible";
+      }
+
+      return null;
+
+    }, [
+      agotado,
+      noDisponible
     ]);
 
   // =========================================
@@ -133,13 +212,13 @@ export default function ProductoCard({
 
   console.log("✅ STOCK DISPONIBLE:", stockDisponible);
 
-  console.log("🚫 DISPONIBLE:", disponible);
+  console.log("🚫 ESTADO:", estado);
 
-  if (!disponible) {
+  console.log("📌 DISPONIBLE:", disponible);
 
-    console.warn("⚠️ PRODUCTO AGOTADO");
+  console.log("📌 AGOTADO:", agotado);
 
-  }
+  console.log("📌 NO DISPONIBLE:", noDisponible);
 
   // =========================================
   // MATERIALIZE
@@ -174,13 +253,13 @@ export default function ProductoCard({
   const handleAgregar =
     () => {
 
-      // =====================================
-      // PRODUCTO AGOTADO
-      // =====================================
+      /*
+        =====================================
+        AGOTADO
+        =====================================
+      */
 
-      if (!disponible) {
-
-        console.log("❌ NO SE PUEDE AGREGAR");
+      if (agotado) {
 
         M.toast({
 
@@ -195,27 +274,40 @@ export default function ProductoCard({
         return;
       }
 
-      // =====================================
-      // DEBUG
-      // =====================================
+      /*
+        =====================================
+        NO DISPONIBLE
+        =====================================
+      */
 
-      console.log("=================================");
-      console.log("➕ AGREGAR PRODUCTO");
+      if (noDisponible) {
 
-      console.log(producto);
+        M.toast({
 
-      console.log("📦 STOCK ACTUAL:");
-      console.log(stockDisponible);
+          html:
+            "⚠️ Producto no disponible",
 
-      // =====================================
-      // AGREGAR
-      // =====================================
+          classes:
+            "grey darken-3 rounded"
+
+        });
+
+        return;
+      }
+
+      /*
+        =====================================
+        AGREGAR
+        =====================================
+      */
 
       agregarAlCarrito(producto);
 
-      // =====================================
-      // TOAST
-      // =====================================
+      /*
+        =====================================
+        TOAST
+        =====================================
+      */
 
       M.toast({
 
@@ -242,18 +334,18 @@ export default function ProductoCard({
       className="col s12 m6 l4"
     >
 
-      <article
+     <article
 
-        className={`
-          producto-card
-          ${
-            !disponible
-              ? "producto-disabled"
-              : ""
-          }
-        `}
+          className={`
+            producto-card
+            ${
+              disponible
+                ? "producto-hover"
+                : "producto-disabled"
+            }
+          `}
 
-      >
+        >
 
         {/* =====================================
             IMAGE
@@ -279,14 +371,25 @@ export default function ProductoCard({
             }}
           />
 
-          {/* BADGE */}
+          {/* =====================================
+              BADGE
+          ===================================== */}
 
           {
-            !disponible && (
+            badgeTexto && (
 
-              <div className="producto-badge">
+              <div
+                className={`
+                  producto-badge
+                  ${
+                    agotado
+                      ? "badge-agotado"
+                      : "badge-no-disponible"
+                  }
+                `}
+              >
 
-                Agotado
+                {badgeTexto}
 
               </div>
 
@@ -311,6 +414,7 @@ export default function ProductoCard({
 
           <div className="producto-info">
 
+            {/* PRECIO */}
             <div className="producto-precio-box">
 
               <span className="precio-label">
@@ -328,21 +432,16 @@ export default function ProductoCard({
 
             </div>
 
+            {/* STOCK */}
             <div className="producto-stock-wrapper">
 
               <span
                 className={
-                  disponible
-                    ? "stock-disponible"
-                    : "stock-agotado"
+                  estadoClase
                 }
               >
 
-                {
-                  disponible
-                    ? "Disponible"
-                    : "Agotado"
-                }
+                {estadoTexto}
 
               </span>
 
@@ -410,7 +509,7 @@ export default function ProductoCard({
             {
               disponible
                 ? "Agregar"
-                : "Agotado"
+                : estadoTexto
             }
 
           </button>

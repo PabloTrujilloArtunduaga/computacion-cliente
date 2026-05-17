@@ -45,13 +45,37 @@ export const createEmpleado = async (req, res) => {
     }
 
     // Verificar duplicado
-    const empleadoExistente = await Empleado.findOne({ usuario_id });
+    // Buscar empleado existente
+const empleadoExistente = await Empleado.findOne({ usuario_id });
 
-    if (empleadoExistente) {
-      return res.status(400).json({
-        message: 'Este usuario ya está registrado como empleado'
-      });
-    }
+// 🔥 SI EXISTE Y ESTÁ INACTIVO → REACTIVAR
+if (empleadoExistente && empleadoExistente.estado === false) {
+
+  empleadoExistente.estado = true;
+  empleadoExistente.cargo = cargo;
+  empleadoExistente.salario = Number(salario);
+
+  if (fecha_contratacion) {
+    empleadoExistente.fecha_contratacion = fecha_contratacion;
+  }
+
+  await empleadoExistente.save();
+
+  const empleadoReactivado = await Empleado.findById(
+    empleadoExistente._id
+  ).populate('usuario_id');
+
+  return res.status(200).json(empleadoReactivado);
+}
+
+// 🔥 SI YA EXISTE Y ESTÁ ACTIVO
+if (empleadoExistente && empleadoExistente.estado === true) {
+
+  return res.status(400).json({
+    message: 'Este usuario ya está registrado como empleado'
+  });
+
+}
 
     // Crear empleado
     const empleado = new Empleado({

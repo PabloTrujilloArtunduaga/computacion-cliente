@@ -103,10 +103,6 @@
 
               </h4>
 
-              <p className="emp-logo-subtitle">
-                Dashboard Empleado
-              </p>
-
             </div>
 
           </div>
@@ -115,20 +111,6 @@
           {/* MENU */}
           {/* ========================================= */}
 
-          <nav className="emp-nav">
-
-            <ul className="emp-nav-menu">
-
-              <NavItem
-                to="/dashboard-empleado"
-                label="Dashboard"
-                icon="dashboard"
-                active={isActive("/dashboard-empleado")}
-              />
-
-            </ul>
-
-          </nav>
 
           {/* ========================================= */}
           {/* USER */}

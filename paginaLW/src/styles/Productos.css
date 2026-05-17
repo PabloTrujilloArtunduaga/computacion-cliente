@@ -1,6 +1,6 @@
 /* =========================================
    PRODUCTOS.CSS
-   DISEÑO UNIFORME + AGOTADO
+   DISEÑO UNIFORME + EFECTOS + ESTADOS
 ========================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@600;800&display=swap');
@@ -10,10 +10,15 @@
 ========================================= */
 
 .productos-section {
+
   padding: 80px 0;
+
   text-align: center;
+
   max-width: 1300px;
+
   margin: auto;
+
 }
 
 /* =========================================
@@ -21,27 +26,37 @@
 ========================================= */
 
 .section-title {
+
   font-family: 'Playfair Display', serif;
+
   font-weight: 700;
+
   font-size: 2.6rem;
+
   color: var(--color-principal);
+
   letter-spacing: 1.5px;
+
   margin-bottom: 55px;
 
   opacity: 0;
+
   transform: translateY(28px);
 
   transition: all 0.9s ease;
 
   position: relative;
+
 }
 
 .section-title::after {
+
   content: "";
 
   display: block;
 
   width: 65px;
+
   height: 2px;
 
   background: var(--color-acento);
@@ -49,15 +64,21 @@
   margin: 14px auto 0;
 
   transition: width 0.6s ease;
+
 }
 
 .section-title.visible {
+
   opacity: 1;
+
   transform: translateY(0);
+
 }
 
 .section-title.visible::after {
+
   width: 120px;
+
 }
 
 /* =========================================
@@ -65,6 +86,7 @@
 ========================================= */
 
 .productos-grid {
+
   display: grid;
 
   grid-template-columns:
@@ -73,6 +95,7 @@
   gap: 2rem;
 
   padding: 0 20px;
+
 }
 
 /* =========================================
@@ -80,13 +103,17 @@
 ========================================= */
 
 .producto-card {
+
   position: relative;
 
   display: flex;
+
   flex-direction: column;
+
   justify-content: space-between;
 
   width: 100%;
+
   max-width: 340px;
 
   min-height: 590px;
@@ -100,13 +127,20 @@
   transition:
     transform 0.35s ease,
     box-shadow 0.35s ease,
-    opacity 0.35s ease;
+    opacity 0.35s ease,
+    filter 0.35s ease;
 
   box-shadow:
     0 8px 22px rgba(0,0,0,0.12);
 
   opacity: 0;
+
   transform: translateY(45px);
+
+  will-change:
+    transform,
+    box-shadow;
+
 }
 
 /* =========================================
@@ -114,33 +148,51 @@
 ========================================= */
 
 .producto-card.visible {
+
   opacity: 1;
+
   transform: translateY(0);
+
 }
 
 /* =========================================
-   HOVER
+   HOVER SOLO DISPONIBLES
 ========================================= */
 
-.producto-card:hover {
-  transform: translateY(-8px);
+.producto-hover:hover {
+
+  transform:
+    scale(1.04)
+    translateY(-8px);
 
   box-shadow:
     0 18px 40px rgba(0,0,0,0.22);
+
+  z-index: 10;
+
 }
 
 /* =========================================
-   AGOTADO
+   PRODUCTO DESHABILITADO
 ========================================= */
 
 .producto-disabled {
-  opacity: 0.7;
 
-  filter: grayscale(0.3);
+  opacity: 0.75;
+
+  filter: grayscale(25%);
+
+  cursor: not-allowed;
+
 }
 
 .producto-disabled:hover {
+
   transform: none;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
 }
 
 /* =========================================
@@ -148,6 +200,7 @@
 ========================================= */
 
 .producto-img-wrapper {
+
   position: relative;
 
   width: 100%;
@@ -155,7 +208,9 @@
   height: 260px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   overflow: hidden;
@@ -166,6 +221,7 @@
       #f8f8f8,
       #ececec
     );
+
 }
 
 /* =========================================
@@ -173,56 +229,92 @@
 ========================================= */
 
 .producto-img {
+
   width: 100%;
+
   height: 100%;
 
   object-fit: cover;
 
   transition:
-    transform 0.4s ease;
+    transform 0.45s ease;
+
 }
 
 /* =========================================
-   IMAGE HOVER
+   IMAGE ZOOM SOLO DISPONIBLE
 ========================================= */
 
-.producto-card:hover .producto-img {
-  transform: scale(1.05);
+.producto-hover:hover
+.producto-img {
+
+  transform: scale(1.12);
+
+}
+
+/* =========================================
+   BADGE GENERAL
+========================================= */
+
+.producto-badge {
+
+  position: absolute;
+
+  top: 14px;
+
+  right: 14px;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  color: white;
+
+  font-weight: 700;
+
+  font-size: 0.8rem;
+
+  z-index: 3;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+
+  backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.2);
+
 }
 
 /* =========================================
    BADGE AGOTADO
 ========================================= */
 
-.producto-badge {
-  position: absolute;
-
-  top: 16px;
-  right: 16px;
-
-  padding:
-    8px 16px;
-
-  border-radius: 999px;
+.badge-agotado {
 
   background:
     linear-gradient(
       135deg,
-      #e53935,
-      #b71c1c
+      #c62828,
+      #ef5350
     );
 
-  color: white !important;
+}
 
-  font-size: 0.85rem !important;
-  font-weight: 700 !important;
+/* =========================================
+   BADGE NO DISPONIBLE
+========================================= */
 
-  text-transform: uppercase;
+.badge-no-disponible {
 
-  letter-spacing: 1px;
+  background:
+    linear-gradient(
+      135deg,
+      #424242,
+      #757575
+    );
 
-  box-shadow:
-    0 4px 14px rgba(0,0,0,0.2);
 }
 
 /* =========================================
@@ -230,12 +322,29 @@
 ========================================= */
 
 .producto-content {
+
   flex: 1;
 
   display: flex;
+
   flex-direction: column;
 
   padding: 22px 20px 14px !important;
+
+  transition:
+    transform 0.3s ease;
+
+}
+
+/* =========================================
+   CONTENT HOVER
+========================================= */
+
+.producto-hover:hover
+.producto-content {
+
+  transform: translateY(-2px);
+
 }
 
 /* =========================================
@@ -243,6 +352,7 @@
 ========================================= */
 
 .producto-titulo {
+
   font-family: 'Playfair Display', serif;
 
   font-size: 1.4rem;
@@ -254,10 +364,13 @@
   min-height: 58px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   text-align: center;
+
 }
 
 /* =========================================
@@ -265,6 +378,7 @@
 ========================================= */
 
 .producto-descripcion {
+
   font-family: 'Lato', sans-serif;
 
   color: var(--color-neutro);
@@ -278,6 +392,7 @@
   overflow: hidden;
 
   margin-bottom: 18px;
+
 }
 
 /* =========================================
@@ -285,7 +400,9 @@
 ========================================= */
 
 .producto-info {
+
   margin-top: auto;
+
 }
 
 /* =========================================
@@ -293,28 +410,101 @@
 ========================================= */
 
 .producto-precio {
+
   font-family: 'Playfair Display', serif;
 
   font-size: 1.55rem;
+
   font-weight: 700;
 
   color: var(--color-acento);
 
   margin-bottom: 10px;
+
+}
+
+/* =========================================
+   ESTADOS STOCK
+========================================= */
+
+.stock-disponible {
+
+  background: #2e7d32;
+
+  color: white;
+
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  font-size: 0.85rem;
+
+  font-weight: 700;
+
+}
+
+.stock-agotado {
+
+  background: #c62828;
+
+  color: white;
+
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  font-size: 0.85rem;
+
+  font-weight: 700;
+
+}
+
+.stock-no-disponible {
+
+  background: #616161;
+
+  color: white;
+
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  font-size: 0.85rem;
+
+  font-weight: 700;
+
+}
+
+/* =========================================
+   STOCK TEXT
+========================================= */
+
+.producto-stock {
+
+  display: block;
+
+  margin-top: 10px;
+
+  font-size: 0.95rem;
+
+  color: #555;
+
 }
 
 /* =========================================
    ACTION
 ========================================= */
 
-.card-action {
+.producto-action {
+
   border-top:
-    1px solid rgba(0,0,0,0.06) !important;
+    1px solid rgba(0,0,0,0.06);
 
   padding:
-    18px 20px 24px !important;
+    18px 20px 24px;
 
-  background: white !important;
+  background: white;
+
 }
 
 /* =========================================
@@ -322,6 +512,7 @@
 ========================================= */
 
 .producto-btn {
+
   width: 100%;
 
   height: 48px;
@@ -338,13 +529,30 @@
 
   box-shadow:
     0 8px 18px rgba(0,0,0,0.12);
+
 }
 
-.producto-btn:hover {
-  transform: translateY(-2px);
+/* =========================================
+   BUTTON HOVER
+========================================= */
+
+.producto-hover:hover
+.producto-btn {
+
+  transform: scale(1.03);
+
+  box-shadow:
+    0 8px 18px rgba(0,0,0,0.18);
+
 }
 
+/* =========================================
+   BUTTON DISABLED
+========================================= */
+
+.producto-btn-disabled,
 .producto-btn:disabled {
+
   background: #9e9e9e !important;
 
   color: white !important;
@@ -352,21 +560,25 @@
   cursor: not-allowed;
 
   box-shadow: none !important;
+
 }
 
 /* =========================================
-   DEBUG VISUAL
+   OVERLAY AGOTADO
 ========================================= */
 
 .producto-disabled::after {
-  content: "SIN STOCK";
+
+  content: "NO DISPONIBLE";
 
   position: absolute;
 
   inset: 0;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   background:
@@ -375,6 +587,7 @@
   color: white;
 
   font-size: 2rem;
+
   font-weight: 800;
 
   letter-spacing: 3px;
@@ -382,6 +595,7 @@
   z-index: 5;
 
   pointer-events: none;
+
 }
 
 /* =========================================
@@ -391,19 +605,29 @@
 @media (max-width: 768px) {
 
   .productos-section {
+
     padding-top: 50px;
+
   }
 
   .section-title {
+
     font-size: 2rem;
+
   }
 
   .producto-card {
+
     max-width: 100%;
+
     min-height: 560px;
+
   }
 
   .producto-img-wrapper {
+
     height: 230px;
+
   }
+
 }

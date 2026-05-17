@@ -1,41 +1,114 @@
-.admin-dashboard {
-  min-height: 100vh;
-  background: #f8f6f1;
-}
+/* =========================================
+   ADMIN.CSS
+   Paleta: Negro + Dorado (coherente con app.css)
+   Identidad propia del panel administrativo
+========================================= */
 
-.admin-container {
-  padding-top: 40px;
-  padding-bottom: 50px;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Lato:wght@400;600;700&display=swap');
+
+:root {
+  --admin-bg:           #f5f3ef;
+  --admin-surface:      #ffffff;
+  --admin-border:       rgba(212, 175, 55, 0.15);
+  --admin-gold:         #d4af37;
+  --admin-gold-hover:   #e7c65a;
+  --admin-gold-light:   rgba(212, 175, 55, 0.10);
+  --admin-dark:         #111111;
+  --admin-text:         #222222;
+  --admin-muted:        #666666;
+  --admin-danger:       #c62828;
+  --admin-danger-light: rgba(198, 40, 40, 0.08);
+  --admin-warning:      #e65100;
+  --admin-warning-light:rgba(230, 81, 0, 0.08);
+  --admin-success:      #2e7d32;
+  --admin-success-light:rgba(46, 125, 50, 0.08);
+  --admin-info:         #1565c0;
+  --admin-info-light:   rgba(21, 101, 192, 0.08);
+  --admin-font:         'Lato', sans-serif;
+  --admin-font-display: 'Playfair Display', serif;
+  --admin-radius:       16px;
+  --admin-radius-sm:    10px;
 }
 
 /* =========================================
-   CARDS
+   BASE
+========================================= */
+
+.admin-dashboard {
+  min-height: 100vh;
+  background: var(--admin-bg);
+  font-family: var(--admin-font);
+}
+
+.admin-container {
+  padding-top: 36px;
+  padding-bottom: 56px;
+}
+
+/* =========================================
+   HERO HEADER
+========================================= */
+
+.admin-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, #111111 0%, #1c1c1c 60%, #252218 100%);
+  border-radius: var(--admin-radius);
+  padding: 32px 36px;
+  margin-bottom: 32px;
+  border: 1px solid rgba(212, 175, 55, 0.20);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.admin-hero__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-hero__title {
+  margin: 0 0 6px;
+  font-family: var(--admin-font-display);
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.admin-hero__subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.60);
+  line-height: 1.5;
+}
+
+/* =========================================
+   KPI CARDS
 ========================================= */
 
 .dashboard-card {
-  border-radius: 20px;
+  border-radius: var(--admin-radius);
   overflow: hidden;
-
-  box-shadow:
-    0 8px 20px rgba(0,0,0,0.08);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
-
-  border: none;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-top: 3px solid var(--card-accent, var(--admin-gold));
 }
 
 .dashboard-card:hover {
-  transform:
-    translateY(-5px);
-
-  box-shadow:
-    0 14px 28px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10);
 }
 
-.dashboard-card .card-content {
-  padding: 28px;
+.dashboard-card__content {
+  padding: 26px !important;
 }
 
 .dashboard-card-top {
@@ -44,54 +117,69 @@
   justify-content: space-between;
 }
 
-.dashboard-card h3 {
+.dashboard-card__value {
   margin: 0;
-  font-size: 2.4rem;
+  font-family: var(--admin-font-display);
+  font-size: 2.6rem;
   font-weight: 800;
-  color: #111;
+  color: var(--admin-dark);
+  line-height: 1;
 }
 
-.dashboard-card p {
-  margin-top: 8px;
-  font-size: 1rem;
+.dashboard-card__label {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #444;
+  color: var(--admin-muted);
+  letter-spacing: 0.3px;
+}
+
+.dashboard-card__icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--card-accent-light, var(--admin-gold-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .dashboard-icon {
-  font-size: 3rem !important;
-  color: #111;
+  font-size: 26px !important;
+  color: var(--card-accent, var(--admin-gold)) !important;
 }
 
 /* =========================================
-   ADMIN CARD
+   ADMIN CARD (contenedor genérico)
 ========================================= */
 
 .admin-card {
-  border-radius: 20px;
-
-  background: white;
-
-  box-shadow:
-    0 8px 20px rgba(0,0,0,0.08);
-
-  border:
-    1px solid rgba(212,175,55,0.12);
+  border-radius: var(--admin-radius);
+  background: var(--admin-surface);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--admin-border);
+  margin-bottom: 0;
 }
 
 .admin-card .card-content {
-  padding: 28px;
+  padding: 28px !important;
 }
 
 .card-title {
-  display: block;
-
+  display: flex !important;
+  align-items: center;
   margin-bottom: 24px !important;
+  color: var(--admin-dark) !important;
+  font-family: var(--admin-font-display) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  padding-bottom: 14px !important;
+}
 
-  color: #111 !important;
-
-  font-size: 1.4rem !important;
-  font-weight: 800 !important;
+.card-title .material-icons.left {
+  margin-right: 10px !important;
 }
 
 /* =========================================
@@ -101,58 +189,48 @@
 .chart-container {
   position: relative;
   width: 100%;
-  height: 350px;
+  height: 320px;
+  margin-top: 8px;
 }
 
 /* =========================================
-   BOTONES
+   QUICK ACCESS BUTTONS
 ========================================= */
 
 .quick-buttons {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .quick-access-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-
+  justify-content: flex-start;
   gap: 10px;
-
   width: 100%;
-
-  padding: 14px;
-
+  padding: 14px 18px;
   border: none;
-  border-radius: 12px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #d4af37,
-      #f4d76a
-    );
-
+  border-radius: var(--admin-radius-sm);
+  background: linear-gradient(135deg, #d4af37, #f4d76a);
   color: #111;
-
-  font-size: 1rem;
+  font-family: var(--admin-font);
+  font-size: 0.97rem;
   font-weight: 800;
-
   cursor: pointer;
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  text-transform: none;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  letter-spacing: 0.2px;
 }
 
 .quick-access-btn:hover {
-  transform:
-    translateY(-3px);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(212, 175, 55, 0.30);
+}
 
-  box-shadow:
-    0 10px 20px rgba(212,175,55,0.25);
+.quick-access-btn .material-icons {
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 /* =========================================
@@ -160,27 +238,121 @@
 ========================================= */
 
 table {
-  background: white;
+  background: var(--admin-surface);
+  border-collapse: collapse;
+  width: 100%;
 }
 
 table thead {
-  background:
-    rgba(212,175,55,0.12);
+  background: rgba(212, 175, 55, 0.10);
 }
 
 table thead th {
-  color: #111;
-  font-weight: 800;
+  color: var(--admin-dark) !important;
+  font-family: var(--admin-font);
+  font-weight: 800 !important;
+  font-size: 0.92rem;
+  letter-spacing: 0.3px;
+  padding: 14px 16px !important;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.25) !important;
 }
 
 table tbody tr {
-  border-bottom:
-    1px solid #ececec;
+  border-bottom: 1px solid #f0ece2 !important;
+  transition: background 0.15s ease;
+}
+
+table tbody tr:hover {
+  background: rgba(212, 175, 55, 0.04);
 }
 
 table tbody td {
-  color: #444;
+  color: var(--admin-text);
   font-weight: 600;
+  font-size: 0.95rem;
+  padding: 14px 16px !important;
+  vertical-align: middle;
+}
+
+/* Fila sin stock — tint rojo muy suave */
+.admin-table-row--agotado {
+  background: rgba(198, 40, 40, 0.03) !important;
+}
+
+.admin-table-row--agotado:hover {
+  background: rgba(198, 40, 40, 0.06) !important;
+}
+
+/* =========================================
+   BADGES DE STOCK
+========================================= */
+
+.admin-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.admin-badge--info {
+  background: var(--admin-info-light);
+  color: var(--admin-info);
+}
+
+.admin-badge--warning {
+  background: var(--admin-warning-light);
+  color: var(--admin-warning);
+}
+
+.admin-badge--danger {
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
+}
+
+/* =========================================
+   CHIPS DE ESTADO
+========================================= */
+
+.admin-chip {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.83rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.admin-chip--success {
+  background: var(--admin-success-light);
+  color: var(--admin-success);
+}
+
+.admin-chip--warning {
+  background: var(--admin-warning-light);
+  color: var(--admin-warning);
+}
+
+.admin-chip--danger {
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
+}
+
+/* =========================================
+   LEYENDA TABLA
+========================================= */
+
+.admin-table-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 4px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  font-size: 0.82rem;
+  color: var(--admin-muted);
 }
 
 /* =========================================
@@ -189,40 +361,64 @@ table tbody td {
 
 .admin-loading {
   min-height: 100vh;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff,
-      #f7f3e8
-    );
+  background: linear-gradient(135deg, #111111, #1c1a14);
 }
 
 .admin-loading h4 {
-  color: #111;
-  font-weight: 800;
+  color: var(--admin-gold);
+  font-family: var(--admin-font-display);
+  font-weight: 700;
+  margin-top: 0;
 }
 
 /* =========================================
    RESPONSIVE
 ========================================= */
 
-@media (max-width: 768px) {
-
-  .dashboard-card h3 {
-    font-size: 2rem;
+@media (max-width: 992px) {
+  .admin-hero {
+    padding: 24px;
+    gap: 16px;
   }
 
-  .dashboard-icon {
-    font-size: 2.4rem !important;
+  .admin-hero__title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    padding-top: 24px;
+    padding-bottom: 40px;
+  }
+
+  .admin-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px 20px;
+  }
+
+  .dashboard-card__value {
+    font-size: 2.1rem;
   }
 
   .admin-card .card-content {
-    padding: 22px;
+    padding: 20px !important;
   }
 
+  .admin-table-legend {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  table thead th,
+  table tbody td {
+    padding: 10px 10px !important;
+    font-size: 0.85rem;
+  }
 }

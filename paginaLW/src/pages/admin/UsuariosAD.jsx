@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminNavbar from "../admin/AdminNavbar";
-
+import '../../styles/usuarios.css'
 // ─── 1. CONSTANTES ────────────────────────────────────────────────────────────
 
 const API = 'http://localhost:3000/api';
@@ -102,16 +103,19 @@ function Toast({ toast }) {
 function UsuarioForm({ initial, onSave, onClose }) {
   const isEdit = Boolean(initial);
 
-  const [form, setForm] = useState({
-    nombre:             initial?.nombre   || '',
-    email:              initial?.email    || '',
-    password:           '',
-    rol:                initial?.rol      || 'cliente',
-    estado:             initial?.estado !== undefined ? initial.estado : true,
-    cargo:              '',
-    salario:            '',
-    fecha_contratacion: '',
-  });
+ const [form, setForm] = useState({
+  nombre: initial?.nombre || '',
+  email: initial?.email || '',
+  password: '',
+  rol: initial?.rol || 'cliente',
+  estado: initial?.estado !== undefined ? initial.estado : true,
+
+  cargo: initial?.cargo || '',
+  salario: initial?.salario || '',
+  fecha_contratacion: initial?.fecha_contratacion
+    ? initial.fecha_contratacion.substring(0, 10)
+    : '',
+});
   const [errors,  setErrors]  = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -408,18 +412,16 @@ const handleSubmit = async () => {
     <>
       {!isEdit ? (
         <Field label="Usuario *" error={errors.usuario_id}>
-          <select
-            style={{
-              ...inputStyle,
-              backgroundColor: '#fff',
-              color: '#333',
-              cursor: 'pointer',
-              appearance: 'menulist',
-              WebkitAppearance: 'menulist',
-              MozAppearance: 'menulist',
-            }}
-            value={form.usuario_id}
-            onChange={e => setForm({ ...form, usuario_id: e.target.value })}
+<select
+  className="browser-default"
+  style={{
+    ...inputStyle,
+    backgroundColor: '#fff',
+    color: '#333',
+  }}
+  value={form.usuario_id}
+  onChange={e => setForm({ ...form, usuario_id: e.target.value })}
+
           >
             <option value="">Seleccione un usuario</option>
             {usuariosLibres.map(u => (
@@ -562,8 +564,17 @@ const fetchEmpleados = async () => {
     }
 
     const data = await res.json();
+    console.log("----------------EMPLEADOS BACKEND:---------------");
+    console.log(data);
 
-    setEmpleados(Array.isArray(data) ? data : []);
+    const empleadosActivos = data.filter(
+            emp =>
+              emp.estado === true &&
+              emp.usuario_id &&
+              emp.usuario_id.estado === true
+          );
+
+          setEmpleados(empleadosActivos);
   } catch (err) {
     console.error(err);
     showToast('Error al cargar empleados', '#c62828');
@@ -602,6 +613,10 @@ const usuariosLibres = useMemo(() => {
   });
 }, [usuarios, empleadoUserIds]);
 
+console.log("USUARIOS:", usuarios);
+console.log("EMPLEADOS:", empleados);
+console.log("LIBRES:", usuariosLibres);
+
 
 
   const totalUsuarios   = usuarios.length;
@@ -612,59 +627,99 @@ const usuariosLibres = useMemo(() => {
   // ── CRUD USUARIOS ──────────────────────────────────────────────────────────
 
   const handleCreateUser = async (body) => {
-    try {
-      const userRes  = await authFetch(`${API}/usuarios`, {
-        method: 'POST',
-        body: JSON.stringify({
-          nombre:   body.nombre,
-          email:    body.email,
-          password: body.password,
-          rol:      body.rol,
-          estado:   body.estado,
-        }),
-      });
-      const userData = await userRes.json();
+  try {
 
-      if (!userRes.ok) {
-        showToast(userData.message || 'Error al crear usuario', '#c62828');
-        return;
+    // 1. Crear usuario
+    const userRes = await authFetch(`${API}/usuarios`, {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre: body.nombre,
+        email: body.email,
+        password: body.password,
+        rol: body.rol,
+        estado: body.estado,
+      }),
+    });
+
+    const userData = await userRes.json();
+
+    if (!userRes.ok) {
+      showToast(userData.message || 'Error al crear usuario', '#c62828');
+      return;
+    }
+
+    // ✅ OBTENER EL ID CORRECTAMENTE
+    const id =
+      userData._id ||
+      userData.usuario?._id;
+
+    // 2. Si es empleado
+    if (body.rol === 'empleado') {
+
+      // Buscar empleado existente
+      const empleadoExistente = await authFetch(
+        `${API}/empleados/usuario/${id}`
+      );
+
+      let empleadoData = null;
+
+      if (empleadoExistente.ok) {
+        empleadoData = await empleadoExistente.json();
       }
 
-      if (body.rol === 'empleado') {
-        const empleadoRes  = await authFetch(`${API}/empleados`, {
-          method: 'POST',
+      // Reactivar empleado
+      if (empleadoExistente.ok && empleadoData) {
+
+        await authFetch(`${API}/empleados/${empleadoData._id}`, {
+          method: 'PUT',
           body: JSON.stringify({
-            usuario_id:         userData._id,
-            cargo:              body.cargo,
-            salario:            Number(body.salario),
-            fecha_contratacion: body.fecha_contratacion || null,
+            estado: true,
+            cargo: body.cargo || empleadoData.cargo,
+            salario:
+              Number(body.salario) || empleadoData.salario,
+            fecha_contratacion:
+              body.fecha_contratacion ||
+              empleadoData.fecha_contratacion,
           }),
         });
-        const empleadoData = await empleadoRes.json();
 
-        if (!empleadoRes.ok) {
-          showToast(
-            empleadoData.message || 'Usuario creado, pero falló la creación del empleado',
-            '#ef6c00'
-          );
-          await fetchUsuarios();
-          return;
-        }
+      } else {
 
-        await fetchEmpleados();
+        // Crear empleado
+        await authFetch(`${API}/empleados`, {
+          method: 'POST',
+          body: JSON.stringify({
+            usuario_id: id,
+            cargo: body.cargo || 'Empleado',
+            salario: Number(body.salario) || 0,
+            fecha_contratacion:
+              body.fecha_contratacion || new Date(),
+          }),
+        });
+
       }
-
-      await fetchUsuarios();
-      setModal(null);
-      showToast(
-        body.rol === 'empleado'
-          ? 'Usuario y empleado creados exitosamente'
-          : 'Usuario creado exitosamente'
-      );
-    } catch {
-      showToast('Error de conexión', '#c62828');
     }
-  };
+
+    await Promise.all([
+      fetchUsuarios(),
+      fetchEmpleados(),
+    ]);
+
+    setModal(null);
+
+    showToast(
+      body.rol === 'empleado'
+        ? 'Usuario y empleado creados exitosamente'
+        : 'Usuario creado exitosamente'
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast('Error de conexión', '#c62828');
+  }
+};
 
   const handleUpdateUser = async (id, body) => {
     try {
@@ -707,14 +762,25 @@ const usuariosLibres = useMemo(() => {
       }
 
       // Si dejó de ser empleado → eliminar registro empleado
-      if (usuarioActual?.rol === 'empleado' && body.rol !== 'empleado') {
-        const empleado = empleados.find(
-          emp => String(emp.usuario_id?._id || emp.usuario_id) === String(id)
-        );
-        if (empleado) {
-          await authFetch(`${API}/empleados/${empleado._id}`, { method: 'DELETE' });
-        }
-      }
+if (
+  usuarioActual?.rol === 'empleado' &&
+  body.rol !== 'empleado'
+) {
+
+  const empleado = empleados.find(
+    emp =>
+      String(emp.usuario_id?._id || emp.usuario_id) ===
+      String(id)
+  );
+
+  if (empleado) {
+
+    await authFetch(`${API}/empleados/${empleado._id}`, {
+      method: 'DELETE',
+    });
+
+  }
+}
 
       await fetchUsuarios();
       await fetchEmpleados();
@@ -736,9 +802,13 @@ const handleSoftDeleteUser = async (usuario) => {
   if (!confirmacion) return;
 
   try {
+
+    // 1. Desactivar usuario
     const res = await authFetch(`${API}/usuarios/${usuario._id}`, {
       method: 'PUT',
-      body: JSON.stringify({ estado: false }),
+      body: JSON.stringify({
+        estado: false,
+      }),
     });
 
     if (!res.ok) {
@@ -746,9 +816,29 @@ const handleSoftDeleteUser = async (usuario) => {
       return;
     }
 
-    await fetchUsuarios();
+    // 2. Si era empleado -> desactivar empleado
+    if (usuario.rol === 'empleado') {
+
+      const empleado = empleados.find(
+        emp =>
+          String(emp.usuario_id?._id || emp.usuario_id) ===
+          String(usuario._id)
+      );
+
+      if (empleado) {
+        await authFetch(`${API}/empleados/${empleado._id}`, {
+          method: 'DELETE',
+        });
+      }
+    }
+
+    await Promise.all([
+      fetchUsuarios(),
+      fetchEmpleados(),
+    ]);
 
     showToast(`Usuario "${usuario.nombre}" desactivado`);
+
   } catch (err) {
     console.error(err);
     showToast('Error de conexión', '#c62828');
@@ -817,11 +907,24 @@ const handleSoftDeleteUser = async (usuario) => {
   };
 
 const handleDeleteEmpleado = async (id) => {
-  if (!window.confirm('¿Desactivar este empleado? (soft delete)')) {
+
+  if (!window.confirm('¿Desactivar este empleado?')) {
     return;
   }
 
   try {
+
+    const empleado = empleados.find(e => e._id === id);
+
+    if (!empleado) {
+      showToast('Empleado no encontrado', '#c62828');
+      return;
+    }
+
+    const usuarioId =
+      empleado.usuario_id?._id || empleado.usuario_id;
+
+    // 1. Desactivar empleado
     const res = await authFetch(`${API}/empleados/${id}`, {
       method: 'DELETE',
     });
@@ -831,12 +934,21 @@ const handleDeleteEmpleado = async (id) => {
       return;
     }
 
+    // 2. Cambiar rol usuario
+    await authFetch(`${API}/usuarios/${usuarioId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        rol: 'cliente',
+      }),
+    });
+
     await Promise.all([
-      fetchEmpleados(),
       fetchUsuarios(),
+      fetchEmpleados(),
     ]);
 
     showToast('Empleado desactivado');
+
   } catch (err) {
     console.error(err);
     showToast('Error de conexión', '#c62828');
@@ -903,15 +1015,6 @@ const formatFecha = (iso) => {
                 <i className="material-icons large">check_circle</i>
                 <h4>{usuariosActivos}</h4>
                 <p>Usuarios Activos</p>
-              </div>
-            </div>
-          </div>
-          <div className="col s12 m6 l3">
-            <div className="card red white-text" style={{ borderRadius: 12 }}>
-              <div className="card-content center">
-                <i className="material-icons large">person_off</i>
-                <h4>{usuariosInact}</h4>
-                <p>Usuarios Inactivos</p>
               </div>
             </div>
           </div>
@@ -1060,7 +1163,26 @@ const formatFecha = (iso) => {
                             className="btn-small blue"
                             title="Editar empleado"
                             style={{ cursor: 'pointer', marginRight: 4 }}
-                            onClick={() => setModal({ type: 'editEmpleado', data: emp })}
+                            onClick={() => {
+
+                                    const empleadoRelacionado = empleados.find(
+                                      emp =>
+                                        String(emp.usuario_id?._id || emp.usuario_id) ===
+                                        String(u._id)
+                                    );
+
+                                    setModal({
+                                      type: 'editUser',
+                                      data: {
+                                        ...u,
+
+                                        cargo: empleadoRelacionado?.cargo || '',
+                                        salario: empleadoRelacionado?.salario || '',
+                                        fecha_contratacion:
+                                          empleadoRelacionado?.fecha_contratacion || '',
+                                      }
+                                    });
+                                  }}
                           >
                             <i className="material-icons">edit</i>
                           </a>
@@ -1126,7 +1248,7 @@ const formatFecha = (iso) => {
         </Modal>
       )}
 
-      <style>{`
+      <style>{`a
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-8px); }
           to   { opacity: 1; transform: none; }

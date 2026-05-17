@@ -1,649 +1,235 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  useMemo
-} from "react";
-
+import { useEffect, useRef, useState, useMemo } from "react";
 import Chart from "chart.js/auto";
-
-import {
-  useNavigate
-} from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import M from "materialize-css";
-
 import AdminNavbar from "../admin/AdminNavbar";
-
-import {
-  getUsuarios,
-  getProductos,
-  getFacturas
-} from "../../api/admin";
-
+import { getUsuarios, getProductos, getFacturas } from "../../api/admin";
 import "../../styles/admin.css";
 
 export default function AdminDashboardMaterialize() {
+  const salesChartRef = useRef(null);
+  const chartInstance = useRef(null);
+  const navigate = useNavigate();
 
-  // =========================================
-  // REFS
-  // =========================================
-
-  const salesChartRef =
-    useRef(null);
-
-  const chartInstance =
-    useRef(null);
-
-  // =========================================
-  // NAVIGATION
-  // =========================================
-
-  const navigate =
-    useNavigate();
-
-  // =========================================
-  // STATES
-  // =========================================
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [usuarios, setUsuarios] =
-    useState([]);
-
-  const [productos, setProductos] =
-    useState([]);
-
-  const [facturas, setFacturas] =
-    useState([]);
-
-  // GRAFICA USUARIOS ACTIVOS
-  const [
-    usuariosActivosGrafica,
-    setUsuariosActivosGrafica
-  ] = useState([]);
-
-  // PRODUCTOS DE LA TIENDA
-  const [
-    productosTienda,
-    setProductosTienda
-  ] = useState([]);
-
-  // =========================================
-  // INIT MATERIALIZE
-  // =========================================
+  const [loading, setLoading] = useState(true);
+  const [usuarios, setUsuarios] = useState([]);
+  const [productos, setProductos] = useState([]);
+  const [facturas, setFacturas] = useState([]);
 
   useEffect(() => {
-
     M.AutoInit();
-
   }, []);
 
-  // =========================================
-  // LOAD DATA
-  // =========================================
-
   useEffect(() => {
-
-    const token =
-      localStorage.getItem("token");
-
+    const token = localStorage.getItem("token");
     if (!token) {
-
-      console.error(
-        "❌ TOKEN NO ENCONTRADO"
-      );
-
       navigate("/login");
-
       return;
-
     }
 
-    const fetchData =
-      async () => {
-
-        try {
-
-          setLoading(true);
-
-          console.log(
-            "📡 CARGANDO DASHBOARD..."
-          );
-
-          const [
-
-            usuariosRes,
-
-            productosRes,
-
-            facturasRes
-
-          ] = await Promise.all([
-
-            getUsuarios(),
-
-            getProductos(),
-
-            getFacturas()
-
-          ]);
-
-          // =====================================
-          // DEBUG RESPUESTAS
-          // =====================================
-
-          console.log(
-            "🟡 RESPUESTA USUARIOS:",
-            usuariosRes
-          );
-
-          console.log(
-            "🟡 RESPUESTA PRODUCTOS:",
-            productosRes
-          );
-
-          console.log(
-            "🟡 RESPUESTA FACTURAS:",
-            facturasRes
-          );
-
-          // =====================================
-          // NORMALIZAR DATOS
-          // =====================================
-
-          const usuariosData =
-            Array.isArray(
-              usuariosRes
-            )
-              ? usuariosRes
-              : usuariosRes?.usuarios || [];
-
-          const productosData =
-            Array.isArray(
-              productosRes
-            )
-              ? productosRes
-              : productosRes?.productos || [];
-
-          const facturasData =
-            Array.isArray(
-              facturasRes
-            )
-              ? facturasRes
-              : facturasRes?.facturas || [];
-
-          // =====================================
-          // DEBUGS
-          // =====================================
-
-          console.log(
-            "✅ USUARIOS NORMALIZADOS:",
-            usuariosData
-          );
-
-          console.log(
-            "✅ PRODUCTOS NORMALIZADOS:",
-            productosData
-          );
-
-          console.log(
-            "✅ FACTURAS NORMALIZADAS:",
-            facturasData
-          );
-
-          // =====================================
-          // SET STATES
-          // =====================================
-
-          setUsuarios(
-            usuariosData
-          );
-
-          setProductos(
-            productosData
-          );
-
-          setFacturas(
-            facturasData
-          );
-
-          // =====================================
-          // USUARIOS ACTIVOS
-          // =====================================
-
-          const usuariosActivos =
-            usuariosData.filter(
-              (usuario) => {
-
-                console.log(
-                  "👤 VALIDANDO USUARIO:",
-                  usuario
-                );
-
-                return (
-                  usuario?.estado === true
-                );
-
-              }
-            );
-
-          console.log(
-            "✅ USUARIOS ACTIVOS:",
-            usuariosActivos
-          );
-
-          // =====================================
-          // GRAFICA USUARIOS ACTIVOS
-          // =====================================
-
-          const agrupados =
-            {};
-
-          usuariosActivos.forEach(
-            (usuario) => {
-
-              try {
-
-                const fecha =
-                  usuario?.createdAt
-                    ? new Date(
-                        usuario.createdAt
-                      )
-                    : null;
-
-                if (!fecha) {
-
-                  console.warn(
-                    "⚠️ USUARIO SIN FECHA:",
-                    usuario
-                  );
-
-                  return;
-                }
-
-                const mes =
-                  fecha.toLocaleString(
-                    "es-CO",
-                    {
-                      month: "short"
-                    }
-                  );
-
-                agrupados[mes] =
-                  (
-                    agrupados[
-                      mes
-                    ] || 0
-                  ) + 1;
-
-              } catch (error) {
-
-                console.error(
-                  "❌ ERROR GRAFICA USUARIOS:",
-                  error
-                );
-
-              }
-
-            }
-          );
-
-          const usuariosGrafica =
-            Object.entries(
-              agrupados
-            ).map(
-              ([mes, total]) => ({
-
-                mes,
-
-                total
-
-              })
-            );
-
-          console.log(
-            "📊 DATOS GRAFICA:",
-            usuariosGrafica
-          );
-
-          setUsuariosActivosGrafica(
-            usuariosGrafica
-          );
-
-          // =====================================
-          // PRODUCTOS TIENDA
-          // SOLO ACTIVOS
-          // =====================================
-
-          const productosActivos =
-            productosData.filter(
-              (producto) => {
-
-                console.log(
-                  "📦 VALIDANDO PRODUCTO:",
-                  producto
-                );
-
-                return (
-                  producto?.estado === true
-                );
-
-              }
-            );
-
-          console.log(
-            "✅ PRODUCTOS ACTIVOS:",
-            productosActivos
-          );
-
-          setProductosTienda(
-            productosActivos
-          );
-
-        } catch (error) {
-
-          console.error(
-            "❌ ERROR GENERAL DASHBOARD:",
-            error
-          );
-
-          setUsuarios([]);
-          setProductos([]);
-          setFacturas([]);
-          setUsuariosActivosGrafica([]);
-          setProductosTienda([]);
-
-          M.toast({
-            html:
-              "❌ Error cargando dashboard",
-            classes:
-              "red rounded"
-          });
-
-        } finally {
-
-          setLoading(false);
-
-        }
-
-      };
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [usuariosRes, productosRes, facturasRes] = await Promise.all([
+          getUsuarios(),
+          getProductos(),
+          getFacturas(),
+        ]);
+
+        setUsuarios(Array.isArray(usuariosRes) ? usuariosRes : usuariosRes?.usuarios || []);
+        setProductos(Array.isArray(productosRes) ? productosRes : productosRes?.productos || []);
+        setFacturas(Array.isArray(facturasRes) ? facturasRes : facturasRes?.facturas || []);
+      } catch (error) {
+        console.error("❌ ERROR GENERAL DASHBOARD:", error);
+        M.toast({
+          html: "<span>❌ Error cargando el dashboard</span>",
+          classes: "red darken-2 rounded",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchData();
-
   }, [navigate]);
+
+  // =========================================
+  // MEMOS
+  // =========================================
+
+  const usuariosActivosLista = useMemo(
+    () => usuarios.filter((u) => u?.estado === true),
+    [usuarios]
+  );
+
+  const productosActivosLista = useMemo(
+    () => productos.filter((p) => p?.estado === true),
+    [productos]
+  );
+
+  const totalUsuariosActivos = usuariosActivosLista.length;
+  const totalProductosActivos = productosActivosLista.length;
+  const totalFacturasActivas = useMemo(
+    () => facturas.filter((f) => f?.estado !== "cancelada").length,
+    [facturas]
+  );
+
+  const datosGraficaUsuarios = useMemo(() => {
+    const agrupados = {};
+    usuariosActivosLista.forEach((usuario) => {
+      if (!usuario?.createdAt) return;
+      try {
+        const fecha = new Date(usuario.createdAt);
+        const mes = fecha.toLocaleString("es-CO", { month: "short" });
+        agrupados[mes] = (agrupados[mes] || 0) + 1;
+      } catch (e) {
+        console.error("Error parseando fecha:", e);
+      }
+    });
+    return Object.entries(agrupados).map(([mes, total]) => ({ mes, total }));
+  }, [usuariosActivosLista]);
 
   // =========================================
   // CHART
   // =========================================
 
   useEffect(() => {
+    if (!salesChartRef.current || datosGraficaUsuarios.length === 0) return;
+    if (chartInstance.current) chartInstance.current.destroy();
 
-    if (
-      !salesChartRef.current ||
-      usuariosActivosGrafica.length === 0
-    ) {
-
-      console.warn(
-        "⚠️ NO HAY DATOS PARA LA GRAFICA"
-      );
-
-      return;
-
-    }
-
-    try {
-
-      if (
-        chartInstance.current
-      ) {
-
-        chartInstance.current.destroy();
-
-      }
-
-      chartInstance.current =
-        new Chart(
-          salesChartRef.current,
+    const ctx = salesChartRef.current.getContext("2d");
+    chartInstance.current = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: datosGraficaUsuarios.map((item) => item.mes),
+        datasets: [
           {
-
-            type: "bar",
-
-            data: {
-
-              labels:
-                usuariosActivosGrafica.map(
-                  (item) => item.mes
-                ),
-
-              datasets: [
-
-                {
-
-                  label:
-                    "Usuarios Activos",
-
-                  data:
-                    usuariosActivosGrafica.map(
-                      (item) => item.total
-                    ),
-
-                  borderRadius: 12,
-
-                  borderWidth: 1,
-
-                  backgroundColor: [
-                    "#64B5F6",
-                    "#81C784",
-                    "#FFB74D",
-                    "#BA68C8",
-                    "#4DD0E1",
-                    "#AED581",
-                    "#FFD54F"
-                  ]
-
-                }
-
-              ]
-
-            },
-
-            options: {
-
-              responsive: true,
-
-              maintainAspectRatio: false,
-
-              plugins: {
-
-                legend: {
-
-                  labels: {
-
-                    color:
-                      "#555",
-
-                    font: {
-
-                      size: 14
-
-                    }
-
-                  }
-
-                }
-
-              },
-
-              scales: {
-
-                x: {
-
-                  ticks: {
-
-                    color:
-                      "#666"
-
-                  },
-
-                  grid: {
-
-                    color:
-                      "#eeeeee"
-
-                  }
-
-                },
-
-                y: {
-
-                  beginAtZero: true,
-
-                  ticks: {
-
-                    color:
-                      "#666"
-
-                  },
-
-                  grid: {
-
-                    color:
-                      "#eeeeee"
-
-                  }
-
-                }
-
-              }
-
-            }
-
-          }
-        );
-
-    } catch (error) {
-
-      console.error(
-        "❌ ERROR CREANDO GRAFICA:",
-        error
-      );
-
-    }
+            label: "Usuarios Activos",
+            data: datosGraficaUsuarios.map((item) => item.total),
+            borderRadius: 8,
+            borderWidth: 0,
+            backgroundColor: "#d4af37",
+            hoverBackgroundColor: "#e7c65a",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "#111",
+            titleColor: "#d4af37",
+            bodyColor: "#ffffff",
+            borderColor: "#d4af37",
+            borderWidth: 1,
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: "#888", font: { weight: "600" } },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: "rgba(212,175,55,0.1)" },
+            ticks: { color: "#888" },
+          },
+        },
+      },
+    });
 
     return () => {
-
-      if (
-        chartInstance.current
-      ) {
-
-        chartInstance.current.destroy();
-
-      }
-
+      if (chartInstance.current) chartInstance.current.destroy();
     };
-
-  }, [usuariosActivosGrafica]);
-
-  // =========================================
-  // MEMOS
-  // =========================================
-
-  const usuariosActivos =
-    useMemo(
-      () =>
-        usuarios.filter(
-          (u) =>
-            u?.estado === true
-        ).length,
-      [usuarios]
-    );
-
-  const productosActivos =
-    useMemo(
-      () =>
-        productos.filter(
-          (p) =>
-            p?.estado === true
-        ).length,
-      [productos]
-    );
-
-  const facturasActivas =
-    useMemo(
-      () =>
-        facturas.filter(
-          (f) =>
-            f?.estado !==
-            "cancelada"
-        ).length,
-      [facturas]
-    );
+  }, [datosGraficaUsuarios]);
 
   // =========================================
-  // CARDS
+  // HELPERS STOCK
   // =========================================
 
-  const cards = [
-
-    {
-
-      title:
-        "Usuarios Activos",
-
-      value:
-        usuariosActivos,
-
-      icon:
-        "people",
-
-      bg:
-        "#E3F2FD",
-
-      iconColor:
-        "#1E88E5"
-
-    },
-
-    {
-
-      title:
-        "Productos Activos",
-
-      value:
-        productosActivos,
-
-      icon:
-        "inventory_2",
-
-      bg:
-        "#E8F5E9",
-
-      iconColor:
-        "#43A047"
-
-    },
-
-    {
-
-      title:
-        "Facturas Activas",
-
-      value:
-        facturasActivas,
-
-      icon:
-        "receipt_long",
-
-      bg:
-        "#FFF3E0",
-
-      iconColor:
-        "#FB8C00"
-
+  /**
+   * Devuelve el JSX del badge de stock
+   * agotado  → rojo
+   * bajo (≤5) → naranja + cantidad
+   * normal   → azul + cantidad
+   */
+  const renderStockBadge = (stock) => {
+    const qty = Number(stock ?? 0);
+    if (qty === 0) {
+      return (
+        <span className="admin-badge admin-badge--danger">
+          Agotado
+        </span>
+      );
     }
+    if (qty <= 5) {
+      return (
+        <span className="admin-badge admin-badge--warning">
+          {qty} u. — bajo
+        </span>
+      );
+    }
+    return (
+      <span className="admin-badge admin-badge--info">
+        {qty} unidades
+      </span>
+    );
+  };
 
+  /**
+   * Devuelve el JSX del chip de estado operativo.
+   * Si el stock es 0 → "Sin Stock" en rojo aunque el producto esté activo en BD.
+   * Si stock bajo   → "Stock Bajo" en naranja.
+   * Normal          → "Activo" en verde.
+   */
+  const renderEstadoChip = (producto) => {
+    const qty = Number(producto?.stock ?? 0);
+    if (qty === 0) {
+      return (
+        <span className="admin-chip admin-chip--danger">
+          Sin Stock
+        </span>
+      );
+    }
+    if (qty <= 5) {
+      return (
+        <span className="admin-chip admin-chip--warning">
+          Stock Bajo
+        </span>
+      );
+    }
+    return (
+      <span className="admin-chip admin-chip--success">
+        Activo
+      </span>
+    );
+  };
+
+  // CARDS CONFIG
+  const cards = [
+    {
+      title: "Usuarios Activos",
+      value: totalUsuariosActivos,
+      icon: "people",
+      accent: "#2196F3",
+      accentLight: "rgba(33,150,243,0.08)",
+    },
+    {
+      title: "Productos Activos",
+      value: totalProductosActivos,
+      icon: "inventory_2",
+      accent: "#d4af37",
+      accentLight: "rgba(212,175,55,0.08)",
+    },
+    {
+      title: "Facturas Activas",
+      value: totalFacturasActivas,
+      icon: "receipt_long",
+      accent: "#4CAF50",
+      accentLight: "rgba(76,175,80,0.08)",
+    },
   ];
 
   // =========================================
@@ -651,61 +237,26 @@ export default function AdminDashboardMaterialize() {
   // =========================================
 
   if (loading) {
-
     return (
-
-      <div
-        className="
-          valign-wrapper
-          center-align
-        "
-        style={{
-          height: "100vh",
-          justifyContent: "center",
-          flexDirection: "column",
-          gap: 20,
-        }}
-      >
-
-        <div
-          className="
-            preloader-wrapper
-            big
-            active
-          "
-        >
-
-          <div className="spinner-layer spinner-blue-only">
-
-            <div className="circle-clipper left">
-              <div className="circle"></div>
+      <div className="admin-loading">
+        <div style={{ textAlign: "center" }}>
+          <div className="preloader-wrapper big active">
+            <div className="spinner-layer" style={{ borderColor: "#d4af37" }}>
+              <div className="circle-clipper left">
+                <div className="circle"></div>
+              </div>
+              <div className="gap-patch">
+                <div className="circle"></div>
+              </div>
+              <div className="circle-clipper right">
+                <div className="circle"></div>
+              </div>
             </div>
-
-            <div className="gap-patch">
-              <div className="circle"></div>
-            </div>
-
-            <div className="circle-clipper right">
-              <div className="circle"></div>
-            </div>
-
           </div>
-
+          <h4 style={{ marginTop: "28px" }}>Cargando dashboard...</h4>
         </div>
-
-        <h5
-          style={{
-            color: "#555",
-            fontWeight: 600,
-          }}
-        >
-          Cargando dashboard...
-        </h5>
-
       </div>
-
     );
-
   }
 
   // =========================================
@@ -713,510 +264,187 @@ export default function AdminDashboardMaterialize() {
   // =========================================
 
   return (
-
-    <div
-      className="admin-dashboard"
-      style={{
-        background:
-          "#f5f7fb",
-        minHeight: "100vh",
-      }}
-    >
-
+    <div className="admin-dashboard">
       <AdminNavbar />
 
-      <div
-        className="container"
-        style={{
-          paddingTop: 30,
-          paddingBottom: 40,
-        }}
-      >
+      <div className="container admin-container">
 
         {/* HEADER */}
-
-        <div
-          className="card-panel"
-          style={{
-            borderRadius: 24,
-            background:
-              "linear-gradient(135deg,#42A5F5,#64B5F6)",
-            color: "#fff",
-            padding: 30,
-            marginBottom: 30,
-          }}
-        >
-
-          <h4
-            style={{
-              fontWeight: 800,
-              marginTop: 0,
-            }}
-          >
-            📊 Dashboard Administrativo
-          </h4>
-
-          <p
-            style={{
-              marginBottom: 0,
-              opacity: 0.95,
-              fontSize: 16,
-            }}
-          >
-            Gestión visual de usuarios,
-            productos y facturas.
-          </p>
-
+        <div className="admin-hero">
+          <div className="admin-hero__icon">
+            <i className="material-icons" style={{ fontSize: "36px", color: "#d4af37" }}>
+              analytics
+            </i>
+          </div>
+          <div>
+            <h4 className="admin-hero__title">Dashboard Administrativo</h4>
+            <p className="admin-hero__subtitle">
+              Monitoreo en tiempo real — usuarios, inventario y facturación.
+            </p>
+          </div>
         </div>
 
-        {/* CARDS */}
-
+        {/* KPI CARDS */}
         <div className="row">
-
-          {cards.map(
-            (card, index) => (
-
-              <div
-                key={index}
-                className="col s12 m6 l4"
-              >
-
-                <div
-                  className="card"
-                  style={{
-                    borderRadius: 24,
-                    background:
-                      card.bg,
-                    boxShadow:
-                      "0 4px 18px rgba(0,0,0,0.06)",
-                  }}
-                >
-
-                  <div
-                    className="card-content"
-                    style={{
-                      padding: 28,
-                    }}
-                  >
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        alignItems:
-                          "center",
-                      }}
-                    >
-
-                      <div>
-
-                        <h3
-                          style={{
-                            margin: 0,
-                            fontWeight: 800,
-                            color: "#333",
-                          }}
-                        >
-                          {
-                            card.value
-                          }
-                        </h3>
-
-                        <p
-                          style={{
-                            marginTop: 8,
-                            color: "#666",
-                            fontWeight: 500,
-                          }}
-                        >
-                          {
-                            card.title
-                          }
-                        </p>
-
-                      </div>
-
-                      <div
-                        style={{
-                          width: 70,
-                          height: 70,
-                          borderRadius:
-                            "50%",
-                          background:
-                            "#fff",
-                          display: "flex",
-                          alignItems:
-                            "center",
-                          justifyContent:
-                            "center",
-                        }}
-                      >
-
-                        <i
-                          className="material-icons"
-                          style={{
-                            fontSize: 38,
-                            color:
-                              card.iconColor,
-                          }}
-                        >
-                          {
-                            card.icon
-                          }
-                        </i>
-
-                      </div>
-
+          {cards.map((card, i) => (
+            <div key={i} className="col s12 m4">
+              <div className="dashboard-card" style={{ "--card-accent": card.accent, "--card-accent-light": card.accentLight }}>
+                <div className="card-content dashboard-card__content">
+                  <div className="dashboard-card-top">
+                    <div>
+                      <h3 className="dashboard-card__value">{card.value}</h3>
+                      <p className="dashboard-card__label">{card.title}</p>
                     </div>
-
+                    <div className="dashboard-card__icon-wrap">
+                      <i className="material-icons dashboard-icon">{card.icon}</i>
+                    </div>
                   </div>
-
                 </div>
-
               </div>
-
-            )
-          )}
-
+            </div>
+          ))}
         </div>
 
-        {/* GRAFICA + BOTONES */}
-
+        {/* ANALYTICS */}
         <div className="row">
-
-          {/* GRAFICA */}
-
+          {/* CHART */}
           <div className="col s12 l8">
-
-            <div
-              className="card"
-              style={{
-                borderRadius: 24,
-                boxShadow:
-                  "0 4px 18px rgba(0,0,0,0.05)",
-              }}
-            >
-
+            <div className="admin-card">
               <div className="card-content">
-
-                <span
-                  className="card-title"
-                  style={{
-                    fontWeight: 700,
-                    color: "#444",
-                  }}
-                >
-                  👥 Usuarios Activos Registrados
+                <span className="card-title">
+                  <i className="material-icons left" style={{ color: "#d4af37" }}>
+                    trending_up
+                  </i>
+                  Tendencia de usuarios activos
                 </span>
-
-                <div
-                  style={{
-                    height: 350,
-                    marginTop: 20,
-                  }}
-                >
-
-                  <canvas
-                    ref={
-                      salesChartRef
-                    }
-                  />
-
+                <div className="chart-container">
+                  <canvas ref={salesChartRef} />
                 </div>
-
               </div>
-
             </div>
-
           </div>
 
-          {/* ACCESOS */}
-
+          {/* ACCESOS RÁPIDOS */}
           <div className="col s12 l4">
-
-            <div
-              className="card"
-              style={{
-                borderRadius: 24,
-                boxShadow:
-                  "0 4px 18px rgba(0,0,0,0.05)",
-              }}
-            >
-
+            <div className="admin-card">
               <div className="card-content">
-
-                <span
-                  className="card-title"
-                  style={{
-                    fontWeight: 700,
-                    color: "#444",
-                  }}
-                >
-                  Accesos Rápidos
+                <span className="card-title">
+                  <i className="material-icons left" style={{ color: "#d4af37" }}>
+                    bolt
+                  </i>
+                  Accesos rápidos
                 </span>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection:
-                      "column",
-                    gap: 15,
-                    marginTop: 25,
-                  }}
-                >
-
+                <div className="quick-buttons">
                   <button
-                    className="
-                      btn-large
-                      waves-effect
-                      waves-light
-                    "
-                    style={{
-                      borderRadius: 14,
-                      background:
-                        "#42A5F5",
-                    }}
-                    onClick={() =>
-                      navigate(
-                        "/admin/usuarios"
-                      )
-                    }
+                    className="quick-access-btn"
+                    onClick={() => navigate("/admin/usuarios")}
                   >
-
-                    <i className="material-icons left">
-                      people
-                    </i>
-
-                    Usuarios y empleados
-
+                    <i className="material-icons left">people</i>
+                    Módulo de usuarios
                   </button>
-
                   <button
-                    className="
-                      btn-large
-                      waves-effect
-                      waves-light
-                    "
-                    style={{
-                      borderRadius: 14,
-                      background:
-                        "#66BB6A",
-                    }}
-                    onClick={() =>
-                      navigate(
-                        "/admin/productos"
-                      )
-                    }
+                    className="quick-access-btn"
+                    onClick={() => navigate("/admin/productos")}
                   >
-
-                    <i className="material-icons left">
-                      inventory_2
-                    </i>
-
-                    Productos y categorias
-
+                    <i className="material-icons left">inventory_2</i>
+                    Control de productos
                   </button>
-
                   <button
-                    className="
-                      btn-large
-                      waves-effect
-                      waves-light
-                    "
-                    style={{
-                      borderRadius: 14,
-                      background:
-                        "#FFA726",
-                    }}
-                    onClick={() =>
-                      navigate(
-                        "/admin/facturas"
-                      )
-                    }
+                    className="quick-access-btn"
+                    onClick={() => navigate("/admin/facturas")}
                   >
-
-                    <i className="material-icons left">
-                      receipt_long
-                    </i>
-
-                    Facturas
-
+                    <i className="material-icons left">receipt_long</i>
+                    Registro de facturas
                   </button>
-
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
 
-        {/* PRODUCTOS TIENDA */}
-
+        {/* TABLA PRODUCTOS */}
         <div className="row">
-
           <div className="col s12">
-
-            <div
-              className="card"
-              style={{
-                borderRadius: 24,
-                boxShadow:
-                  "0 4px 18px rgba(0,0,0,0.05)",
-              }}
-            >
-
+            <div className="admin-card">
               <div className="card-content">
-
-                <span
-                  className="card-title"
-                  style={{
-                    fontWeight: 700,
-                    color: "#444",
-                  }}
-                >
-                  🔥 Productos de la Tienda
+                <span className="card-title">
+                  <i className="material-icons left" style={{ color: "#d4af37" }}>
+                    shopping_bag
+                  </i>
+                  Stock de productos activos
                 </span>
 
-                <table
-                  className="
-                    highlight
-                    responsive-table
-                  "
-                >
-
+                <table className="highlight responsive-table">
                   <thead>
-
                     <tr>
-
-                      <th>
-                        Producto
-                      </th>
-
-                      <th>
-                        Precio
-                      </th>
-
-                      <th>
-                        Stock
-                      </th>
-
-                      <th>
-                        Estado
-                      </th>
-
+                      <th>Producto</th>
+                      <th>Precio unitario</th>
+                      <th>Existencias</th>
+                      <th>Estado operativo</th>
                     </tr>
-
                   </thead>
-
                   <tbody>
-
-                    {
-                      productosTienda.length === 0
-                        ? (
-
-                          <tr>
-
-                            <td
-                              colSpan="4"
-                              className="center"
-                            >
-                              No hay productos activos
-                            </td>
-
-                          </tr>
-
-                        )
-                        : (
-
-                          productosTienda.map(
-                            (
-                              producto,
-                              index
-                            ) => {
-
-                              console.log(
-                                "📦 RENDER PRODUCTO:",
-                                producto
-                              );
-
-                              return (
-
-                                <tr
-                                  key={
-                                    producto._id ||
-                                    index
-                                  }
+                    {productosActivosLista.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="center-align grey-text">
+                          No existen productos activos registrados actualmente.
+                        </td>
+                      </tr>
+                    ) : (
+                      productosActivosLista.map((producto, index) => {
+                        const sinStock = Number(producto?.stock ?? 0) === 0;
+                        return (
+                          <tr
+                            key={producto._id || index}
+                            className={sinStock ? "admin-table-row--agotado" : ""}
+                          >
+                            <td className="fw-medium">
+                              {sinStock && (
+                                <i
+                                  className="material-icons"
+                                  title="Sin stock disponible"
+                                  style={{
+                                    fontSize: "16px",
+                                    verticalAlign: "middle",
+                                    marginRight: "6px",
+                                    color: "#c62828",
+                                  }}
                                 >
-
-                                  <td>
-                                    {
-                                      producto?.nombre ||
-                                      "Sin nombre"
-                                    }
-                                  </td>
-
-                                  <td>
-                                    $
-                                    {
-                                      Number(
-                                        producto?.precio || 0
-                                      ).toLocaleString(
-                                        "es-CO"
-                                      )
-                                    }
-                                  </td>
-
-                                  <td>
-                                    {
-                                      producto?.stock || 0
-                                    }
-                                  </td>
-
-                                  <td>
-
-                                    <span
-                                      className="
-                                        new
-                                        badge
-                                        green
-                                      "
-                                      data-badge-caption=""
-                                    >
-                                      Activo
-                                    </span>
-
-                                  </td>
-
-                                </tr>
-
-                              );
-
-                            }
-                          )
-
-                        )
-                    }
-
+                                  warning
+                                </i>
+                              )}
+                              {producto?.nombre || "Sin nombre"}
+                            </td>
+                            <td>
+                              $
+                              {Number(producto?.precio || 0).toLocaleString("es-CO", {
+                                minimumFractionDigits: 0,
+                              })}
+                            </td>
+                            <td>{renderStockBadge(producto?.stock)}</td>
+                            <td>{renderEstadoChip(producto)}</td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
-
                 </table>
 
+                {/* LEYENDA */}
+                <div className="admin-table-legend">
+                  <span className="admin-chip admin-chip--success" style={{ fontSize: "0.78rem" }}>Activo</span>
+                  <span style={{ fontSize: "0.82rem", color: "#555" }}>Stock disponible</span>
+                  <span className="admin-chip admin-chip--warning" style={{ fontSize: "0.78rem", marginLeft: "12px" }}>Stock Bajo</span>
+                  <span style={{ fontSize: "0.82rem", color: "#555" }}>≤ 5 unidades</span>
+                  <span className="admin-chip admin-chip--danger" style={{ fontSize: "0.78rem", marginLeft: "12px" }}>Sin Stock</span>
+                  <span style={{ fontSize: "0.82rem", color: "#555" }}>0 unidades — no disponible para venta</span>
+                </div>
               </div>
-
             </div>
-
           </div>
-
         </div>
 
       </div>
-
     </div>
-
   );
-
 }

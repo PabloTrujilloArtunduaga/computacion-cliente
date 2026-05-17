@@ -395,7 +395,7 @@ export default function Carrito() {
       // =====================================
       // REDIRIGIR
       // =====================================
-      navigate("/cliente");
+      navigate("/productos");
 
     } catch (error) {
 

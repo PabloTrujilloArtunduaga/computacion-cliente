@@ -37,6 +37,18 @@ export default function Login() {
     setLoading
   ] = useState(false);
 
+  /*
+    ======================================
+    ERRORES
+    ======================================
+  */
+
+  const [errors, setErrors] =
+    useState({
+      usuario: "",
+      password: "",
+    });
+
   const navigate =
     useNavigate();
 
@@ -285,7 +297,6 @@ export default function Login() {
   /*
     ======================================
     SIMPLE TOAST
-    SIN MATERIALIZE JS
     ======================================
   */
 
@@ -360,13 +371,40 @@ export default function Login() {
         usuario
       );
 
+      /*
+        ==========================
+        VALIDAR CAMPOS VACÍOS
+        ==========================
+      */
+
+      const nuevosErrores = {
+        usuario: "",
+        password: "",
+      };
+
+      if (!usuario.trim()) {
+
+        nuevosErrores.usuario =
+          "El usuario es obligatorio";
+
+      }
+
+      if (!password.trim()) {
+
+        nuevosErrores.password =
+          "La contraseña es obligatoria";
+
+      }
+
+      setErrors(nuevosErrores);
+
       if (
-        !usuario.trim() ||
-        !password.trim()
+        nuevosErrores.usuario ||
+        nuevosErrores.password
       ) {
 
         showToast(
-          "❌ Completa todos los campos",
+          "❌ Completa los campos requeridos",
           "error"
         );
 
@@ -411,7 +449,9 @@ export default function Login() {
         );
 
         /*
-          ERROR
+          =================================
+          ERROR LOGIN
+          =================================
         */
 
         if (!res.ok) {
@@ -429,6 +469,49 @@ export default function Login() {
             }
           );
 
+          /*
+            MENSAJES
+          */
+
+          const mensaje =
+            (
+              data?.mensaje ||
+              data?.message ||
+              ""
+            ).toLowerCase();
+
+          if (
+            mensaje.includes("usuario")
+          ) {
+
+            setErrors({
+              usuario:
+                "El usuario no existe",
+              password: ""
+            });
+
+          } else if (
+            mensaje.includes("contraseña") ||
+            mensaje.includes("password")
+          ) {
+
+            setErrors({
+              usuario: "",
+              password:
+                "Contraseña incorrecta"
+            });
+
+          } else {
+
+            setErrors({
+              usuario:
+                "Datos incorrectos",
+              password:
+                "Datos incorrectos"
+            });
+
+          }
+
           showToast(
             "❌ " +
             (
@@ -444,7 +527,9 @@ export default function Login() {
         }
 
         /*
+          =================================
           SAVE
+          =================================
         */
 
         localStorage.setItem(
@@ -478,6 +563,15 @@ export default function Login() {
           "✅ Bienvenido",
           "success"
         );
+
+        /*
+          LIMPIAR ERRORES
+        */
+
+        setErrors({
+          usuario: "",
+          password: "",
+        });
 
         /*
           EXIT
@@ -655,11 +749,23 @@ export default function Login() {
               type="text"
               value={usuario}
               autoComplete="username"
-              onChange={(e) =>
+              className={
+                errors.usuario
+                  ? "invalid"
+                  : ""
+              }
+              onChange={(e) => {
+
                 setUsuario(
                   e.target.value
-                )
-              }
+                );
+
+                setErrors((prev) => ({
+                  ...prev,
+                  usuario: "",
+                }));
+
+              }}
             />
 
             <label
@@ -672,6 +778,14 @@ export default function Login() {
             >
               Usuario
             </label>
+
+            {
+              errors.usuario && (
+                <span className="login-error">
+                  {errors.usuario}
+                </span>
+              )
+            }
 
           </div>
 
@@ -697,11 +811,23 @@ export default function Login() {
               }
               value={password}
               autoComplete="current-password"
-              onChange={(e) =>
+              className={
+                errors.password
+                  ? "invalid"
+                  : ""
+              }
+              onChange={(e) => {
+
                 setPassword(
                   e.target.value
-                )
-              }
+                );
+
+                setErrors((prev) => ({
+                  ...prev,
+                  password: "",
+                }));
+
+              }}
             />
 
             <label
@@ -736,6 +862,14 @@ export default function Login() {
               </i>
 
             </button>
+
+            {
+              errors.password && (
+                <span className="login-error">
+                  {errors.password}
+                </span>
+              )
+            }
 
           </div>
 
@@ -791,19 +925,6 @@ export default function Login() {
             login-links
           "
         >
-
-          <p>
-
-            <Link
-              to="/recuperar-password"
-              className="
-                forgot-link
-              "
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-
-          </p>
 
           <p>
 
