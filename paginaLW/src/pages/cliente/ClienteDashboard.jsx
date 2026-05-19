@@ -1,870 +1,849 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
-
+import React, { useEffect, useState } from "react";
 import ClienteNavbar from "./ClienteNavbar";
 import Footer from "../../components/Footer";
 
-export default function ClienteDashboard() {
+/* =========================================
+   MODAL DE FACTURA
+========================================= */
+function FacturaModal({ factura, onClose }) {
+  if (!factura) return null;
 
-  const [usuario, setUsuario] =
-    useState(null);
-
-  const [facturas, setFacturas] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  /* =========================================
-     USER
-  ========================================= */
-
-  useEffect(() => {
-
-    try {
-
-      const user = JSON.parse(
-        localStorage.getItem("user")
-      );
-
-      setUsuario(user);
-
-    } catch (error) {
-
-      console.error(
-        "Error obteniendo usuario",
-        error
-      );
-
-    }
-
-  }, []);
-
-  /* =========================================
-     FACTURAS
-  ========================================= */
-
-  useEffect(() => {
-
-    const cargarFacturas = async () => {
-
-      try {
-
-        const user = JSON.parse(
-          localStorage.getItem("user")
-        );
-
-        const token =
-          localStorage.getItem("token");
-
-        if (!user || !token) {
-
-          setLoading(false);
-          return;
-
-        }
-
-        const res = await fetch(
-          `http://localhost:3000/api/facturas/cliente/${user._id}`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await res.json();
-
-        setFacturas(
-          Array.isArray(data)
-            ? data
-            : []
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Error cargando facturas",
-          error
-        );
-
-      } finally {
-
-        setLoading(false);
-
-      }
-
-    };
-
-    cargarFacturas();
-
-  }, []);
-
-  /* =========================================
-     ESTADOS
-  ========================================= */
-
-  const getEstadoStyles = (estado) => {
-
+  const getEstadoColor = (estado) => {
     switch (estado) {
-
-      case "pagada":
-
-        return {
-          background:
-            "rgba(34,197,94,0.14)",
-          color: "#16a34a",
-          border:
-            "1px solid rgba(34,197,94,0.18)",
-        };
-
-      case "pendiente":
-
-        return {
-          background:
-            "rgba(245,158,11,0.14)",
-          color: "#d97706",
-          border:
-            "1px solid rgba(245,158,11,0.18)",
-        };
-
-      case "anulada":
-
-        return {
-          background:
-            "rgba(239,68,68,0.14)",
-          color: "#dc2626",
-          border:
-            "1px solid rgba(239,68,68,0.18)",
-        };
-
-      default:
-
-        return {
-          background:
-            "rgba(0,0,0,0.05)",
-          color: "#444",
-          border:
-            "1px solid rgba(0,0,0,0.08)",
-        };
-
+      case "pagada":   return { bg: "#dcfce7", color: "#15803d", border: "#bbf7d0" };
+      case "pendiente":return { bg: "#fef9c3", color: "#a16207", border: "#fde68a" };
+      case "anulada":  return { bg: "#fee2e2", color: "#b91c1c", border: "#fecaca" };
+      default:         return { bg: "#f3f4f6", color: "#374151", border: "#e5e7eb" };
     }
-
   };
 
-  return (
+  const estadoColor = getEstadoColor(factura.estado);
+  const subtotal = factura.productos?.reduce((acc, p) => acc + (p.precio * p.cantidad), 0) || 0;
 
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalContainerStyle} onClick={(e) => e.stopPropagation()}>
+
+        {/* HEADER */}
+        <div style={modalHeaderStyle}>
+          <div>
+            <p style={modalEtiquetaStyle}>FACTURA</p>
+            <h2 style={modalTitleStyle}>#{factura._id?.slice(-8).toUpperCase()}</h2>
+          </div>
+          <button style={closeBtnStyle} onClick={onClose} aria-label="Cerrar">✕</button>
+        </div>
+
+        <div style={modalBodyStyle}>
+
+          {/* ESTADO + FECHA */}
+          <div style={modalMetaRowStyle}>
+            <span style={{
+              ...estadoBadgeModalStyle,
+              background: estadoColor.bg,
+              color: estadoColor.color,
+              border: `1px solid ${estadoColor.border}`,
+            }}>
+              {factura.estado?.toUpperCase()}
+            </span>
+            <span style={modalFechaStyle}>
+              📅 {new Date(factura.createdAt).toLocaleDateString("es-CO", {
+                year: "numeric", month: "long", day: "numeric",
+              })}
+            </span>
+          </div>
+
+          <div style={modalDividerStyle} />
+
+          {/* CLIENTE */}
+          <div style={modalSectionStyle}>
+            <p style={modalSectionTitleStyle}>Cliente</p>
+            <div style={modalInfoGridStyle}>
+              <div style={modalInfoItemStyle}>
+                <span style={modalLabelStyle}>Método de pago</span>
+                <span style={modalValueStyle}>{factura.metodo_pago || "—"}</span>
+              </div>
+              <div style={modalInfoItemStyle}>
+                <span style={modalLabelStyle}>ID completo</span>
+                <span style={{ ...modalValueStyle, fontSize: "0.75rem", color: "#9ca3af", fontFamily: "monospace" }}>
+                  {factura._id}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div style={modalDividerStyle} />
+
+          {/* PRODUCTOS */}
+          <div style={modalSectionStyle}>
+            <p style={modalSectionTitleStyle}>Productos</p>
+            <div style={productosListStyle}>
+              {factura.productos?.map((p, i) => (
+                <div key={i} style={productoRowStyle}>
+                  <div style={productoInfoStyle}>
+                    <span style={productoNombreStyle}>{p.nombre}</span>
+                    <span style={productoCantidadStyle}>× {p.cantidad}</span>
+                  </div>
+                  <span style={productoPrecioStyle}>
+                    ${(p.precio * p.cantidad)?.toLocaleString("es-CO")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={modalDividerStyle} />
+
+          {/* TOTAL */}
+          <div style={totalRowStyle}>
+            <div>
+              <span style={totalLabelStyle}>Total de la factura</span>
+            </div>
+            <span style={totalAmountStyle}>
+              ${factura.total?.toLocaleString("es-CO")}
+            </span>
+          </div>
+
+        </div>
+
+        {/* FOOTER */}
+        <div style={modalFooterStyle}>
+          <button style={closeModalBtnStyle} onClick={onClose}>
+            Cerrar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+/* =========================================
+   DASHBOARD PRINCIPAL
+========================================= */
+export default function ClienteDashboard() {
+  const [usuario, setUsuario]           = useState(null);
+  const [facturas, setFacturas]         = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [facturaModal, setFacturaModal] = useState(null);
+
+  /* USER */
+  useEffect(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      setUsuario(user);
+    } catch (error) {
+      console.error("Error obteniendo usuario", error);
+    }
+  }, []);
+
+  /* FACTURAS */
+  useEffect(() => {
+    const cargarFacturas = async () => {
+      try {
+        const user  = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("token");
+        if (!user || !token) { setLoading(false); return; }
+
+        const res  = await fetch(`http://localhost:3000/api/facturas/cliente/${user._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setFacturas(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error cargando facturas", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargarFacturas();
+  }, []);
+
+  /* ESTADO BADGE */
+  const getEstadoStyles = (estado) => {
+    switch (estado) {
+      case "pagada":   return { background: "#dcfce7", color: "#15803d", border: "1px solid #bbf7d0" };
+      case "pendiente":return { background: "#fef9c3", color: "#a16207", border: "1px solid #fde68a" };
+      case "anulada":  return { background: "#fee2e2", color: "#b91c1c", border: "1px solid #fecaca" };
+      default:         return { background: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb" };
+    }
+  };
+
+  const pagadas   = facturas.filter(f => f.estado === "pagada").length;
+  const pendientes = facturas.filter(f => f.estado === "pendiente").length;
+
+  return (
     <div style={pageStyle}>
+
+      {facturaModal && (
+        <FacturaModal factura={facturaModal} onClose={() => setFacturaModal(null)} />
+      )}
 
       <ClienteNavbar />
 
-      {/* =========================================
-          HERO
-      ========================================= */}
-
+      {/* HERO */}
       <section style={heroStyle}>
-
-        <div style={heroOverlayStyle}></div>
-
+        <div style={heroGlowStyle} />
         <div style={heroContentStyle}>
-
-          <span style={heroTagStyle}>
-            PANEL DEL CLIENTE
-          </span>
-
+          <span style={heroTagStyle}>Panel del Cliente</span>
           <h1 style={heroTitleStyle}>
-            Bienvenido,
-            {" "}
-            {usuario?.nombre || "Cliente"}
+            Hola, <span style={{ color: "#f4d76a" }}>{usuario?.nombre || "Cliente"}</span>
           </h1>
-
           <p style={heroTextStyle}>
-            Consulta tus compras,
-            facturas y actividad
-            reciente desde tu panel.
+            Aquí puedes consultar tus compras, facturas y actividad reciente.
           </p>
-
         </div>
-
       </section>
 
-      {/* =========================================
-          MAIN
-      ========================================= */}
-
+      {/* MAIN */}
       <main style={mainStyle}>
 
-        {/* =========================================
-            TOP GRID
-        ========================================= */}
-
-        <div style={topGridStyle}>
-
-          {/* USER CARD */}
-
-          <div style={cardStyle}>
-
-            <div style={cardHeaderStyle}>
-
-              <h3 style={cardTitleStyle}>
-                Mi Información
-              </h3>
-
+        {/* STATS ROW */}
+        <div style={statsRowStyle}>
+          <StatCard icon="🧾" label="Total compras" value={facturas.length} color="#4f46e5" />
+          <StatCard icon="✅" label="Pagadas"        value={pagadas}         color="#15803d" />
+          <StatCard icon="⏳" label="Pendientes"     value={pendientes}      color="#a16207" />
+          <div style={userSummaryCardStyle}>
+            <div style={userAvatarStyle}>
+              {usuario?.nombre?.charAt(0)?.toUpperCase() || "C"}
             </div>
-
-            <div style={userInfoStyle}>
-
-              <div style={avatarStyle}>
-
-                {
-                  usuario?.nombre
-                    ?.charAt(0)
-                    ?.toUpperCase() || "C"
-                }
-
-              </div>
-
-              <div>
-
-                <p style={infoTextStyle}>
-
-                  <strong>
-                    Nombre:
-                  </strong>
-
-                  {" "}
-                  {usuario?.nombre}
-
-                </p>
-
-                <p style={infoTextStyle}>
-
-                  <strong>
-                    Email:
-                  </strong>
-
-                  {" "}
-                  {usuario?.email}
-
-                </p>
-
-                <span style={activeBadgeStyle}>
-                  Activo
-                </span>
-
-              </div>
-
+            <div>
+              <p style={userNameStyle}>{usuario?.nombre || "—"}</p>
+              <p style={userEmailStyle}>{usuario?.email || "—"}</p>
+              <span style={activeBadgeStyle}>● Cuenta activa</span>
             </div>
-
           </div>
-
-          {/* STATS */}
-
-          <div style={statsCardStyle}>
-
-            <span style={statsLabelStyle}>
-              Compras realizadas
-            </span>
-
-            <h2 style={statsNumberStyle}>
-              {facturas.length}
-            </h2>
-
-          </div>
-
         </div>
 
-        {/* =========================================
-            FACTURAS
-        ========================================= */}
-
-        <div style={cardStyle}>
-
-          <div style={cardHeaderStyle}>
-
-            <h3 style={cardTitleStyle}>
-              Mis Compras
-            </h3>
-
+        {/* TABLA DE FACTURAS */}
+        <div style={tableCardStyle}>
+          <div style={tableCardHeaderStyle}>
+            <div>
+              <h2 style={tableTitleStyle}>Mis Compras</h2>
+              <p style={tableSubtitleStyle}>Historial completo de facturas y pedidos</p>
+            </div>
           </div>
 
           {loading ? (
-
             <div style={emptyStateStyle}>
-              Cargando compras...
+              <span style={emptyIconStyle}>⏳</span>
+              <p>Cargando tus compras...</p>
             </div>
-
           ) : facturas.length === 0 ? (
-
             <div style={emptyStateStyle}>
-              No tienes compras aún
+              <span style={emptyIconStyle}>🛒</span>
+              <p>Aún no tienes compras registradas.</p>
             </div>
-
           ) : (
-
             <div style={tableWrapperStyle}>
-
               <table style={tableStyle}>
-
-                <thead style={tableHeadStyle}>
-
-                  <tr>
-
-                    <th style={thStyle}>
-                      ID
-                    </th>
-
-                    <th style={thStyle}>
-                      Productos
-                    </th>
-
-                    <th style={thStyle}>
-                      Total
-                    </th>
-
-                    <th style={thStyle}>
-                      Pago
-                    </th>
-
-                    <th style={thStyle}>
-                      Fecha
-                    </th>
-
-                    <th style={thStyle}>
-                      Estado
-                    </th>
-
+                <thead>
+                  <tr style={tableHeadRowStyle}>
+                    <th style={thStyle}>ID</th>
+                    <th style={thStyle}>Productos</th>
+                    <th style={thStyle}>Total</th>
+                    <th style={thStyle}>Método</th>
+                    <th style={thStyle}>Fecha</th>
+                    <th style={thStyle}>Estado</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>Acción</th>
                   </tr>
-
                 </thead>
-
                 <tbody>
-
-                  {facturas.map(
-                    (factura) => (
-
-                      <tr
-                        key={factura._id}
-                        style={trStyle}
-                      >
-
-                        <td style={{
-                          ...tdStyle,
-                          ...idStyle,
-                        }}>
-
-                          {factura._id}
-
-                        </td>
-
-                        <td style={tdStyle}>
-
-                          {
-                            factura.productos.map(
-                              (p, i) => (
-
-                                <div
-                                  key={i}
-                                  style={
-                                    productItemStyle
-                                  }
-                                >
-
-                                  {p.nombre}
-                                  {" "}
-                                  ×
-                                  {p.cantidad}
-
-                                </div>
-
-                              )
-                            )
-                          }
-
-                        </td>
-
-                        <td style={{
-                          ...tdStyle,
-                          ...totalStyle,
-                        }}>
-
-                          $
-                          {factura.total?.toLocaleString()}
-
-                        </td>
-
-                        <td style={tdStyle}>
-                          {factura.metodo_pago}
-                        </td>
-
-                        <td style={tdStyle}>
-
-                          {
-                            new Date(
-                              factura.createdAt
-                            ).toLocaleDateString(
-                              "es-CO"
-                            )
-                          }
-
-                        </td>
-
-                        <td style={tdStyle}>
-
-                          <span
-                            style={{
-                              ...estadoBadgeStyle,
-                              ...getEstadoStyles(
-                                factura.estado
-                              ),
-                            }}
-                          >
-
-                            {factura.estado}
-
-                          </span>
-
-                        </td>
-
-                      </tr>
-
-                    )
-                  )}
-
+                  {facturas.map((factura, idx) => (
+                    <tr
+                      key={factura._id}
+                      style={{ ...trStyle, background: idx % 2 === 0 ? "#fff" : "#fafafa" }}
+                    >
+                      <td style={{ ...tdStyle, ...idCellStyle }}>
+                        #{factura._id?.slice(-8).toUpperCase()}
+                      </td>
+                      <td style={tdStyle}>
+                        <div style={productTagsStyle}>
+                          {factura.productos?.slice(0, 2).map((p, i) => (
+                            <span key={i} style={productTagStyle}>
+                              {p.nombre} ×{p.cantidad}
+                            </span>
+                          ))}
+                          {factura.productos?.length > 2 && (
+                            <span style={{ ...productTagStyle, background: "#e5e7eb", color: "#6b7280" }}>
+                              +{factura.productos.length - 2} más
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td style={{ ...tdStyle, ...totalCellStyle }}>
+                        ${factura.total?.toLocaleString("es-CO")}
+                      </td>
+                      <td style={tdStyle}>{factura.metodo_pago}</td>
+                      <td style={{ ...tdStyle, whiteSpace: "nowrap" }}>
+                        {new Date(factura.createdAt).toLocaleDateString("es-CO", {
+                          year: "numeric", month: "short", day: "numeric",
+                        })}
+                      </td>
+                      <td style={tdStyle}>
+                        <span style={{ ...estadoBadgeStyle, ...getEstadoStyles(factura.estado) }}>
+                          {factura.estado}
+                        </span>
+                      </td>
+                      <td style={{ ...tdStyle, textAlign: "center" }}>
+                        <button
+                          style={verBtnStyle}
+                          onClick={() => setFacturaModal(factura)}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.background = "#4f46e5";
+                            e.currentTarget.style.color = "#fff";
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.background = "transparent";
+                            e.currentTarget.style.color = "#4f46e5";
+                          }}
+                        >
+                          Ver factura
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
-
               </table>
-
             </div>
-
           )}
-
         </div>
 
       </main>
 
       <Footer />
-
     </div>
-
   );
-
 }
 
-{/* =========================================
+/* =========================================
+   STAT CARD COMPONENT
+========================================= */
+function StatCard({ icon, label, value, color }) {
+  return (
+    <div style={{ ...statCardStyle, "--accent": color }}>
+      <span style={statIconStyle}>{icon}</span>
+      <p style={statLabelStyle}>{label}</p>
+      <p style={{ ...statValueStyle, color }}>{value}</p>
+    </div>
+  );
+}
+
+/* =========================================
    PAGE
-========================================= */}
-
+========================================= */
 const pageStyle = {
-
   minHeight: "100vh",
-
-  background: "#fafafa",
-
+  background: "#f5f6fa",
+  fontFamily: "'Segoe UI', system-ui, sans-serif",
 };
 
 /* =========================================
    HERO
 ========================================= */
-
 const heroStyle = {
-
   position: "relative",
-
-  padding:
-    "70px 20px 60px",
-
-  textAlign: "center",
-
+  padding: "72px 24px 60px",
+  background: "linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)",
   overflow: "hidden",
-
-  background:
-    "linear-gradient(135deg,#111,#1b1b1b)",
-
 };
 
-const heroOverlayStyle = {
-
+const heroGlowStyle = {
   position: "absolute",
-  inset: 0,
-
-  background:
-    "radial-gradient(circle at top, rgba(212,175,55,0.14), transparent 65%)",
-
+  top: "-60px", left: "50%",
+  transform: "translateX(-50%)",
+  width: "600px", height: "300px",
+  borderRadius: "50%",
+  background: "radial-gradient(ellipse, rgba(79,70,229,0.3), transparent 70%)",
+  pointerEvents: "none",
 };
 
 const heroContentStyle = {
-
   position: "relative",
-
   zIndex: 2,
-
-  maxWidth: "800px",
-
+  maxWidth: "820px",
   margin: "0 auto",
-
+  textAlign: "center",
 };
 
 const heroTagStyle = {
-
   display: "inline-block",
-
-  padding: "7px 16px",
-
+  padding: "6px 16px",
   borderRadius: "999px",
-
-  background:
-    "rgba(212,175,55,0.12)",
-
-  color: "#d4af37",
-
-  fontWeight: 700,
-
+  background: "rgba(79,70,229,0.2)",
+  border: "1px solid rgba(79,70,229,0.4)",
+  color: "#a5b4fc",
   fontSize: "0.78rem",
-
-  letterSpacing: "1.5px",
-
+  fontWeight: 700,
+  letterSpacing: "2px",
+  textTransform: "uppercase",
+  marginBottom: "16px",
 };
 
 const heroTitleStyle = {
-
-  marginTop: "22px",
-
-  marginBottom: "14px",
-
-  fontSize:
-    "clamp(2.3rem,5vw,4rem)",
-
+  margin: "0 0 14px",
+  fontSize: "clamp(2rem, 4vw, 3.2rem)",
+  fontWeight: 800,
   color: "#fff",
-
-  fontFamily:
-    "'Playfair Display', serif",
-
-  lineHeight: 1.1,
-
+  lineHeight: 1.15,
 };
 
 const heroTextStyle = {
-
-  maxWidth: "620px",
-
-  margin: "0 auto",
-
-  color:
-    "rgba(255,255,255,0.78)",
-
+  margin: 0,
+  color: "rgba(255,255,255,0.62)",
   fontSize: "1rem",
-
-  lineHeight: 1.7,
-
+  lineHeight: 1.75,
 };
 
 /* =========================================
    MAIN
 ========================================= */
-
 const mainStyle = {
-
-  maxWidth: "1250px",
-
+  maxWidth: "1280px",
   margin: "0 auto",
-
-  padding:
-    "35px 20px 70px",
-
+  padding: "36px 20px 72px",
+  boxSizing: "border-box",
 };
 
-const topGridStyle = {
-
+/* =========================================
+   STATS ROW
+========================================= */
+const statsRowStyle = {
   display: "grid",
-
-  gridTemplateColumns:
-    "repeat(auto-fit,minmax(300px,1fr))",
-
-  gap: "22px",
-
-  marginBottom: "28px",
-
-};
-
-/* =========================================
-   CARDS
-========================================= */
-
-const cardStyle = {
-
-  background: "#fff",
-
-  borderRadius: "20px",
-
-  padding: "26px",
-
-  border:
-    "1px solid rgba(0,0,0,0.05)",
-
-  boxShadow:
-    "0 4px 18px rgba(0,0,0,0.05)",
-
-};
-
-const cardHeaderStyle = {
-
-  marginBottom: "20px",
-
-};
-
-const cardTitleStyle = {
-
-  margin: 0,
-
-  color: "#111",
-
-  fontSize: "1.5rem",
-
-  fontFamily:
-    "'Playfair Display', serif",
-
-};
-
-/* =========================================
-   USER
-========================================= */
-
-const userInfoStyle = {
-
-  display: "flex",
-
-  alignItems: "center",
-
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
   gap: "16px",
-
+  marginBottom: "28px",
 };
 
-const avatarStyle = {
+const statCardStyle = {
+  background: "#fff",
+  borderRadius: "16px",
+  padding: "22px 20px",
+  border: "1px solid #e5e7eb",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+};
 
-  width: "64px",
-  height: "64px",
+const statIconStyle = {
+  fontSize: "1.5rem",
+  display: "block",
+  marginBottom: "10px",
+};
 
-  borderRadius: "50%",
+const statLabelStyle = {
+  margin: "0 0 6px",
+  fontSize: "0.82rem",
+  color: "#6b7280",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+};
 
-  background:
-    "linear-gradient(135deg,#d4af37,#f4d76a)",
+const statValueStyle = {
+  margin: 0,
+  fontSize: "2.2rem",
+  fontWeight: 800,
+  lineHeight: 1,
+};
 
+const userSummaryCardStyle = {
+  background: "#fff",
+  borderRadius: "16px",
+  padding: "20px",
+  border: "1px solid #e5e7eb",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
   display: "flex",
+  alignItems: "center",
+  gap: "14px",
+};
 
+const userAvatarStyle = {
+  width: "54px",
+  height: "54px",
+  minWidth: "54px",
+  borderRadius: "50%",
+  background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+  display: "flex",
   alignItems: "center",
   justifyContent: "center",
-
-  color: "#111",
-
-  fontSize: "1.2rem",
-
+  fontSize: "1.3rem",
   fontWeight: 800,
-
+  color: "#fff",
+  boxShadow: "0 4px 12px rgba(79,70,229,0.3)",
 };
 
-const infoTextStyle = {
-
-  color: "#444",
-
-  marginBottom: "6px",
-
+const userNameStyle = {
+  margin: "0 0 2px",
+  fontWeight: 700,
   fontSize: "0.95rem",
+  color: "#111",
+};
 
+const userEmailStyle = {
+  margin: "0 0 8px",
+  fontSize: "0.82rem",
+  color: "#6b7280",
+  wordBreak: "break-all",
 };
 
 const activeBadgeStyle = {
-
-  display: "inline-flex",
-
-  alignItems: "center",
-
-  padding: "6px 12px",
-
+  display: "inline-block",
+  padding: "4px 10px",
   borderRadius: "999px",
-
-  background:
-    "rgba(34,197,94,0.12)",
-
-  color: "#16a34a",
-
-  border:
-    "1px solid rgba(34,197,94,0.14)",
-
-  fontSize: "0.78rem",
-
+  background: "#dcfce7",
+  color: "#15803d",
+  border: "1px solid #bbf7d0",
+  fontSize: "0.75rem",
   fontWeight: 700,
-
 };
 
 /* =========================================
-   STATS
+   TABLE CARD
 ========================================= */
-
-const statsCardStyle = {
-
+const tableCardStyle = {
+  background: "#fff",
   borderRadius: "20px",
+  border: "1px solid #e5e7eb",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+  overflow: "hidden",
+};
 
-  padding: "26px",
-
-  background:
-    "linear-gradient(135deg,#d4af37,#f4d76a)",
-
-  color: "#111",
-
+const tableCardHeaderStyle = {
+  padding: "24px 28px 20px",
+  borderBottom: "1px solid #f3f4f6",
   display: "flex",
-
-  flexDirection: "column",
-
-  justifyContent: "center",
-
-  boxShadow:
-    "0 6px 20px rgba(212,175,55,0.18)",
-
+  alignItems: "center",
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+  gap: "12px",
 };
 
-const statsLabelStyle = {
-
-  fontWeight: 700,
-
-  fontSize: "0.95rem",
-
+const tableTitleStyle = {
+  margin: "0 0 4px",
+  fontSize: "1.25rem",
+  fontWeight: 800,
+  color: "#111",
 };
 
-const statsNumberStyle = {
-
-  margin: "8px 0 0",
-
-  fontSize: "3.4rem",
-
-  lineHeight: 1,
-
+const tableSubtitleStyle = {
+  margin: 0,
+  fontSize: "0.88rem",
+  color: "#6b7280",
 };
-
-/* =========================================
-   TABLE
-========================================= */
 
 const tableWrapperStyle = {
-
-  width: "100%",
-
   overflowX: "auto",
-
 };
 
 const tableStyle = {
-
   width: "100%",
-
   borderCollapse: "collapse",
-
+  minWidth: "860px",
 };
 
-const tableHeadStyle = {
-
-  background:
-    "rgba(212,175,55,0.08)",
-
+const tableHeadRowStyle = {
+  background: "#f9fafb",
 };
 
 const thStyle = {
-
-  padding: "15px",
-
+  padding: "14px 18px",
   textAlign: "left",
-
-  color: "#222",
-
+  fontSize: "0.78rem",
   fontWeight: 700,
-
-  fontSize: "0.92rem",
-
-  borderBottom:
-    "1px solid rgba(0,0,0,0.06)",
-
+  color: "#374151",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  borderBottom: "1px solid #e5e7eb",
+  whiteSpace: "nowrap",
 };
 
 const trStyle = {
-
-  transition: "0.2s ease",
-
+  transition: "background 0.15s",
 };
 
 const tdStyle = {
-
-  padding: "16px 15px",
-
-  color: "#444",
-
-  fontSize: "0.92rem",
-
-  borderBottom:
-    "1px solid rgba(0,0,0,0.05)",
-
+  padding: "14px 18px",
+  fontSize: "0.9rem",
+  color: "#374151",
+  borderBottom: "1px solid #f3f4f6",
+  verticalAlign: "middle",
 };
 
-const idStyle = {
-
-  fontSize: "0.72rem",
-
-  color: "#888",
-
-  maxWidth: "160px",
-
+const idCellStyle = {
+  fontFamily: "monospace",
+  fontSize: "0.82rem",
+  color: "#9ca3af",
+  fontWeight: 600,
 };
 
-const productItemStyle = {
-
-  marginBottom: "5px",
-
-  color: "#444",
-
+const productTagsStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "6px",
 };
 
-const totalStyle = {
+const productTagStyle = {
+  padding: "4px 10px",
+  borderRadius: "8px",
+  background: "#f3f4f6",
+  fontSize: "0.78rem",
+  fontWeight: 600,
+  color: "#374151",
+};
 
-  color: "#b88a12",
-
+const totalCellStyle = {
   fontWeight: 800,
-
+  color: "#4f46e5",
+  whiteSpace: "nowrap",
 };
 
 const estadoBadgeStyle = {
-
   display: "inline-flex",
-
   alignItems: "center",
-
-  justifyContent: "center",
-
-  padding: "7px 12px",
-
+  padding: "5px 12px",
   borderRadius: "999px",
-
-  fontSize: "0.76rem",
-
+  fontSize: "0.75rem",
   fontWeight: 700,
-
   textTransform: "capitalize",
+  whiteSpace: "nowrap",
+};
 
+const verBtnStyle = {
+  padding: "7px 14px",
+  borderRadius: "10px",
+  border: "1.5px solid #4f46e5",
+  background: "transparent",
+  color: "#4f46e5",
+  fontSize: "0.8rem",
+  fontWeight: 700,
+  cursor: "pointer",
+  transition: "all 0.18s ease",
+  whiteSpace: "nowrap",
 };
 
 /* =========================================
-   EMPTY
+   EMPTY STATE
 ========================================= */
-
 const emptyStateStyle = {
-
-  padding: "45px 20px",
-
+  padding: "64px 20px",
   textAlign: "center",
-
-  color: "#777",
-
+  color: "#9ca3af",
   fontSize: "0.95rem",
+};
 
+const emptyIconStyle = {
+  display: "block",
+  fontSize: "2.5rem",
+  marginBottom: "12px",
+};
+
+/* =========================================
+   MODAL
+========================================= */
+const modalOverlayStyle = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.55)",
+  backdropFilter: "blur(4px)",
+  zIndex: 1000,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "20px",
+};
+
+const modalContainerStyle = {
+  background: "#fff",
+  borderRadius: "24px",
+  width: "100%",
+  maxWidth: "560px",
+  maxHeight: "90vh",
+  overflowY: "auto",
+  boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
+};
+
+const modalHeaderStyle = {
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  padding: "28px 28px 0",
+};
+
+const modalEtiquetaStyle = {
+  margin: "0 0 4px",
+  fontSize: "0.72rem",
+  fontWeight: 700,
+  color: "#9ca3af",
+  letterSpacing: "2px",
+};
+
+const modalTitleStyle = {
+  margin: 0,
+  fontSize: "1.6rem",
+  fontWeight: 800,
+  color: "#111",
+  fontFamily: "monospace",
+};
+
+const closeBtnStyle = {
+  background: "#f3f4f6",
+  border: "none",
+  borderRadius: "50%",
+  width: "36px",
+  height: "36px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  fontSize: "0.9rem",
+  color: "#6b7280",
+  flexShrink: 0,
+};
+
+const modalBodyStyle = {
+  padding: "24px 28px",
+};
+
+const modalMetaRowStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  flexWrap: "wrap",
+  marginBottom: "20px",
+};
+
+const estadoBadgeModalStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  padding: "6px 14px",
+  borderRadius: "999px",
+  fontSize: "0.75rem",
+  fontWeight: 700,
+  letterSpacing: "1px",
+};
+
+const modalFechaStyle = {
+  fontSize: "0.88rem",
+  color: "#6b7280",
+};
+
+const modalDividerStyle = {
+  borderTop: "1px solid #f3f4f6",
+  margin: "20px 0",
+};
+
+const modalSectionStyle = {
+  marginBottom: "4px",
+};
+
+const modalSectionTitleStyle = {
+  margin: "0 0 12px",
+  fontSize: "0.75rem",
+  fontWeight: 700,
+  color: "#9ca3af",
+  textTransform: "uppercase",
+  letterSpacing: "1px",
+};
+
+const modalInfoGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "12px",
+};
+
+const modalInfoItemStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "3px",
+};
+
+const modalLabelStyle = {
+  fontSize: "0.75rem",
+  color: "#9ca3af",
+  fontWeight: 600,
+};
+
+const modalValueStyle = {
+  fontSize: "0.92rem",
+  color: "#111",
+  fontWeight: 600,
+};
+
+const productosListStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+};
+
+const productoRowStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "12px 14px",
+  borderRadius: "12px",
+  background: "#f9fafb",
+  border: "1px solid #f3f4f6",
+};
+
+const productoInfoStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+};
+
+const productoNombreStyle = {
+  fontWeight: 600,
+  fontSize: "0.92rem",
+  color: "#111",
+};
+
+const productoCantidadStyle = {
+  fontSize: "0.82rem",
+  color: "#9ca3af",
+  background: "#e5e7eb",
+  padding: "2px 8px",
+  borderRadius: "999px",
+};
+
+const productoPrecioStyle = {
+  fontWeight: 700,
+  fontSize: "0.92rem",
+  color: "#4f46e5",
+};
+
+const totalRowStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "16px 20px",
+  borderRadius: "14px",
+  background: "linear-gradient(135deg, #ede9fe, #f5f3ff)",
+  border: "1px solid #ddd6fe",
+};
+
+const totalLabelStyle = {
+  fontSize: "0.92rem",
+  fontWeight: 700,
+  color: "#4c1d95",
+};
+
+const totalAmountStyle = {
+  fontSize: "1.5rem",
+  fontWeight: 800,
+  color: "#4f46e5",
+};
+
+const modalFooterStyle = {
+  padding: "0 28px 28px",
+  display: "flex",
+  justifyContent: "flex-end",
+};
+
+const closeModalBtnStyle = {
+  padding: "11px 28px",
+  borderRadius: "12px",
+  border: "1.5px solid #e5e7eb",
+  background: "#fff",
+  color: "#374151",
+  fontSize: "0.9rem",
+  fontWeight: 700,
+  cursor: "pointer",
 };

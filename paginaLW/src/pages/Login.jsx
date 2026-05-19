@@ -85,15 +85,10 @@ export default function Login() {
   /*
     ======================================
     GSAP ANIMATIONS
-    SOLO LOGIN
     ======================================
   */
 
   useEffect(() => {
-
-    console.log(
-      "🎬 INICIANDO ANIMACIONES LOGIN"
-    );
 
     const ctx =
       gsap.context(() => {
@@ -108,16 +103,16 @@ export default function Login() {
         gsap.fromTo(
           containerRef.current,
           {
-            opacity: 0
+            opacity: 0,
           },
           {
             opacity: 1,
-            duration: 1
+            duration: 1,
           }
         );
 
         /*
-          BG CIRCLES
+          FLOATING CIRCLES
         */
 
         circlesRef.current.forEach(
@@ -149,7 +144,7 @@ export default function Login() {
                 yoyo: true,
 
                 ease:
-                  "sine.inOut"
+                  "sine.inOut",
               }
             );
 
@@ -165,7 +160,7 @@ export default function Login() {
           {
             scale: 0,
             rotate: -180,
-            opacity: 0
+            opacity: 0,
           },
           {
             scale: 1,
@@ -173,7 +168,7 @@ export default function Login() {
             opacity: 1,
             duration: 1.1,
             ease:
-              "back.out(1.8)"
+              "back.out(1.8)",
           }
         );
 
@@ -194,7 +189,7 @@ export default function Login() {
             scale: 1,
             duration: 1,
             ease:
-              "power4.out"
+              "power4.out",
           }
         )
 
@@ -206,30 +201,30 @@ export default function Login() {
           titleRef.current,
           {
             opacity: 0,
-            y: -20
+            y: -20,
           },
           {
             opacity: 1,
             y: 0,
-            duration: 0.7
+            duration: 0.7,
           },
           "-=0.5"
         )
 
         /*
-          TEXT
+          SUBTITLE
         */
 
         .fromTo(
           textRef.current,
           {
             opacity: 0,
-            y: 20
+            y: 20,
           },
           {
             opacity: 1,
             y: 0,
-            duration: 0.7
+            duration: 0.7,
           },
           "-=0.4"
         )
@@ -242,7 +237,7 @@ export default function Login() {
           formRef.current.children,
           {
             opacity: 0,
-            y: 25
+            y: 25,
           },
           {
             opacity: 1,
@@ -250,7 +245,7 @@ export default function Login() {
             stagger: 0.15,
             duration: 0.8,
             ease:
-              "power3.out"
+              "power3.out",
           },
           "-=0.3"
         );
@@ -263,7 +258,7 @@ export default function Login() {
           buttonRef.current,
           {
             boxShadow:
-              "0 0 24px rgba(37,99,235,0.35)",
+              "0 0 24px rgba(245,158,11,0.45)",
 
             repeat: -1,
 
@@ -272,7 +267,7 @@ export default function Login() {
             duration: 1.6,
 
             ease:
-              "sine.inOut"
+              "sine.inOut",
           }
         );
 
@@ -283,20 +278,14 @@ export default function Login() {
     */
 
     return () => {
-
-      console.log(
-        "🧹 LIMPIANDO GSAP LOGIN"
-      );
-
       ctx.revert();
-
     };
 
   }, []);
 
   /*
     ======================================
-    SIMPLE TOAST
+    TOAST
     ======================================
   */
 
@@ -324,12 +313,12 @@ export default function Login() {
       toast,
       {
         opacity: 0,
-        y: -20
+        y: -20,
       },
       {
         opacity: 1,
         y: 0,
-        duration: 0.4
+        duration: 0.4,
       }
     );
 
@@ -343,7 +332,7 @@ export default function Login() {
           duration: 0.4,
           onComplete: () => {
             toast.remove();
-          }
+          },
         }
       );
 
@@ -362,19 +351,8 @@ export default function Login() {
 
       e.preventDefault();
 
-      console.log(
-        "🔐 INTENTANDO LOGIN..."
-      );
-
-      console.log(
-        "👤 USUARIO:",
-        usuario
-      );
-
       /*
-        ==========================
-        VALIDAR CAMPOS VACÍOS
-        ==========================
+        VALIDAR
       */
 
       const nuevosErrores = {
@@ -383,17 +361,13 @@ export default function Login() {
       };
 
       if (!usuario.trim()) {
-
         nuevosErrores.usuario =
           "El usuario es obligatorio";
-
       }
 
       if (!password.trim()) {
-
         nuevosErrores.password =
           "La contraseña es obligatoria";
-
       }
 
       setErrors(nuevosErrores);
@@ -424,34 +398,22 @@ export default function Login() {
 
               headers: {
                 "Content-Type":
-                  "application/json"
+                  "application/json",
               },
 
               body:
                 JSON.stringify({
                   usuario,
-                  password
-                })
+                  password,
+                }),
             }
           );
-
-        console.log(
-          "📡 STATUS LOGIN:",
-          res.status
-        );
 
         const data =
           await res.json();
 
-        console.log(
-          "✅ RESPUESTA LOGIN:",
-          data
-        );
-
         /*
-          =================================
-          ERROR LOGIN
-          =================================
+          LOGIN ERROR
         */
 
         if (!res.ok) {
@@ -459,19 +421,15 @@ export default function Login() {
           gsap.fromTo(
             cardRef.current,
             {
-              x: -10
+              x: -10,
             },
             {
               x: 10,
               repeat: 5,
               yoyo: true,
-              duration: 0.07
+              duration: 0.07,
             }
           );
-
-          /*
-            MENSAJES
-          */
 
           const mensaje =
             (
@@ -487,7 +445,7 @@ export default function Login() {
             setErrors({
               usuario:
                 "El usuario no existe",
-              password: ""
+              password: "",
             });
 
           } else if (
@@ -498,7 +456,7 @@ export default function Login() {
             setErrors({
               usuario: "",
               password:
-                "Contraseña incorrecta"
+                "Contraseña incorrecta",
             });
 
           } else {
@@ -507,7 +465,7 @@ export default function Login() {
               usuario:
                 "Datos incorrectos",
               password:
-                "Datos incorrectos"
+                "Datos incorrectos",
             });
 
           }
@@ -527,9 +485,7 @@ export default function Login() {
         }
 
         /*
-          =================================
           SAVE
-          =================================
         */
 
         localStorage.setItem(
@@ -542,9 +498,7 @@ export default function Login() {
           data.rol
         );
 
-        if (
-          data.usuario
-        ) {
+        if (data.usuario) {
 
           localStorage.setItem(
             "user",
@@ -555,23 +509,19 @@ export default function Login() {
 
         }
 
-        console.log(
-          "💾 LOGIN GUARDADO"
-        );
-
-        showToast(
-          "✅ Bienvenido",
-          "success"
-        );
-
         /*
-          LIMPIAR ERRORES
+          SUCCESS
         */
 
         setErrors({
           usuario: "",
           password: "",
         });
+
+        showToast(
+          "✅ Bienvenido",
+          "success"
+        );
 
         /*
           EXIT
@@ -586,15 +536,10 @@ export default function Login() {
             duration: 0.7,
             ease:
               "power4.in",
+
             onComplete: () => {
-
-              console.log(
-                "🚀 REDIRECCIONANDO..."
-              );
-
               navigate("/");
-
-            }
+            },
           }
         );
 
@@ -637,7 +582,7 @@ export default function Login() {
         }
         className="
           login-circle
-          circle-1
+          login-circle-1
         "
       />
 
@@ -649,7 +594,7 @@ export default function Login() {
         }
         className="
           login-circle
-          circle-2
+          login-circle-2
         "
       />
 
@@ -661,7 +606,7 @@ export default function Login() {
         }
         className="
           login-circle
-          circle-3
+          login-circle-3
         "
       />
 
@@ -672,7 +617,7 @@ export default function Login() {
       <div
         ref={cardRef}
         className="
-          tarjeta-login
+          login-card
         "
       >
 
@@ -713,8 +658,7 @@ export default function Login() {
           "
         >
 
-          Ingresa a
-          {" "}
+          Ingresa a{" "}
 
           <strong>
             Estanco MalaCopa
@@ -769,12 +713,12 @@ export default function Login() {
             />
 
             <label
+              htmlFor="usuarioLogin"
               className={
                 usuario
                   ? "active"
                   : ""
               }
-              htmlFor="usuarioLogin"
             >
               Usuario
             </label>
@@ -831,12 +775,12 @@ export default function Login() {
             />
 
             <label
+              htmlFor="passwordLogin"
               className={
                 password
                   ? "active"
                   : ""
               }
-              htmlFor="passwordLogin"
             >
               Contraseña
             </label>
@@ -928,8 +872,7 @@ export default function Login() {
 
           <p>
 
-            ¿No tienes cuenta?
-            {" "}
+            ¿No tienes cuenta?{" "}
 
             <Link
               to="/register"
