@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ProductoCard from "../components/ProductoCard";
 import "../styles/Productos.css";
+import { API } from "../constants/api";
 
 function Productos() {
   const [productos, setProductos] = useState([]);
@@ -11,7 +12,7 @@ function Productos() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/products");
+        const res = await fetch(`${API}/products`);
         const data = await res.json();
 
         console.log("PRODUCTOS BACKEND:", data);

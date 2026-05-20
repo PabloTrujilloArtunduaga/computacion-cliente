@@ -6,50 +6,10 @@
 
 /* ================================================================
    VARIABLES
+   ✅ Centralizadas en App.css — bloque :root eliminado de aquí.
+   Todas las variables (--bg, --surface, --border, --radius-*,
+   --shadow-*, --font-*, --color-*, etc.) se definen en App.css.
 ================================================================ */
-
-:root {
-  --color-principal: #050505;
-  --color-secundario: #ffffff;
-  --color-acento: #d4af37;
-  --color-acento-hover: #f0d36b;
-
-  --bg: #f4f4f4;
-  --surface: #ffffff;
-  --surface-2: #fafafa;
-
-  --border: #e0e0e0;
-  --border-soft: rgba(255,255,255,0.08);
-
-  --text: #111111;
-  --text-muted: #555555;
-  --text-light: #ffffff;
-
-  --green-bg: #e8f5e9;
-  --green-text: #2e7d32;
-
-  --yellow-bg: #fff8e1;
-  --yellow-text: #f57f17;
-
-  --red-bg: #ffebee;
-  --red-text: #c62828;
-
-  --sidebar-w: 280px;
-
-  --radius-lg: 20px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
-
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
-  --shadow-md: 0 8px 24px rgba(0,0,0,0.06);
-  --shadow-gold: 0 4px 15px rgba(212,175,55,0.2);
-
-  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
-
-  --font: 'Inter', sans-serif;
-  --font-title: 'Playfair Display', serif;
-  --font-mono: 'JetBrains Mono', monospace;
-}
 
 /* ================================================================
    RESET
@@ -73,7 +33,9 @@ body {
   font-family: var(--font);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
+  /* overflow:hidden eliminado — estaba bloqueando el scroll global
+     en todas las páginas tras visitar el dashboard.
+     El scroll se contiene en .emp-root y .emp-main (ya definidos abajo). */
 }
 
 /* ================================================================

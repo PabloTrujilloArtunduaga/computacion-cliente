@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { CarritoContext } from "../context/CarritoContext";
 
 import "../styles/Carrito.css";
+import { API } from "../constants/api";
 
 export default function Carrito() {
 
@@ -282,7 +283,7 @@ export default function Carrito() {
       // FETCH
       // =====================================
       const res = await fetch(
-        "http://localhost:3000/api/facturas/cliente",
+        `${API}/facturas/cliente`,
         {
           method: "POST",
 

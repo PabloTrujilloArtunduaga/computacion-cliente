@@ -12,6 +12,7 @@ import {
 import gsap from "gsap";
 
 import "../styles/Login.css";
+import { API } from "../constants/api";
 
 export default function Login() {
 
@@ -418,7 +419,7 @@ export default function Login() {
 
         const res =
           await fetch(
-            "http://localhost:3000/api/users/login",
+            `${API}/users/login`,
             {
               method: "POST",
 
@@ -700,10 +701,10 @@ export default function Login() {
         <h3
           ref={titleRef}
           className="
-            login-title
+            login-title-center
           "
         >
-          Bienvenido
+        Bienvenido
         </h3>
 
         <p

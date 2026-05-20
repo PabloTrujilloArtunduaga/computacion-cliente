@@ -5,6 +5,7 @@ import React, {
 
 import ClienteNavbar from "./ClienteNavbar";
 import Footer from "../../components/Footer";
+import { API } from "../../constants/api";
 
 export default function ClienteDashboard() {
 
@@ -67,7 +68,7 @@ export default function ClienteDashboard() {
         }
 
         const res = await fetch(
-          `http://localhost:3000/api/facturas/cliente/${user._id}`,
+          `${API}/facturas/cliente/${user._id}`,
           {
             headers: {
               Authorization:

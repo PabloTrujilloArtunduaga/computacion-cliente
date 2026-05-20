@@ -1,0 +1,285 @@
+/* =====================================================
+   CLIENTE NAVBAR
+   src/styles/ClienteNavbar.css
+
+   Migrado desde inline styles en ClienteNavbar.jsx.
+   Usa variables de App.css (único bloque :root).
+   Paleta: Negro + Dorado — coherente con Admin y Empleado.
+===================================================== */
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.cn-header {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: linear-gradient(90deg, #000, #111, #1a1a1a);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+}
+
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.cn-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 76px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   LOGO
+===================================================== */
+
+.cn-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.25s ease;
+}
+
+.cn-logo:hover {
+  opacity: 0.85;
+}
+
+.cn-logo-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #d4af37, #f4d76a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.28);
+  flex-shrink: 0;
+}
+
+.cn-logo-text {
+  margin: 0;
+  color: var(--color-acento);
+  font-size: 1.7rem;
+  font-weight: 800;
+  font-family: 'Playfair Display', serif;
+  line-height: 1;
+}
+
+.cn-logo-sub {
+  display: block;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* =====================================================
+   NAV
+===================================================== */
+
+.cn-nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.cn-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* =====================================================
+   LINKS
+===================================================== */
+
+.cn-link {
+  display: block;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 10px 18px;
+  border-radius: 12px;
+  transition: color 0.25s ease, background 0.25s ease;
+  white-space: nowrap;
+}
+
+.cn-link:hover {
+  color: var(--color-acento);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.cn-link--active {
+  color: #111;
+  background: linear-gradient(135deg, #d4af37, #f4d76a);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.24);
+}
+
+.cn-link--active:hover {
+  color: #111;
+  background: linear-gradient(135deg, #d4af37, #f4d76a);
+}
+
+/* =====================================================
+   ACTIONS (user card + logout)
+===================================================== */
+
+.cn-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   USER CARD
+===================================================== */
+
+.cn-user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cn-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4af37, #f4d76a);
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.cn-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cn-user-name {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.cn-user-role {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.72rem;
+}
+
+/* =====================================================
+   LOGOUT BUTTON
+===================================================== */
+
+.cn-logout-btn {
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  background: rgba(212, 175, 55, 0.12);
+  color: #f4d76a;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: background 0.25s ease, transform 0.25s ease;
+  white-space: nowrap;
+}
+
+.cn-logout-btn:hover {
+  background: rgba(212, 175, 55, 0.22);
+  transform: translateY(-1px);
+}
+
+/* =====================================================
+   RESPONSIVE — 768px: ocultar info de usuario
+===================================================== */
+
+@media (max-width: 768px) {
+  .cn-container {
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  .cn-user-info {
+    display: none;
+  }
+
+  .cn-logo-sub {
+    display: none;
+  }
+
+  .cn-link {
+    padding: 8px 12px;
+    font-size: 0.88rem;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE — 480px: menú compacto
+===================================================== */
+
+@media (max-width: 480px) {
+  .cn-logo-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cn-logo-text {
+    font-size: 1.35rem;
+  }
+
+  .cn-menu {
+    gap: 4px;
+  }
+
+  .cn-link {
+    padding: 8px 10px;
+    font-size: 0.82rem;
+  }
+
+  .cn-logout-btn {
+    padding: 8px 12px;
+    font-size: 0.82rem;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE — 375px: avatar sin texto
+===================================================== */
+
+@media (max-width: 375px) {
+  .cn-user-card {
+    padding: 6px 8px;
+  }
+
+  .cn-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 0.85rem;
+  }
+}

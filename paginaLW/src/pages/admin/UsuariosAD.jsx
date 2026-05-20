@@ -2,10 +2,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminNavbar from "../admin/AdminNavbar";
+import { API } from '../../constants/api';
 import '../../styles/usuarios.css'
 // ─── 1. CONSTANTES ────────────────────────────────────────────────────────────
-
-const API = 'http://localhost:3000/api';
+// API importado desde constants/api.js — ya no se hardcodea localhost aquí.
 
 const authFetch = (url, options = {}) => {
   const token = localStorage.getItem('token');

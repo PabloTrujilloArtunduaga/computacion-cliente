@@ -7,6 +7,7 @@ import React, {
 import gsap from "gsap";
 
 import M from "materialize-css";
+import { API } from "../constants/api";
 
 import "../styles/RecuperarPassword.css";
 
@@ -59,7 +60,7 @@ export default function RecuperarPassword() {
 
         const res =
           await fetch(
-            "http://localhost:3000/api/users/forgot-password",
+            `${API}/users/forgot-password`,
             {
               method: "POST",
               headers: {

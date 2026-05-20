@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from "react";
 import M from "materialize-css";
 import "../../styles/Dashboard.css";
+import { API } from "../../constants/api";
 
 export default function EmpleadoDashboard() {
   // =====================================================
@@ -108,7 +109,7 @@ export default function EmpleadoDashboard() {
   const cargarFacturas = async () => {
     try {
       debug("CARGANDO FACTURAS...");
-      const res = await fetch("http://localhost:3000/api/facturas", {
+      const res = await fetch(`${API}/facturas`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -128,7 +129,7 @@ export default function EmpleadoDashboard() {
   const cargarProductos = async () => {
     try {
       debug("CARGANDO PRODUCTOS...");
-      const res = await fetch("http://localhost:3000/api/products");
+      const res = await fetch(`${API}/products`);
       const data = await res.json();
       debug("PRODUCTOS RESPONSE", data);
       if (!Array.isArray(data)) return;
@@ -143,7 +144,7 @@ export default function EmpleadoDashboard() {
   const cargarClientes = async () => {
     try {
       debug("CARGANDO CLIENTES...");
-      const res = await fetch("http://localhost:3000/api/usuarios", {
+      const res = await fetch(`${API}/usuarios`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -257,13 +258,13 @@ export default function EmpleadoDashboard() {
       };
       let res;
       if (editando) {
-        res = await fetch(`http://localhost:3000/api/facturas/${facturaEditandoId}`, {
+        res = await fetch(`${API}/facturas/${facturaEditandoId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetch("http://localhost:3000/api/facturas", {
+        res = await fetch(`${API}/facturas`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload)
@@ -317,7 +318,7 @@ export default function EmpleadoDashboard() {
     try {
       const confirmar = window.confirm("¿Seguro que deseas eliminar esta factura de forma permanente?");
       if (!confirmar) return;
-      const res = await fetch(`http://localhost:3000/api/facturas/${id}`, {
+      const res = await fetch(`${API}/facturas/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
