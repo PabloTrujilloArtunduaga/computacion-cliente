@@ -12,6 +12,7 @@ import {
 import gsap from "gsap";
 
 import "../styles/Registro.css";
+import { API } from "../constants/api";
 
 export default function Registro() {
 
@@ -322,7 +323,7 @@ export default function Registro() {
 
         const res =
           await fetch(
-            "http://localhost:3000/api/users/register",
+            `${API}/users/register`,
             {
               method: "POST",
 

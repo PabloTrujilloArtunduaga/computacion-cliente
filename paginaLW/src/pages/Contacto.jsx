@@ -68,7 +68,7 @@ export default function Contacto() {
                 className="btn btn-contacto waves-effect waves-light"
                 type="submit"
               >
-                Enviar Mensaje ✉️
+                Enviar Mensaje 
               </button>
             </div>
 

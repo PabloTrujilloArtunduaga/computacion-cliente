@@ -247,7 +247,7 @@
    TITLE
 ========================================= */
 
-.login-title {
+.login-title-center {
   margin: 0 0 10px 0;
 
   text-align: center;
@@ -255,7 +255,8 @@
   font-size: 2rem;
   font-weight: 700;
 
-  color: #111827;
+  color: #ffffff; 
+  text-align: center;
 }
 
 .login-subtitle {

@@ -1,15 +1,106 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Lato:wght@400;600;700&display=swap');
 
+/* =========================================
+   FUENTE ÚNICA DE VARIABLES CSS
+   Centralizado desde App.css.
+   Los archivos Dashboard.css, admin.css y
+   usuarios.css tienen sus bloques :root
+   propios eliminados para evitar conflictos.
+   
+   Antes existían 4 bloques :root distintos:
+   - App.css:        --color-acento-hover: #e7c65a
+   - Dashboard.css:  --color-acento-hover: #f0d36b  ← diferente
+   - admin.css:      variables --admin-*
+   - usuarios.css:   variables --ue-*
+   
+   Ahora todo está aquí, un único valor por variable.
+========================================= */
 :root {
-  --color-principal: #000000;
-  --color-secundario: #ffffff;
-  --color-acento: #d4af37;
-  --color-acento-hover: #e7c65a;
-  --color-neutro: #333333;
-  --color-footer: #0f0f0f;
-  --color-texto-light: #ffffff;
 
+  /* ── PALETA BASE ── */
+  --color-principal:    #000000;
+  --color-secundario:   #ffffff;
+  --color-acento:       #d4af37;
+  --color-acento-hover: #e7c65a;   /* valor unificado desde App.css */
+  --color-neutro:       #333333;
+  --color-footer:       #0f0f0f;
+  --color-texto-light:  #ffffff;
+
+  /* ── TIPOGRAFÍA BASE ── */
   --font-base: 'Lato', sans-serif;
+
+  /* ── VARIABLES PANEL EMPLEADO (Dashboard.css) ── */
+  --bg:           #f4f4f4;
+  --surface:      #ffffff;
+  --surface-2:    #fafafa;
+
+  --border:       #e0e0e0;
+  --border-soft:  rgba(255, 255, 255, 0.08);
+
+  --text:         #111111;
+  --text-muted:   #555555;
+  --text-light:   #ffffff;
+
+  --green-bg:     #e8f5e9;
+  --green-text:   #2e7d32;
+  --yellow-bg:    #fff8e1;
+  --yellow-text:  #f57f17;
+  --red-bg:       #ffebee;
+  --red-text:     #c62828;
+
+  --sidebar-w:    280px;
+
+  --radius-lg:    20px;
+  --radius-md:    12px;
+  --radius-sm:    8px;
+
+  --shadow-sm:    0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md:    0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-gold:  0 4px 15px rgba(212, 175, 55, 0.2);
+
+  --transition:   0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --font:         'Lato', sans-serif;
+  --font-title:   'Playfair Display', serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  /* ── VARIABLES PANEL ADMIN (admin.css) ── */
+  --admin-bg:            #f5f3ef;
+  --admin-surface:       #ffffff;
+  --admin-border:        rgba(212, 175, 55, 0.15);
+  --admin-gold:          #d4af37;
+  --admin-gold-hover:    #e7c65a;
+  --admin-gold-light:    rgba(212, 175, 55, 0.10);
+  --admin-dark:          #111111;
+  --admin-text:          #222222;
+  --admin-muted:         #666666;
+  --admin-danger:        #c62828;
+  --admin-danger-light:  rgba(198, 40, 40, 0.08);
+  --admin-warning:       #e65100;
+  --admin-warning-light: rgba(230, 81, 0, 0.08);
+  --admin-success:       #2e7d32;
+  --admin-success-light: rgba(46, 125, 50, 0.08);
+  --admin-info:          #1565c0;
+  --admin-info-light:    rgba(21, 101, 192, 0.08);
+  --admin-font:          'Lato', sans-serif;
+  --admin-font-display:  'Playfair Display', serif;
+  --admin-radius:        16px;
+  --admin-radius-sm:     10px;
+
+  /* ── VARIABLES PANEL USUARIOS (usuarios.css) ── */
+  --ue-primary:       #2563eb;
+  --ue-primary-light: #3b82f6;
+  --ue-success:       #16a34a;
+  --ue-danger:        #dc2626;
+  --ue-warning:       #ea580c;
+  --ue-bg:            #f8fafc;
+  --ue-card:          #ffffff;
+  --ue-border:        #e5e7eb;
+  --ue-text:          #111827;
+  --ue-text-soft:     #6b7280;
+  --ue-radius:        18px;
+  --ue-shadow:        0 4px 18px rgba(15, 23, 42, 0.05);
+  --ue-font:          'Inter', sans-serif;
 }
 
 /* =========================================

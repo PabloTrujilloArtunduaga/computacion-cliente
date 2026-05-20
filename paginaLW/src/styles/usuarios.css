@@ -5,30 +5,12 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-:root {
-
-  --ue-primary: #2563eb;
-  --ue-primary-light: #3b82f6;
-
-  --ue-success: #16a34a;
-  --ue-danger: #dc2626;
-  --ue-warning: #ea580c;
-
-  --ue-bg: #f8fafc;
-  --ue-card: #ffffff;
-  --ue-border: #e5e7eb;
-
-  --ue-text: #111827;
-  --ue-text-soft: #6b7280;
-
-  --ue-radius: 18px;
-
-  --ue-shadow:
-    0 4px 18px rgba(15, 23, 42, 0.05);
-
-  --ue-font: 'Inter', sans-serif;
-
-}
+/* =========================================
+   VARIABLES
+   ✅ Centralizadas en App.css — bloque :root
+   eliminado de aquí. Variables --ue-*
+   disponibles globalmente desde App.css.
+========================================= */
 
 /* =========================================================
    PAGE

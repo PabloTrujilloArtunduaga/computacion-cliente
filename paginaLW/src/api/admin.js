@@ -2,11 +2,15 @@ import axios from "axios";
 
 // ============================================
 // CONFIG AXIOS
+// Usa VITE_API_URL del .env (sin /api al final
+// porque axios usa baseURL + rutas relativas).
+// Misma variable que constants/api.js.
 // ============================================
 
 const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:3000";
+  import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace(/\/api$/, "")
+    : "http://localhost:3000";
 
 // ============================================
 // INSTANCE

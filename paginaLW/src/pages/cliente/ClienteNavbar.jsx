@@ -9,53 +9,50 @@ import {
   useLocation,
 } from "react-router-dom";
 
+import "../../styles/ClienteNavbar.css";
+
 export default function ClienteNavbar() {
 
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const location  = useLocation();
 
-  const location = useLocation();
+  /* =========================================
+     USUARIO
+  ========================================= */
 
   let user = null;
 
   try {
 
-    const storedUser =
-      localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
-    if (
-      storedUser &&
-      storedUser !== "undefined"
-    ) {
-
+    if (storedUser && storedUser !== "undefined") {
       user = JSON.parse(storedUser);
 
     }
 
   } catch (error) {
-
-    console.error(
-      "Error parsing user:",
-      error
-    );
-
+    console.error("Error parsing user:", error);
   }
 
-  // =====================================================
-  // LOGOUT
-  // =====================================================
+  /* =========================================
+     HANDLERS
+  ========================================= */
 
   const handleLogout = () => {
-
     localStorage.removeItem("token");
 
     localStorage.removeItem("user");
 
     localStorage.removeItem("rol");
-
     navigate("/login");
-
   };
 
+  const isActive = (path) => location.pathname === path;
+
+  /* =========================================
+     RENDER
+  ========================================= */
   // =====================================================
   // ACTIVE LINK
   // =====================================================
@@ -69,15 +66,16 @@ export default function ClienteNavbar() {
 
   return (
 
-    <header style={headerStyle}>
+    <header className="cn-header">
 
-      <div style={containerStyle}>
+      <div className="cn-container">
 
         {/* =========================================
             LOGO
         ========================================= */}
 
         <div
+          className="cn-logo"
           onClick={() => navigate("/")}
           style={logoContainerStyle}
           onMouseEnter={(e) => {
@@ -94,11 +92,16 @@ export default function ClienteNavbar() {
           }}
         >
 
-          <div style={logoIconStyle}>
+          <div className="cn-logo-icon">
             🍷
           </div>
 
           <div>
+            <h1 className="cn-logo-text">
+              MalaCopa
+            </h1>
+            <span className="cn-logo-sub">
+              Cliente
 
             <h1 style={logoTextStyle}>
 
@@ -117,18 +120,17 @@ export default function ClienteNavbar() {
             <span style={logoSubTextStyle}>
               Panel del Cliente
             </span>
-
           </div>
 
         </div>
 
         {/* =========================================
-            MENU
+            MENÚ
         ========================================= */}
 
-        <nav style={navStyle}>
+        <nav className="cn-nav">
 
-          <ul style={menuStyle}>
+          <ul className="cn-menu">
 
             <NavItem
               to="/"
@@ -153,11 +155,24 @@ export default function ClienteNavbar() {
         </nav>
 
         {/* =========================================
+            USUARIO + LOGOUT
             USER SECTION
         ========================================= */}
 
-        <div style={actionsStyle}>
+        <div className="cn-actions">
 
+          <div className="cn-user-card">
+
+            <div className="cn-avatar">
+              {user?.nombre?.charAt(0)?.toUpperCase() || "C"}
+            </div>
+
+            <div className="cn-user-info">
+              <span className="cn-user-name">
+                {user?.nombre || "Cliente"}
+              </span>
+              <span className="cn-user-role">
+                Cliente Premium
           {/* USER CARD */}
 
           <div style={userCardStyle}>
@@ -189,7 +204,6 @@ export default function ClienteNavbar() {
               <span style={userRoleStyle}>
                 Cliente activo
               </span>
-
             </div>
 
           </div>
@@ -198,6 +212,8 @@ export default function ClienteNavbar() {
 
           <button
             onClick={handleLogout}
+            className="cn-logout-btn"
+          >
             style={logoutButtonStyle}
             onMouseEnter={(e) => {
 
@@ -224,7 +240,6 @@ export default function ClienteNavbar() {
             </span>
 
             Salir
-
           </button>
 
         </div>
@@ -241,13 +256,17 @@ export default function ClienteNavbar() {
 // NAV ITEM
 // =====================================================
 
-function NavItem({
-  to,
-  label,
-  active,
-}) {
+function NavItem({ to, label, active }) {
 
   return (
+    <li>
+      <Link
+        to={to}
+        className={
+          active
+            ? "cn-link cn-link--active"
+            : "cn-link"
+        }
 
     <li style={navItemStyle}>
 
@@ -286,7 +305,6 @@ function NavItem({
 
         }}
       >
-
         {label}
 
         {
@@ -300,16 +318,13 @@ function NavItem({
         }
 
       </Link>
-
     </li>
-
   );
 
 }
 
 /* =====================================================
    HEADER
-===================================================== */
 
 const headerStyle = {
 
@@ -336,7 +351,6 @@ const headerStyle = {
 
 /* =====================================================
    CONTAINER
-===================================================== */
 
 const containerStyle = {
 
@@ -366,7 +380,6 @@ const containerStyle = {
 
 /* =====================================================
    LOGO
-===================================================== */
 
 const logoContainerStyle = {
 
@@ -460,7 +473,6 @@ const logoSubTextStyle = {
 
 /* =====================================================
    NAV
-===================================================== */
 
 const navStyle = {
 
@@ -568,7 +580,6 @@ const activeLineStyle = {
 
 /* =====================================================
    ACTIONS
-===================================================== */
 
 const actionsStyle = {
 
@@ -588,7 +599,6 @@ const actionsStyle = {
 
 /* =====================================================
    USER CARD
-===================================================== */
 
 const userCardStyle = {
 
@@ -677,7 +687,6 @@ const userRoleStyle = {
 
 /* =====================================================
    LOGOUT
-===================================================== */
 
 const logoutButtonStyle = {
 

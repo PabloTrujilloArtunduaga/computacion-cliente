@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ClienteNavbar from "./ClienteNavbar";
 import Footer from "../../components/Footer";
+import { API } from "../../constants/api";
 
 /* =========================================
    MODAL DE FACTURA
@@ -144,9 +145,30 @@ export default function ClienteDashboard() {
         const token = localStorage.getItem("token");
         if (!user || !token) { setLoading(false); return; }
 
-        const res  = await fetch(`http://localhost:3000/api/facturas/cliente/${user._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const user = JSON.parse(
+          localStorage.getItem("user")
+        );
+
+        const token =
+          localStorage.getItem("token");
+
+        if (!user || !token) {
+
+          setLoading(false);
+          return;
+
+        }
+
+        const res = await fetch(
+          `${API}/facturas/cliente/${user._id}`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
         const data = await res.json();
         setFacturas(Array.isArray(data) ? data : []);
       } catch (error) {
