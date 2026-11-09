@@ -1,0 +1,18 @@
+/**
+ * Error controlado con código HTTP.
+ * Se lanza desde controladores y lo resuelve el manejador global.
+ */
+export class HttpError extends Error {
+  constructor(status, message, details = null) {
+    super(message);
+    this.name = 'HttpError';
+    this.status = status;
+    this.details = details;
+  }
+}
+
+export const badRequest = (message, details) => new HttpError(400, message, details);
+export const notFound = (message = 'Recurso no encontrado') => new HttpError(404, message);
+export const unauthorized = (message = 'No autorizado') => new HttpError(401, message);
+export const forbidden = (message = 'Acceso denegado') => new HttpError(403, message);
+export const conflict = (message, details) => new HttpError(409, message, details);

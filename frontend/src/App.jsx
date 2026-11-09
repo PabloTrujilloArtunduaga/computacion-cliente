@@ -1,27 +1,230 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import RegisterPage from "./pages/RegisterPage"
-import LoginPages from "./pages/LoginPages";
-import { AuthProvider } from "./context/AuthContext";
+import React from "react";
+
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+
+import { CarritoProvider } from "./context/CarritoContext";
+
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+
+import EmpleadoNavbar from "./pages/empleados/EmpleadoNavbar";
+
+import Inicio from "./pages/Inicio";
+import Nosotros from "./pages/Nosotros";
+import Contacto from "./pages/Contacto";
+import Productos from "./pages/Productos";
+import Carrito from "./pages/Carrito";
+
+import Login from "./pages/Login";
+import Registro from "./pages/Registro";
+
+import Admin from "./pages/admin/Admin.jsx";
+
+import Dashboard from "./pages/empleados/Dashboard";
+
+import NotFound from "./pages/NotFound";
+import RecuperarPassword from "./pages/RecuperarPassword.jsx";
+
+import ProtectedRoute from "./ProtectedRoute.jsx";
+
+import ProductosCategoriasPage from "./pages/admin/ProductosAD.jsx";
+
+import UsuariosEmpleadosPage from "./pages/admin/UsuariosAD.jsx";
+
+import FacturasPage from "./pages/admin/Fact.jsx";
+
+import ClienteDashboard from "./pages/cliente/ClienteDashboard";
+
+function Layout() {
+
+  const location = useLocation();
+
+  // =========================================
+  // VALIDAR RUTAS
+  // =========================================
+
+  const isAdmin =
+    location.pathname.startsWith(
+      "/admin"
+    );
+
+  const isCliente =
+    location.pathname.startsWith(
+      "/cliente"
+    );
+
+  const isEmpleado =
+    location.pathname.startsWith(
+      "/dashboard-empleado"
+    );
+
+  return (
+
+    <>
+
+      {/* ===================================== */}
+      {/* NAVBAR */}
+      {/* ===================================== */}
+
+      {
+        isEmpleado
+          ? <EmpleadoNavbar />
+          : !isAdmin &&
+            !isCliente &&
+            <Navbar />
+      }
+
+      {/* ===================================== */}
+      {/* CONTENT */}
+      {/* ===================================== */}
+
+      <main className="main-content">
+
+        <Routes>
+
+          {/* PUBLICO */}
+          <Route
+            path="/"
+            element={<Inicio />}
+          />
+
+          <Route
+            path="/productos"
+            element={<Productos />}
+          />
+
+          <Route
+            path="/nosotros"
+            element={<Nosotros />}
+          />
+
+          <Route
+            path="/contacto"
+            element={<Contacto />}
+          />
+
+          <Route
+            path="/carrito"
+            element={<Carrito />}
+          />
+
+          {/* AUTH */}
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/register"
+            element={<Registro />}
+          />
+
+          <Route
+            path="/recuperar-password"
+            element={
+              <RecuperarPassword />
+            }
+          />
+
+          {/* EMPLEADO */}
+          <Route
+            path="/dashboard-empleado"
+            element={
+              <ProtectedRoute rolPermitido="empleado">
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* CLIENTE */}
+          <Route
+            path="/cliente"
+            element={
+              <ProtectedRoute rolPermitido="cliente">
+                <ClienteDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ADMIN */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute rolPermitido="admin">
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/productos"
+            element={
+              <ProtectedRoute rolPermitido="admin">
+                <ProductosCategoriasPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/usuarios"
+            element={
+              <ProtectedRoute rolPermitido="admin">
+                <UsuariosEmpleadosPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/facturas"
+            element={
+              <ProtectedRoute rolPermitido="admin">
+                <FacturasPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 404 */}
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
+
+        </Routes>
+
+      </main>
+
+      {/* ===================================== */}
+      {/* FOOTER */}
+      {/* ===================================== */}
+
+      {
+        !isAdmin &&
+        !isCliente &&
+        !isEmpleado &&
+        <Footer />
+      }
+
+    </>
+  );
+}
 
 function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<h1>Home Page</h1>} />
-        <Route path='/login' element={< LoginPages/>} />
-        <Route path='/register' element={<RegisterPage/>}/>
-        <Route path='/tasks' element={<h1>Task Page</h1>} />
-        <Route path='/add-task' element={<h1>New Task</h1>} />
-        <Route path='/tasks/:id' element={<h1>Update task</h1>} />
-        <Route path='/profile' element={<h1>Profile</h1>} />
-      </Routes>
-    </BrowserRouter>
 
-    </AuthProvider>
+  return (
+
+    <CarritoProvider>
+
+      <Router>
+        <Layout />
+      </Router>
+
+    </CarritoProvider>
   );
 }
 
 export default App;
-
-
